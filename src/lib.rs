@@ -141,8 +141,13 @@ pub trait TermControl {
         self.csi(b"0m")
     }
     /// Go to a given position.
-    fn goto(&mut self, x: usize, y: usize) -> IoResult<usize> {
-        self.csi(format!("{};{}H", x, y).as_bytes())
+    fn goto(&mut self, x: u16, y: u16) -> IoResult<usize> {
+        self.csi(&[
+             (x / 10000 % 10) as u8, (x / 1000 % 10) as u8, (x / 100 % 10) as u8, (x / 10 % 10) as u8, (x % 10) as u8,
+             b';',
+             (y / 10000 % 10) as u8, (y / 1000 % 10) as u8, (y / 100 % 10) as u8, (y / 10 % 10) as u8, (y % 10) as u8,
+             b'H',
+        ])
     }
 }
 
