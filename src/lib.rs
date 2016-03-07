@@ -16,3 +16,6 @@ pub use size::termsize;
 
 mod color;
 pub use color::Color;
+
+mod mode;
+pub use mode::Mode;

@@ -1,5 +1,5 @@
 use std::io::{Write, Result as IoResult};
-use Color;
+use {Color, Mode};
 
 /// Controlling terminals.
 pub trait TermControl {
@@ -21,8 +21,8 @@ pub trait TermControl {
     fn hide(&mut self) -> IoResult<usize> {
         self.csi(b"?25l")
     }
-    /// Reset the style of the cursor.
-    fn reset_style(&mut self) -> IoResult<usize> {
+    /// Reset the rendition mode.
+    fn reset(&mut self) -> IoResult<usize> {
         self.csi(b"m")
     }
     /// Go to a given position.
@@ -70,6 +70,10 @@ pub trait TermControl {
             b'0' + ansi % 10,
             b'm',
         ])
+    }
+    /// Set rendition mode (SGR).
+    fn mode(&mut self, mode: Mode) -> IoResult<usize> {
+        self.rendition(mode as u8)
     }
 }
 
