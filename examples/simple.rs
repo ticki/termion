@@ -1,6 +1,6 @@
 extern crate libterm;
 
-use libterm::{TermControl, raw_mode};
+use libterm::{TermControl, raw_mode, Color};
 use std::io::{Read, Write, stdout, stdin};
 
 fn main() {
@@ -21,7 +21,7 @@ fn main() {
         match b {
             b'q' => return,
             b'c' => stdout.clear(),
-            b'r' => stdout.rendition(91),
+            b'r' => stdout.color(Color::Rgb(5, 0, 0)),
             a => stdout.write(&[a]),
         }.unwrap();
 

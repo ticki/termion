@@ -1,4 +1,6 @@
 #![feature(libc)]
+#[warn(missing_docs)]
+
 extern crate libc;
 
 mod termios;
@@ -11,3 +13,6 @@ pub use raw::{raw_mode, TerminalRestorer};
 
 mod size;
 pub use size::termsize;
+
+mod color;
+pub use color::Color;

@@ -1,4 +1,5 @@
 use std::io::{Write, Result as IoResult};
+use Color;
 
 /// Controlling terminals.
 pub trait TermControl {
@@ -27,9 +28,9 @@ pub trait TermControl {
     /// Go to a given position.
     fn goto(&mut self, x: u16, y: u16) -> IoResult<usize> {
         self.csi(&[
-             (x / 10000) as u8 + b'0', ((x / 1000) % 10) as u8 + b'0', ((x / 100) % 10) as u8 + b'0', ((x / 10) % 10) as u8 + b'0', (x % 10) as u8 + b'0',
+             (x / 10000) as u8 + b'0', (x / 1000) as u8 % 10 + b'0', (x / 100) as u8 % 10 + b'0', (x / 10) as u8 % 10 + b'0', x as u8 % 10 + b'0',
              b';',
-             (y / 10000) as u8 + b'0', ((y / 1000) % 10) as u8 + b'0', ((y / 100) % 10) as u8 + b'0', ((y / 10) % 10) as u8 + b'0', (y % 10) as u8 + b'0',
+             (y / 10000) as u8 + b'0', (y / 1000) as u8 % 10 + b'0', (y / 100) as u8 % 10 + b'0', (y / 10) as u8 % 10 + b'0', y as u8 % 10 + b'0',
              b'H',
         ])
     }
@@ -38,6 +39,36 @@ pub trait TermControl {
         self.csi(&[
              r / 100 + b'0', r / 10 % 10 + b'0', r % 10 + b'0',
              b'm',
+        ])
+    }
+    /// Set foreground color
+    fn color(&mut self, color: Color) -> IoResult<usize> {
+        let ansi = color.to_ansi_val();
+        self.csi(&[
+            b'3',
+            b'8',
+            b';',
+            b'5',
+            b';',
+            b'0' + ansi / 100,
+            b'0' + ansi / 10 % 10,
+            b'0' + ansi % 10,
+            b'm',
+        ])
+    }
+    /// Set background color
+    fn bg_color(&mut self, color: Color) -> IoResult<usize> {
+        let ansi = color.to_ansi_val();
+        self.csi(&[
+            b'4',
+            b'8',
+            b';',
+            b'5',
+            b';',
+            b'0' + ansi / 100,
+            b'0' + ansi / 10 % 10,
+            b'0' + ansi % 10,
+            b'm',
         ])
     }
 }
