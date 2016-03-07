@@ -4,14 +4,15 @@ use libterm::{TermControl, raw_mode};
 use std::io::{Read, Write, stdout, stdin};
 
 fn main() {
-    let raw = raw_mode();
+    let _raw = raw_mode();
     let mut stdout = stdout();
-    let mut stdin = stdin();
+    let stdin = stdin();
 
-    stdout.goto(5, 5);
-    stdout.clear();
-    stdout.write(b"yo, 'q' will exit.");
-    stdout.flush();
+    stdout.goto(5, 5).unwrap();
+    stdout.clear().unwrap();
+    stdout.write(b"yo, 'q' will exit.").unwrap();
+    stdout.flush().unwrap();
+    stdout.goto(20, 10).unwrap();
 
     let mut bytes = stdin.bytes();
     loop {
@@ -20,9 +21,10 @@ fn main() {
         match b {
             b'q' => return,
             b'c' => stdout.clear(),
+            b'r' => stdout.rendition(91),
             a => stdout.write(&[a]),
-        };
+        }.unwrap();
 
-        stdout.flush();
+        stdout.flush().unwrap();
     }
 }

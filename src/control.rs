@@ -27,10 +27,17 @@ pub trait TermControl {
     /// Go to a given position.
     fn goto(&mut self, x: u16, y: u16) -> IoResult<usize> {
         self.csi(&[
-             (x / 10000 % 10) as u8, (x / 1000 % 10) as u8, (x / 100 % 10) as u8, (x / 10 % 10) as u8, (x % 10) as u8,
+             (x / 10000) as u8 + b'0', ((x / 1000) % 10) as u8 + b'0', ((x / 100) % 10) as u8 + b'0', ((x / 10) % 10) as u8 + b'0', (x % 10) as u8 + b'0',
              b';',
-             (y / 10000 % 10) as u8, (y / 1000 % 10) as u8, (y / 100 % 10) as u8, (y / 10 % 10) as u8, (y % 10) as u8,
+             (y / 10000) as u8 + b'0', ((y / 1000) % 10) as u8 + b'0', ((y / 100) % 10) as u8 + b'0', ((y / 10) % 10) as u8 + b'0', (y % 10) as u8 + b'0',
              b'H',
+        ])
+    }
+    /// Set graphic rendition.
+    fn rendition(&mut self, r: u8) -> IoResult<usize> {
+        self.csi(&[
+             r / 100 + b'0', r / 10 % 10 + b'0', r % 10 + b'0',
+             b'm',
         ])
     }
 }
