@@ -1,12 +1,13 @@
 extern crate libterm;
 
-use libterm::{TermControl, raw_mode, Color, Mode};
+use libterm::{TermControl, raw_mode, Color, Mode, ReadExt};
 use std::io::{Read, Write, stdout, stdin};
 
 fn main() {
     let _raw = raw_mode();
-    let mut stdout = stdout();
-    let stdin = stdin();
+    let stdout = stdout();
+    let mut stdout = stdout.lock();
+    let mut stdin = stdin();
 
     stdout.goto(5, 5).unwrap();
     stdout.clear().unwrap();
