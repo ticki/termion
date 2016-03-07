@@ -84,6 +84,8 @@ impl<W: Write> IntoRawMode for W {
     }
     #[cfg(target_os = "redox")]
     fn into_raw_mode(self) -> Result<TerminalRestorer<W>, TerminalError> {
+        use TermControl;
+
         if let Err(_) = self.csi("r") {
             Err(TerminalError::StdoutError)
         } else {
