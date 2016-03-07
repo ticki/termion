@@ -1,8 +1,5 @@
 use libc::{c_int, c_uint, c_uchar};
 
-use std::error::Error;
-use std::fmt::{Display, Formatter, Error as FmtError};
-
 extern {
     pub static tiocgwinsz: c_int;
 
@@ -45,38 +42,5 @@ pub fn get_terminal_attr() -> (Termios, c_int) {
 pub fn set_terminal_attr(ios: *mut Termios) -> c_int {
     unsafe {
         tcsetattr(0, 0, ios)
-    }
-}
-
-/// Termios error.
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-pub enum TermiosError {
-    /// Failed to load attributes.
-    LoadAttrError,
-    /// Failed to set attributes.
-    SetAttrError,
-    /// Failed to get terminal size.
-    TermSizeError,
-}
-
-impl TermiosError {
-    fn msg(self) -> &'static str {
-        match self {
-            TermiosError::LoadAttrError => "Failed to load Termios attributes.",
-            TermiosError::SetAttrError => "Failed to set Termios attribute.",
-            TermiosError::TermSizeError => "Failed to get terminal size.",
-        }
-    }
-}
-
-impl Error for TermiosError {
-    fn description(&self) -> &str {
-        self.msg()
-    }
-}
-
-impl Display for TermiosError {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), FmtError> {
-        f.write_str(self.msg())
     }
 }

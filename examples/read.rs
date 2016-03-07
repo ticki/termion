@@ -11,7 +11,7 @@ fn main() {
     stdout.write(b"password: ").unwrap();
     stdout.flush().unwrap();
 
-    let pass = stdin.read_passwd();
+    let pass = stdin.read_passwd(&mut stdout);
 
     if let Some(pass) = pass {
         stdout.write(pass.as_bytes()).unwrap();

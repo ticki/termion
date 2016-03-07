@@ -3,6 +3,8 @@ libterm
 
 A pure Rust library for handling, manipulating and reading information about terminals. This provides a full-featured alternative to Termbox.
 
+Supports Redox and POSIX. Untested on Windows.
+
 Features
 --------
 

@@ -3,12 +3,15 @@ use {Color, Mode};
 
 /// Controlling terminals.
 pub trait TermControl {
+
     /// Print the CSI (control sequence introducer) followed by a byte string.
     fn csi(&mut self, b: &[u8]) -> IoResult<usize>;
     /// Print OSC (operating system command) followed by a byte string.
     fn osc(&mut self, b: &[u8]) -> IoResult<usize>;
     /// Print OSC (device control string) followed by a byte string.
     fn dsc(&mut self, b: &[u8]) -> IoResult<usize>;
+
+
     /// Clear the terminal.
     fn clear(&mut self) -> IoResult<usize> {
         self.csi(b"2J")
