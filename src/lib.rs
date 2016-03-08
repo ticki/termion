@@ -7,7 +7,10 @@ extern crate libc;
 mod termios;
 
 mod control;
-pub use control::TermControl;
+pub use control::WriteExt;
+
+mod input;
+pub use input::ReadExt;
 
 mod error;
 pub use error::TerminalError;
@@ -23,6 +26,3 @@ pub use color::Color;
 
 mod style;
 pub use style::Style;
-
-mod extra;
-pub use extra::ReadExt;

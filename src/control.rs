@@ -1,8 +1,11 @@
 use std::io::{Write, Result as IoResult};
 use {Color, Style};
 
-/// Controlling terminals.
-pub trait TermControl {
+/// Extension to the `Write` trait.
+///
+/// This extension to the `Write` trait is capable of producing the correct ANSI escape sequences
+/// for given commands, effectively controlling the terminal.
+pub trait TermWrite {
 
     /// Print the CSI (control sequence introducer) followed by a byte string.
     fn csi(&mut self, b: &[u8]) -> IoResult<usize>;
@@ -111,7 +114,7 @@ pub trait TermControl {
     }
 }
 
-impl<W: Write> TermControl for W {
+impl<W: Write> TermWrite for W {
     fn csi(&mut self, b: &[u8]) -> IoResult<usize> {
         self.write(b"\x1B[").and_then(|x| {
             self.write(b).map(|y| x + y)

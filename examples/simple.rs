@@ -1,6 +1,6 @@
 extern crate libterm;
 
-use libterm::{TermControl, IntoRawMode, Color, Style};
+use libterm::{WriteExt, IntoRawMode, Color, Style};
 use std::io::{Read, Write, stdout, stdin};
 
 fn main() {

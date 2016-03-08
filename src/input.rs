@@ -2,7 +2,7 @@ use std::io::{Read, Write};
 use {IntoRawMode, TerminalError};
 
 /// Extension to `Read` trait.
-pub trait ReadExt {
+pub trait TermRead {
     /// Read a password.
     ///
     /// EOT and ETX will abort the prompt, returning `None`. Newline or carriage return will
@@ -10,7 +10,7 @@ pub trait ReadExt {
     fn read_passwd<W: Write>(&mut self, writer: &mut W) -> Result<Option<String>, TerminalError>;
 }
 
-impl<R: Read> ReadExt for R {
+impl<R: Read> TermRead for R {
     fn read_passwd<W: Write>(&mut self, writer: &mut W) -> Result<Option<String>, TerminalError> {
         let _raw = try!(writer.into_raw_mode());
         let mut passbuf = Vec::with_capacity(30);
