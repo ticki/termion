@@ -12,6 +12,8 @@ pub enum TerminalError {
     TermSizeError,
     /// Failed to write to stdout.
     StdoutError,
+    /// Failed to read from stdin.
+    StdinError,
 }
 
 impl TerminalError {
@@ -21,6 +23,7 @@ impl TerminalError {
             TerminalError::SetAttrError => "Failed to set Terminal attribute.",
             TerminalError::TermSizeError => "Failed to get terminal size.",
             TerminalError::StdoutError => "Failed to write to stdout.",
+            TerminalError::StdinError => "Failed to read from stdin.",
         }
     }
 }

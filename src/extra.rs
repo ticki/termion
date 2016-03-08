@@ -1,33 +1,26 @@
 use std::io::{Read, Write};
-use IntoRawMode;
+use {IntoRawMode, TerminalError};
 
 /// Extension to `Read` trait.
 pub trait ReadExt {
     /// Read a password.
-    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> Option<String>;
+    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> Result<Option<String>, TerminalError>;
 }
 
 impl<R: Read> ReadExt for R {
-    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> Option<String> {
-        let _raw = if let Ok(x) = writer.into_raw_mode() {
-            x
-        } else {
-            return None;
-        };
+    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> Result<Option<String>, TerminalError> {
+        let _raw = try!(writer.into_raw_mode());
         let mut string = String::with_capacity(30);
 
         for c in self.chars() {
-            match if let Ok(c) = c {
-                c
-            } else {
-                return None;
-            } {
-                '\x00' | '\x03' | '\x04' => return None,
-                '\r' => return Some(string),
-                b => string.push(b),
+            match c {
+                Err(_) => return Err(TerminalError::StdinError),
+                Ok('\0') | Ok('\x03') | Ok('\x04') => return Ok(None),
+                Ok('\n') | Ok('\r') => return Ok(Some(string)),
+                Ok(c) => string.push(c),
             }
         }
 
-        Some(string)
+        Ok(Some(string))
     }
 }
