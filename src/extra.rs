@@ -18,7 +18,7 @@ impl<R: Read> ReadExt for R {
         for c in self.bytes() {
             match c {
                 Err(_) => return Err(TerminalError::StdinError),
-                Ok(b'\0') | Ok(b'\x03') | Ok(b'\x04') => return Ok(None),
+                Ok(0) | Ok(3) | Ok(4) => return Ok(None),
                 Ok(b'\n') | Ok(b'\r') => return Ok(Some(string)),
                 Ok(c) => string.push(c as char),
             }
