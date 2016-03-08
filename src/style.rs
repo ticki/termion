@@ -1,5 +1,5 @@
 /// A SGR parameter (rendition mode).
-pub enum Mode {
+pub enum Style {
     /// Reset SGR parameters.
     Reset = 0,
     /// Bold text.

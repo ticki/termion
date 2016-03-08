@@ -21,8 +21,8 @@ pub use size::terminal_size;
 mod color;
 pub use color::Color;
 
-mod mode;
-pub use mode::Mode;
+mod style;
+pub use style::Style;
 
 mod extra;
 pub use extra::ReadExt;

@@ -1,5 +1,5 @@
 use std::io::{Write, Result as IoResult};
-use {Color, Mode};
+use {Color, Style};
 
 /// Controlling terminals.
 pub trait TermControl {
@@ -12,9 +12,13 @@ pub trait TermControl {
     fn dsc(&mut self, b: &[u8]) -> IoResult<usize>;
 
 
-    /// Clear the terminal.
+    /// Clear the entire screen.
     fn clear(&mut self) -> IoResult<usize> {
         self.csi(b"2J")
+    }
+    /// Clear the current line.
+    fn clear_line(&mut self) -> IoResult<usize> {
+        self.csi(b"2K")
     }
     /// Show the cursor.
     fn show(&mut self) -> IoResult<usize> {
@@ -85,7 +89,7 @@ pub trait TermControl {
         ])
     }
     /// Set rendition mode (SGR).
-    fn mode(&mut self, mode: Mode) -> IoResult<usize> {
+    fn style(&mut self, mode: Style) -> IoResult<usize> {
         self.rendition(mode as u8)
     }
 }

@@ -1,6 +1,6 @@
 extern crate libterm;
 
-use libterm::{TermControl, IntoRawMode, Color, Mode};
+use libterm::{TermControl, IntoRawMode, Color, Style};
 use std::io::{Read, Write, stdout, stdin};
 
 fn main() {
@@ -10,7 +10,7 @@ fn main() {
 
     stdout.goto(5, 5).unwrap();
     stdout.clear().unwrap();
-    stdout.mode(Mode::Bold).unwrap();
+    stdout.style(Style::Bold).unwrap();
     stdout.write(b"yo, 'q' will exit.").unwrap();
     stdout.reset().unwrap();
     stdout.flush().unwrap();
