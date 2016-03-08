@@ -21,11 +21,11 @@ pub trait TermControl {
         self.csi(b"2K")
     }
     /// Show the cursor.
-    fn show(&mut self) -> IoResult<usize> {
+    fn show_cursor(&mut self) -> IoResult<usize> {
         self.csi(b"?25h")
     }
     /// Hide the cursor.
-    fn hide(&mut self) -> IoResult<usize> {
+    fn hide_cursor(&mut self) -> IoResult<usize> {
         self.csi(b"?25l")
     }
     /// Reset the rendition mode.
