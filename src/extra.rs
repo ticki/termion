@@ -13,17 +13,19 @@ pub trait ReadExt {
 impl<R: Read> ReadExt for R {
     fn read_passwd<W: Write>(&mut self, writer: &mut W) -> Result<Option<String>, TerminalError> {
         let _raw = try!(writer.into_raw_mode());
-        let mut string = String::with_capacity(30);
+        let mut passbuf = Vec::with_capacity(30);
 
         for c in self.bytes() {
             match c {
                 Err(_) => return Err(TerminalError::StdinError),
                 Ok(0) | Ok(3) | Ok(4) => return Ok(None),
-                Ok(b'\n') | Ok(b'\r') => return Ok(Some(string)),
-                Ok(c) => string.push(c as char),
+                Ok(b'\n') | Ok(b'\r') => break,
+                Ok(c) => passbuf.push(c),
             }
         }
 
-        Ok(Some(string))
+        let passwd = try!(String::from_utf8(passbuf).map_err(|_| TerminalError::UnicodeError ));
+
+        Ok(Some(passwd))
     }
 }
