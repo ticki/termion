@@ -24,7 +24,7 @@ impl<R: Read> ReadExt for R {
             }
         }
 
-        let passwd = try!(String::from_utf8(passbuf).map_err(|_| TerminalError::UnicodeError ));
+        let passwd = try!(String::from_utf8(passbuf).map_err(|_| TerminalError::UnicodeError));
 
         Ok(Some(passwd))
     }
