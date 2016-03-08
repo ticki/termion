@@ -33,19 +33,24 @@ pub trait TermControl {
         self.csi(b"m")
     }
     /// Go to a given position.
-    fn goto(&mut self, x: u16, y: u16) -> IoResult<usize> {
+    ///
+    /// The position is 0-based.
+    fn goto(&mut self, mut x: u16, mut y: u16) -> IoResult<usize> {
+        x += 1;
+        y += 1;
+
         self.csi(&[
-            b'0' + (x / 10000) as u8,
-            b'0' + (x / 1000) as u8 % 10,
-            b'0' + (x / 100) as u8 % 10,
-            b'0' + (x / 10) as u8 % 10,
-            b'0' + x as u8 % 10,
-            b';',
             b'0' + (y / 10000) as u8,
             b'0' + (y / 1000) as u8 % 10,
             b'0' + (y / 100) as u8 % 10,
             b'0' + (y / 10) as u8 % 10,
             b'0' + y as u8 % 10,
+            b';',
+            b'0' + (x / 10000) as u8,
+            b'0' + (x / 1000) as u8 % 10,
+            b'0' + (x / 100) as u8 % 10,
+            b'0' + (x / 10) as u8 % 10,
+            b'0' + x as u8 % 10,
             b'H',
         ])
     }
