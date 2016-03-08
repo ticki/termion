@@ -1,8 +1,12 @@
 use libc::{c_int, c_uint, c_uchar};
 
-extern {
-    pub static tiocgwinsz: c_int;
+#[cfg(not(target_os = "macos"))]
+pub const TIOCGWINSZ: u64 = 0x00005413;
 
+#[cfg(target_os = "macos")]
+pub const TIOCGWINSZ: u64 = 0x40087468;
+
+extern {
     pub fn tcgetattr(filedes: c_int, termptr: *mut Termios) -> c_int;
     pub fn tcsetattr(filedes: c_int, opt: c_int, termptr: *mut Termios) -> c_int;
     pub fn cfmakeraw(termptr: *mut Termios);

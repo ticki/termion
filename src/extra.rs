@@ -4,6 +4,9 @@ use {IntoRawMode, TerminalError};
 /// Extension to `Read` trait.
 pub trait ReadExt {
     /// Read a password.
+    ///
+    /// EOT and ETX will abort the prompt, returning `None`. Newline or carriage return will
+    /// complete the password input.
     fn read_passwd<W: Write>(&mut self, writer: &mut W) -> Result<Option<String>, TerminalError>;
 }
 
