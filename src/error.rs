@@ -16,6 +16,8 @@ pub enum TerminalError {
     StdinError,
     /// Failed to parse number.
     ParseError,
+    /// Failed to read unicode encoded data.
+    UnicodeError
 }
 
 impl TerminalError {
@@ -27,6 +29,7 @@ impl TerminalError {
             TerminalError::StdoutError => "Failed to write to stdout.",
             TerminalError::StdinError => "Failed to read from stdin.",
             TerminalError::ParseError => "Failed to parse number.",
+            TerminalError::UnicodeError => "Failed to read unicode encoded data.",
         }
     }
 }
