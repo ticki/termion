@@ -1,6 +1,3 @@
-#![feature(io)]
-#![feature(libc)]
-
 #[warn(missing_docs)]
 
 #[cfg(not(target_os = "redox"))]
