@@ -1,4 +1,3 @@
-#![feature(io)]
 #![feature(libc)]
 
 #[warn(missing_docs)]

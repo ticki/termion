@@ -15,12 +15,12 @@ impl<R: Read> ReadExt for R {
         let _raw = try!(writer.into_raw_mode());
         let mut string = String::with_capacity(30);
 
-        for c in self.chars() {
+        for c in self.bytes() {
             match c {
                 Err(_) => return Err(TerminalError::StdinError),
-                Ok('\0') | Ok('\x03') | Ok('\x04') => return Ok(None),
-                Ok('\n') | Ok('\r') => return Ok(Some(string)),
-                Ok(c) => string.push(c),
+                Ok(b'\0') | Ok(b'\x03') | Ok(b'\x04') => return Ok(None),
+                Ok(b'\n') | Ok(b'\r') => return Ok(Some(string)),
+                Ok(c) => string.push(c as char),
             }
         }
 
