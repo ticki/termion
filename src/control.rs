@@ -16,9 +16,21 @@ pub trait TermControl {
     fn clear(&mut self) -> IoResult<usize> {
         self.csi(b"2J")
     }
+    /// Clear everything _after_ the cursor.
+    fn clear_after(&mut self) -> IoResult<usize> {
+        self.csi(b"J")
+    }
+    /// Clear everything _before_ the cursor.
+    fn clear_before(&mut self) -> IoResult<usize> {
+        self.csi(b"1J")
+    }
     /// Clear the current line.
     fn clear_line(&mut self) -> IoResult<usize> {
         self.csi(b"2K")
+    }
+    /// Clear from the cursor until newline.
+    fn clear_until_newline(&mut self) -> IoResult<usize> {
+        self.csi(b"K")
     }
     /// Show the cursor.
     fn show_cursor(&mut self) -> IoResult<usize> {
