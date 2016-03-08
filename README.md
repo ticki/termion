@@ -5,6 +5,11 @@ A pure Rust library for handling, manipulating and reading information about ter
 
 Supports Redox and POSIX. Untested on Windows.
 
+A note on stability
+-------------------
+
+This crate is not stable, yet. However, if you do want stability, you should specify the revision (commit hash) in your `Cargo.toml`, this way builds are complete reproducible, and won't break.
+
 Features
 --------
 
@@ -16,6 +21,11 @@ Features
 - Control sequences.
 - Termios control.
 - Password input.
+- Redox support.
+- 256-color mode.
+- Panic-free error handling.
+
+and much more.
 
 TODO
 ----
