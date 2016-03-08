@@ -5,3 +5,18 @@ authors = ["Ticki <Ticki@users.noreply.github.com>"]
 
 [dependencies]
 libc = "0.2.8"
+
+[library]
+name = "libterm"
+
+[[bin]]
+name = "simple"
+path = "examples/simple.rs"
+
+[[bin]]
+name = "read"
+path = "examples/read.rs"
+
+[[bin]]
+name = "size"
+path = "examples/size.rs"
