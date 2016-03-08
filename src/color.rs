@@ -33,7 +33,7 @@ pub enum Color {
     HiCyan,
     /// High-intensity white.
     HiWhite,
-    /// 216-color (6, 6, 6) RGB.
+    /// 216-color (r, g, b ≤ 5) RGB.
     Rgb(u8, u8, u8),
     /// Grayscale (max value: 24)
     Grayscale(u8),
@@ -67,7 +67,7 @@ impl Color {
         }
     }
 
-    pub fn debug_check(self) {
+    fn debug_check(self) {
         match self {
             Rgb(r, g, b) => {
                 debug_assert!(r <= 5, "Red color fragment (r = {}) is out of bound. Make sure r ≤ 5.", r);
