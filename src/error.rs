@@ -14,6 +14,8 @@ pub enum TerminalError {
     StdoutError,
     /// Failed to read from stdin.
     StdinError,
+    /// Failed to parse number.
+    ParseError,
 }
 
 impl TerminalError {
@@ -24,6 +26,7 @@ impl TerminalError {
             TerminalError::TermSizeError => "Failed to get terminal size.",
             TerminalError::StdoutError => "Failed to write to stdout.",
             TerminalError::StdinError => "Failed to read from stdin.",
+            TerminalError::ParseError => "Failed to parse number.",
         }
     }
 }

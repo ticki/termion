@@ -18,10 +18,7 @@ pub use error::TerminalError;
 mod raw;
 pub use raw::{IntoRawMode, TerminalRestorer};
 
-// TODO Redox terminal size
-#[cfg(not(target_os = "redox"))]
 mod size;
-#[cfg(not(target_os = "redox"))]
 pub use size::terminal_size;
 
 mod color;
