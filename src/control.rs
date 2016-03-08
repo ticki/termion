@@ -92,17 +92,17 @@ pub trait TermControl {
 
 impl<W: Write> TermControl for W {
     fn csi(&mut self, b: &[u8]) -> IoResult<usize> {
-        self.write(b"\x1b[").and_then(|x| {
+        self.write(b"\x1B[").and_then(|x| {
             self.write(b).map(|y| x + y)
         })
     }
     fn osc(&mut self, b: &[u8]) -> IoResult<usize> {
-        self.write(b"\x1b]").and_then(|x| {
+        self.write(b"\x1B]").and_then(|x| {
             self.write(b).map(|y| x + y)
         })
     }
     fn dsc(&mut self, b: &[u8]) -> IoResult<usize> {
-        self.write(b"\x1bP").and_then(|x| {
+        self.write(b"\x1BP").and_then(|x| {
             self.write(b).map(|y| x + y)
         })
     }
