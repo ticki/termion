@@ -18,21 +18,21 @@ pub enum Color {
     /// White.
     White,
     /// High-intensity black.
-    HiBlack,
+    LightBlack,
     /// High-intensity red.
-    HiRed,
+    LightRed,
     /// High-intensity green.
-    HiGreen,
+    LightGreen,
     /// High-intensity yellow.
-    HiYellow,
+    LightYellow,
     /// High-intensity blue.
-    HiBlue,
+    LightBlue,
     /// High-intensity magenta.
-    HiMagenta,
+    LightMagenta,
     /// High-intensity cyan.
-    HiCyan,
+    LightCyan,
     /// High-intensity white.
-    HiWhite,
+    LightWhite,
     /// 216-color (r, g, b ≤ 5) RGB.
     Rgb(u8, u8, u8),
     /// Grayscale (max value: 24)
@@ -61,14 +61,14 @@ impl Color {
             Magenta => 0x5,
             Cyan => 0x6,
             White => 0x7,
-            HiBlack => 0x8,
-            HiRed => 0x9,
-            HiGreen => 0xA,
-            HiYellow => 0xB,
-            HiBlue => 0xC,
-            HiMagenta => 0xD,
-            HiCyan => 0xE,
-            HiWhite => 0xF,
+            LightBlack => 0x8,
+            LightRed => 0x9,
+            LightGreen => 0xA,
+            LightYellow => 0xB,
+            LightBlue => 0xC,
+            LightMagenta => 0xD,
+            LightCyan => 0xE,
+            LightWhite => 0xF,
             Rgb(r, g, b) => 16 + 36 * r + 6 * g + b,
             Grayscale(shade) => 0xE8 + shade,
         }
