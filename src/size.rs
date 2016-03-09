@@ -57,3 +57,13 @@ pub fn terminal_size() -> Result<(usize, usize), TerminalError> {
 
     Ok((try!(w), try!(h)))
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_size() {
+        assert!(terminal_size().is_ok());
+    }
+}

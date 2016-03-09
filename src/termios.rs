@@ -7,8 +7,8 @@ pub const TIOCGWINSZ: usize = 0x00005413;
 pub const TIOCGWINSZ: usize = 0x40087468;
 
 extern {
-    pub fn tcgetattr(filedes: c_int, termptr: *mut Termios) -> c_int;
-    pub fn tcsetattr(filedes: c_int, opt: c_int, termptr: *mut Termios) -> c_int;
+    pub fn tcgetattr(fd: c_int, termptr: *mut Termios) -> c_int;
+    pub fn tcsetattr(fd: c_int, opt: c_int, termptr: *mut Termios) -> c_int;
     pub fn cfmakeraw(termptr: *mut Termios);
 }
 

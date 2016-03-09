@@ -101,11 +101,11 @@ impl<R: Read> TermRead for R {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-
     #[cfg(feature = "nightly")]
     #[test]
     fn test_keys() {
+        use {TermRead, Key};
+
         let mut i = b"\x1Bayo\x7F\x1B[D".keys();
 
         assert_eq!(i.next(), Some(Key::Alt('a')));
