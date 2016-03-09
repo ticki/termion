@@ -1,8 +1,8 @@
-use std::io::{Read, Write};
+use std::io::{self, Read, Write};
 use {IntoRawMode, TerminalError};
 
 #[cfg(feature = "nightly")]
-use std::io::Chars;
+use std::io::{Chars, CharsError};
 
 /// A key.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
@@ -28,14 +28,13 @@ pub enum Key {
     Error,
 }
 
-#[cfg(feature = "nightly")]
 /// An iterator over input keys.
-pub struct Keys<R> {
-    chars: Chars<R>,
+pub struct Keys<I> {
+    chars: I,
 }
 
 #[cfg(feature = "nightly")]
-impl<R: Read> Iterator for Keys<R> {
+impl<I: Iterator<Item = Result<char, CharsError>>> Iterator for Keys<I> {
     type Item = Key;
 
     fn next(&mut self) -> Option<Key> {
@@ -63,7 +62,7 @@ impl<R: Read> Iterator for Keys<R> {
 pub trait TermRead {
     /// An iterator over key inputs.
     #[cfg(feature = "nightly")]
-    fn keys(self) -> Keys<Self> where Self: Sized;
+    fn keys(self) -> Keys<Chars<Self>> where Self: Sized;
 
     /// Read a password.
     ///
@@ -74,7 +73,7 @@ pub trait TermRead {
 
 impl<R: Read> TermRead for R {
     #[cfg(feature = "nightly")]
-    fn keys(self) -> Keys<R> {
+    fn keys(self) -> Keys<Chars<R>> {
         Keys {
             chars: self.chars(),
         }
