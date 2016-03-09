@@ -1,4 +1,4 @@
-use std::io::{self, Read, Write};
+use std::io::{Read, Write};
 use {IntoRawMode, TerminalError};
 
 #[cfg(feature = "nightly")]
@@ -29,6 +29,7 @@ pub enum Key {
 }
 
 /// An iterator over input keys.
+#[cfg(feature = "nightly")]
 pub struct Keys<I> {
     chars: I,
 }

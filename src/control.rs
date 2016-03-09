@@ -44,9 +44,19 @@ pub trait TermWrite {
         self.csi(b"?25l")
     }
     /// Reset the rendition mode.
+    ///
+    /// This will reset both the current style and color.
     fn reset(&mut self) -> IoResult<usize> {
         self.csi(b"m")
     }
+    /// Restore the defaults.
+    ///
+    /// This will reset color, position, cursor state, and so on. It is recommended that you use
+    /// this before you exit your program, to avoid messing up the user's terminal.
+    fn restore(&mut self) -> IoResult<usize> {
+        Ok(try!(self.reset()) + try!(self.clear()) + try!(self.goto(0, 0)) + try!(self.show_cursor()))
+    }
+
     /// Go to a given position.
     ///
     /// The position is 0-based.
@@ -116,18 +126,12 @@ pub trait TermWrite {
 
 impl<W: Write> TermWrite for W {
     fn csi(&mut self, b: &[u8]) -> IoResult<usize> {
-        self.write(b"\x1B[").and_then(|x| {
-            self.write(b).map(|y| x + y)
-        })
+        Ok(try!(self.write(b"\x1B[")) + try!(self.write(b)))
     }
     fn osc(&mut self, b: &[u8]) -> IoResult<usize> {
-        self.write(b"\x1B]").and_then(|x| {
-            self.write(b).map(|y| x + y)
-        })
+        Ok(try!(self.write(b"\x1B]")) + try!(self.write(b)))
     }
     fn dsc(&mut self, b: &[u8]) -> IoResult<usize> {
-        self.write(b"\x1BP").and_then(|x| {
-            self.write(b).map(|y| x + y)
-        })
+        Ok(try!(self.write(b"\x1BP")) + try!(self.write(b)))
     }
 }
