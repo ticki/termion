@@ -1,6 +1,6 @@
 extern crate libterm;
 
-use libterm::ReadExt;
+use libterm::TermRead;
 use std::io::{Write, stdout, stdin};
 
 fn main() {
