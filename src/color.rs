@@ -27,7 +27,7 @@ pub enum Color {
     HiYellow,
     /// High-intensity blue.
     HiBlue,
-    /// High-intensity megenta.
+    /// High-intensity magenta.
     HiMagenta,
     /// High-intensity cyan.
     HiCyan,
@@ -42,6 +42,13 @@ pub enum Color {
 use Color::*;
 
 impl Color {
+    /// Get the corresponding ANSI value.
+    ///
+    /// Panics
+    /// ======
+    ///
+    /// This method will panic in debug mode, if `self` is invalid (that is, the values are out of
+    /// bound).
     pub fn to_ansi_val(self) -> u8 {
         self.debug_check();
 

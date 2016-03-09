@@ -49,6 +49,7 @@ impl<W> DerefMut for TerminalRestorer<W> {
     }
 }
 
+/// Types which can be converted into "raw mode".
 pub trait IntoRawMode: Sized {
     /// Switch to raw mode.
     ///
