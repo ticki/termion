@@ -98,3 +98,21 @@ impl<R: Read> TermRead for R {
         Ok(Some(passwd))
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[cfg(feature = "nightly")]
+    #[test]
+    fn test_keys() {
+        let mut i = b"\x1Bayo\x7F\x1B[D".keys();
+
+        assert_eq!(i.next(), Some(Key::Alt('a')));
+        assert_eq!(i.next(), Some(Key::Char('y')));
+        assert_eq!(i.next(), Some(Key::Char('o')));
+        assert_eq!(i.next(), Some(Key::Backspace));
+        assert_eq!(i.next(), Some(Key::Left));
+        assert_eq!(i.next(), None);
+    }
+}

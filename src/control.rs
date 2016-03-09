@@ -135,3 +135,90 @@ impl<W: Write> TermWrite for W {
         Ok(try!(self.write(b"\x1BP")) + try!(self.write(b)))
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use std::io::Cursor;
+
+    #[test]
+    fn test_csi() {
+        let mut buf = Cursor::new(Vec::new());
+        buf.csi(b"bluh").unwrap();
+
+        assert_eq!(buf.get_ref(), b"\x1B[bluh");
+
+        buf.csi(b"blah").unwrap();
+        assert_eq!(buf.get_ref(), b"\x1B[bluh\x1B[blah");
+    }
+    #[test]
+    fn test_csi_partial() {
+        let mut buf = [0; 3];
+        let mut buf = &mut buf[..];
+        assert_eq!(buf.csi(b"blu").unwrap(), 3);
+        assert_eq!(buf.csi(b"").unwrap(), 0);
+        assert_eq!(buf.csi(b"nooooo").unwrap(), 0);
+    }
+    #[test]
+    fn test_osc() {
+        let mut buf = Cursor::new(Vec::new());
+        buf.osc(b"bluh").unwrap();
+
+        assert_eq!(buf.get_ref(), b"\x1B]bluh");
+
+        buf.osc(b"blah").unwrap();
+        assert_eq!(buf.get_ref(), b"\x1B]bluh\x1B]blah");
+    }
+    #[test]
+    fn test_osc_partial() {
+        let mut buf = [0; 3];
+        let mut buf = &mut buf[..];
+        assert_eq!(buf.osc(b"blu").unwrap(), 3);
+        assert_eq!(buf.osc(b"").unwrap(), 0);
+        assert_eq!(buf.osc(b"nooooo").unwrap(), 0);
+    }
+    #[test]
+    fn test_dsc() {
+        let mut buf = Cursor::new(Vec::new());
+        buf.dsc(b"bluh").unwrap();
+
+        assert_eq!(buf.get_ref(), b"\x1BPbluh");
+
+        buf.dsc(b"blah").unwrap();
+        assert_eq!(buf.get_ref(), b"\x1BPbluh\x1BPblah");
+    }
+    #[test]
+    fn test_dsc_partial() {
+        let mut buf = [0; 3];
+        let mut buf = &mut buf[..];
+        assert_eq!(buf.dsc(b"blu").unwrap(), 3);
+        assert_eq!(buf.dsc(b"").unwrap(), 0);
+        assert_eq!(buf.dsc(b"nooooo").unwrap(), 0);
+    }
+    #[test]
+    fn test_clear() {
+        let mut buf = Cursor::new(Vec::new());
+        buf.clear().unwrap();
+        assert_eq!(buf.get_ref(), b"\x1B[2J");
+        buf.clear().unwrap();
+        assert_eq!(buf.get_ref(), b"\x1B[2J\x1B[2J");
+    }
+    #[test]
+    fn test_goto() {
+        let mut buf = Cursor::new(Vec::new());
+        buf.goto(34, 43).unwrap();
+        assert_eq!(buf.get_ref(), b"\x1B[00044;00035H");
+        buf.goto(24, 45).unwrap();
+        assert_eq!(buf.get_ref(), b"\x1B[00044;00035H\x1B[00046;00025H");
+    }
+    #[test]
+    fn test_style() {
+        use Style;
+
+        let mut buf = Cursor::new(Vec::new());
+        buf.style(Style::Bold).unwrap();
+        assert_eq!(buf.get_ref(), b"\x1B[001m");
+        buf.style(Style::Italic).unwrap();
+        assert_eq!(buf.get_ref(), b"\x1B[001m\x1B[003m");
+    }
+}

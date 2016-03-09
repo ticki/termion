@@ -96,3 +96,16 @@ impl<W: Write> IntoRawMode for W {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use std::io::{Write, stdout};
+
+    #[test]
+    fn test_into_raw_mode() {
+        let mut out = stdout().into_raw_mode().unwrap();
+
+        out.write(b"this is a test, muahhahahah").unwrap();
+    }
+}

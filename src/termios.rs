@@ -48,3 +48,20 @@ pub fn set_terminal_attr(ios: *mut Termios) -> c_int {
         tcsetattr(0, 0, ios)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_get_terminal_attr() {
+        get_terminal_attr();
+        get_terminal_attr();
+        get_terminal_attr();
+    }
+    #[test]
+    fn test_set_terminal_attr() {
+        let mut ios = get_terminal_attr().0;
+        set_terminal_attr(&mut ios as *mut _);
+    }
+}

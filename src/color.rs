@@ -89,3 +89,51 @@ impl Color {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_rgb() {
+        assert_eq!(Color::Rgb(2, 3, 4).to_ansi_val(), 110);
+        assert_eq!(Color::Rgb(2, 1, 4).to_ansi_val(), 98);
+        assert_eq!(Color::Rgb(5, 1, 4).to_ansi_val(), 206);
+    }
+    #[test]
+    fn test_grayscale() {
+        assert_eq!(Color::Grayscale(2).to_ansi_val(), 234);
+        assert_eq!(Color::Grayscale(5).to_ansi_val(), 237);
+    }
+    #[test]
+    fn test_normal() {
+        assert_eq!(Color::Black.to_ansi_val(), 0);
+        assert_eq!(Color::Green.to_ansi_val(), 2);
+        assert_eq!(Color::White.to_ansi_val(), 7);
+    }
+    #[test]
+    fn test_hi() {
+        assert_eq!(Color::LightRed.to_ansi_val(), 9);
+        assert_eq!(Color::LightCyan.to_ansi_val(), 0xE);
+        assert_eq!(Color::LightWhite.to_ansi_val(), 0xF);
+    }
+
+    #[cfg(debug)]
+    #[should_panic]
+    #[test]
+    fn test_bound_check_rgb() {
+        Color::Rgb(3, 9, 1).debug_check();
+    }
+    #[cfg(debug)]
+    #[should_panic]
+    #[test]
+    fn test_bound_check_rgb_2() {
+        Color::Rgb(3, 6, 1).debug_check();
+    }
+    #[cfg(debug)]
+    #[should_panic]
+    #[test]
+    fn test_bound_check_grayscale() {
+        Color::Grayscale(25).debug_check();
+    }
+}
