@@ -20,6 +20,7 @@ fn main() {
             Key::Char('q') => break,
             Key::Char(c) => println!("{}", c),
             Key::Alt(c) => println!("^{}", c),
+            Key::Ctrl(c) => println!("*{}", c),
             Key::Left => println!("←"),
             Key::Right => println!("→"),
             Key::Up => println!("↑"),

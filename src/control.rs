@@ -43,6 +43,9 @@ pub trait TermWrite {
     fn hide_cursor(&mut self) -> IoResult<usize> {
         self.csi(b"?25l")
     }
+
+    // TODO insert mode
+
     /// Reset the rendition mode.
     ///
     /// This will reset both the current style and color.

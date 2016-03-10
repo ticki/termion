@@ -17,10 +17,14 @@ pub enum Key {
     Up,
     /// Down arrow.
     Down,
-    /// Alt modified character.
-    Alt(char),
     /// Normal character.
     Char(char),
+    /// Alt modified character.
+    Alt(char),
+    /// Ctrl modified character.
+    ///
+    /// Note that certain keys may not be modifiable with `ctrl`, due to limitations of terminals.
+    Ctrl(char),
     /// Invalid character code.
     Invalid,
     // TODO handle errors better?
@@ -52,6 +56,10 @@ impl<I: Iterator<Item = Result<char, CharsError>>> Iterator for Keys<I> {
                 Some(Err(_)) | None => Key::Invalid,
             }),
             Some(Ok('\x7F')) => Some(Key::Backspace),
+            Some(Ok(c @ '\x10' ... '\x1A')) => Some(Key::Ctrl((c as u8 - 0x10 + b'p') as char)),
+            Some(Ok(c @ '\x01' ... '\x04')) => Some(Key::Ctrl((c as u8 - 0x1  + b'a') as char)),
+            Some(Ok(c @ '\x1C' ... '\x1F')) => Some(Key::Ctrl((c as u8 - 0x1C + b'4') as char)),
+            Some(Ok('\x06')) => Some(Key::Alt('f')),
             Some(Ok(c)) => Some(Key::Char(c)),
             None => None,
             Some(Err(_)) => Some(Key::Error),
