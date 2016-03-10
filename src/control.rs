@@ -44,7 +44,9 @@ pub trait TermWrite {
         self.csi(b"?25l")
     }
 
-    // TODO insert mode
+    // TODO
+    // fn mode
+
 
     /// Reset the rendition mode.
     ///

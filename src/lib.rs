@@ -28,7 +28,7 @@ mod error;
 pub use error::TerminalError;
 
 mod raw;
-pub use raw::{IntoRawMode, TerminalRestorer};
+pub use raw::{IntoRawMode, RawTerminal};
 
 mod size;
 pub use size::terminal_size;
