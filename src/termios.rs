@@ -1,4 +1,7 @@
-use libc::{c_int, c_uint, c_uchar};
+use libc::c_int;
+use std::mem;
+
+pub use libc::termios as Termios;
 
 #[cfg(not(target_os = "macos"))]
 pub const TIOCGWINSZ: usize = 0x00005413;
@@ -12,32 +15,9 @@ extern {
     pub fn cfmakeraw(termptr: *mut Termios);
 }
 
-#[derive(Clone)]
-#[repr(C)]
-pub struct Termios {
-    c_iflag: c_uint,
-    c_oflag: c_uint,
-    c_cflag: c_uint,
-    c_lflag: c_uint,
-    c_line: c_uchar,
-    c_cc: [c_uchar; 32],
-    c_ispeed: c_uint,
-    c_ospeed: c_uint,
-}
-
 pub fn get_terminal_attr() -> (Termios, c_int) {
     unsafe {
-        let mut ios = Termios {
-            c_iflag: 0,
-            c_oflag: 0,
-            c_cflag: 0,
-            c_lflag: 0,
-            c_line: 0,
-            c_cc: [0; 32],
-            c_ispeed: 0,
-            c_ospeed: 0
-        };
-
+        let mut ios = mem::zeroed();
         let attr = tcgetattr(0, &mut ios);
         (ios, attr)
     }
