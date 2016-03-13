@@ -1,9 +1,11 @@
 extern crate libterm;
 
-use libterm::{TermRead, TermWrite, IntoRawMode, Key};
-use std::io::{Write, stdout, stdin};
 
+#[cfg(feature = "nightly")]
 fn main() {
+    use libterm::{TermRead, TermWrite, IntoRawMode, Key};
+    use std::io::{Write, stdout, stdin};
+
     let stdin = stdin();
     let mut stdout = stdout().into_raw_mode().unwrap();
 
@@ -34,4 +36,8 @@ fn main() {
     }
 
     stdout.show_cursor().unwrap();
+}
+#[cfg(not(feature = "nightly"))]
+fn main() {
+    println!("To run this example, you need to enable the `nightly` feature. Use Rust nightly and compile with `--features nightly`.")
 }
