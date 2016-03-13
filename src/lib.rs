@@ -24,9 +24,6 @@ pub use input::{TermRead, Key};
 #[cfg(feature = "nightly")]
 pub use input::Keys;
 
-mod error;
-pub use error::TerminalError;
-
 mod raw;
 pub use raw::{IntoRawMode, RawTerminal};
 

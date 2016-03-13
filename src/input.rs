@@ -1,5 +1,5 @@
-use std::io::{Read, Write};
-use {IntoRawMode, TerminalError};
+use std::io::{Read, Write, Error, ErrorKind, Result as IoResult};
+use IntoRawMode;
 
 #[cfg(feature = "nightly")]
 use std::io::{Chars, CharsError};
@@ -30,6 +30,10 @@ pub enum Key {
     // TODO handle errors better?
     /// IO error.
     Error,
+
+    #[allow(missing_docs)]
+    #[doc(hidden)]
+    __IsNotComplete
 }
 
 /// An iterator over input keys.
@@ -77,7 +81,7 @@ pub trait TermRead {
     ///
     /// EOT and ETX will abort the prompt, returning `None`. Newline or carriage return will
     /// complete the password input.
-    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> Result<Option<String>, TerminalError>;
+    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> IoResult<Option<String>>;
 }
 
 impl<R: Read> TermRead for R {
@@ -88,20 +92,20 @@ impl<R: Read> TermRead for R {
         }
     }
 
-    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> Result<Option<String>, TerminalError> {
+    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> IoResult<Option<String>> {
         let _raw = try!(writer.into_raw_mode());
         let mut passbuf = Vec::with_capacity(30);
 
         for c in self.bytes() {
             match c {
-                Err(_) => return Err(TerminalError::StdinError),
+                Err(e) => return Err(e),
                 Ok(0) | Ok(3) | Ok(4) => return Ok(None),
                 Ok(b'\n') | Ok(b'\r') => break,
                 Ok(c) => passbuf.push(c),
             }
         }
 
-        let passwd = try!(String::from_utf8(passbuf).map_err(|_| TerminalError::UnicodeError));
+        let passwd = try!(String::from_utf8(passbuf).map_err(|e| Error::new(ErrorKind::InvalidData, e)));
 
         Ok(Some(passwd))
     }

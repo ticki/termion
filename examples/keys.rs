@@ -28,6 +28,7 @@ fn main() {
             Key::Backspace => println!("×"),
             Key::Invalid => println!("???"),
             Key::Error => println!("ERROR"),
+            _ => {},
         }
         stdout.flush().unwrap();
     }
