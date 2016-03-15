@@ -1,4 +1,4 @@
-use std::io::{Error, ErrorKind, Result as IoResult};
+use std::io;
 
 #[cfg(not(target_os = "redox"))]
 use libc::c_ushort;
@@ -27,7 +27,7 @@ fn tiocgwinsz() -> u32 {
 
 /// Get the size of the terminal.
 #[cfg(not(target_os = "redox"))]
-pub fn terminal_size() -> IoResult<(usize, usize)> {
+pub fn terminal_size() -> io::Result<(usize, usize)> {
     use libc::ioctl;
     use libc::STDOUT_FILENO;
 
@@ -38,22 +38,22 @@ pub fn terminal_size() -> IoResult<(usize, usize)> {
         if ioctl(STDOUT_FILENO, tiocgwinsz(), &mut size as *mut _) == 0 {
             Ok((size.col as usize, size.row as usize))
         } else {
-            Err(Error::new(ErrorKind::Other, "Unable to get the terminal size."))
+            Err(io::Error::new(io::ErrorKind::Other, "Unable to get the terminal size."))
         }
     }
 }
 
 /// Get the size of the terminal.
 #[cfg(target_os = "redox")]
-pub fn terminal_size() -> IoResult<(usize, usize), TerminalError> {
-    fn get_int(s: &'static str) -> IoResult<usize> {
-        use std::env::{VarError, var};
+pub fn terminal_size() -> io::Result<(usize, usize)> {
+    fn get_int(s: &'static str) -> io::Result<usize> {
+        use std::env;
 
-        var(s).map_err(|e| match e {
-            VarError::NotPresent => Error::new(ErrorKind::NotFound, e),
-            VarError::NotUnicode(u) => Error::new(ErrorKind::InvalidData, u),
+        env::var(s).map_err(|e| match e {
+            env::VarError::NotPresent => io::Error::new(io::ErrorKind::NotFound, e),
+            env::VarError::NotUnicode(u) => io::Error::new(io::ErrorKind::InvalidData, u),
         }).and_then(|x| {
-            x.parse().map_err(|e| Error::new(ErrorKind::InvalidData, e))
+            x.parse().map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
         })
     }
 

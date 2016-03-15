@@ -1,4 +1,4 @@
-use std::io::{Write, Result as IoResult};
+use std::io::{self, Write};
 use {Color, Style};
 
 /// Extension to the `Write` trait.
@@ -8,39 +8,39 @@ use {Color, Style};
 pub trait TermWrite {
 
     /// Print the CSI (control sequence introducer) followed by a byte string.
-    fn csi(&mut self, b: &[u8]) -> IoResult<usize>;
+    fn csi(&mut self, b: &[u8]) -> io::Result<usize>;
     /// Print OSC (operating system command) followed by a byte string.
-    fn osc(&mut self, b: &[u8]) -> IoResult<usize>;
+    fn osc(&mut self, b: &[u8]) -> io::Result<usize>;
     /// Print OSC (device control string) followed by a byte string.
-    fn dsc(&mut self, b: &[u8]) -> IoResult<usize>;
+    fn dsc(&mut self, b: &[u8]) -> io::Result<usize>;
 
 
     /// Clear the entire screen.
-    fn clear(&mut self) -> IoResult<usize> {
+    fn clear(&mut self) -> io::Result<usize> {
         self.csi(b"2J")
     }
     /// Clear everything _after_ the cursor.
-    fn clear_after(&mut self) -> IoResult<usize> {
+    fn clear_after(&mut self) -> io::Result<usize> {
         self.csi(b"J")
     }
     /// Clear everything _before_ the cursor.
-    fn clear_before(&mut self) -> IoResult<usize> {
+    fn clear_before(&mut self) -> io::Result<usize> {
         self.csi(b"1J")
     }
     /// Clear the current line.
-    fn clear_line(&mut self) -> IoResult<usize> {
+    fn clear_line(&mut self) -> io::Result<usize> {
         self.csi(b"2K")
     }
     /// Clear from the cursor until newline.
-    fn clear_until_newline(&mut self) -> IoResult<usize> {
+    fn clear_until_newline(&mut self) -> io::Result<usize> {
         self.csi(b"K")
     }
     /// Show the cursor.
-    fn show_cursor(&mut self) -> IoResult<usize> {
+    fn show_cursor(&mut self) -> io::Result<usize> {
         self.csi(b"?25h")
     }
     /// Hide the cursor.
-    fn hide_cursor(&mut self) -> IoResult<usize> {
+    fn hide_cursor(&mut self) -> io::Result<usize> {
         self.csi(b"?25l")
     }
 
@@ -51,21 +51,21 @@ pub trait TermWrite {
     /// Reset the rendition mode.
     ///
     /// This will reset both the current style and color.
-    fn reset(&mut self) -> IoResult<usize> {
+    fn reset(&mut self) -> io::Result<usize> {
         self.csi(b"m")
     }
     /// Restore the defaults.
     ///
     /// This will reset color, position, cursor state, and so on. It is recommended that you use
     /// this before you exit your program, to avoid messing up the user's terminal.
-    fn restore(&mut self) -> IoResult<usize> {
+    fn restore(&mut self) -> io::Result<usize> {
         Ok(try!(self.reset()) + try!(self.clear()) + try!(self.goto(0, 0)) + try!(self.show_cursor()))
     }
 
     /// Go to a given position.
     ///
     /// The position is 0-based.
-    fn goto(&mut self, mut x: u16, mut y: u16) -> IoResult<usize> {
+    fn goto(&mut self, mut x: u16, mut y: u16) -> io::Result<usize> {
         x += 1;
         y += 1;
 
@@ -85,7 +85,7 @@ pub trait TermWrite {
         ])
     }
     /// Set graphic rendition.
-    fn rendition(&mut self, r: u8) -> IoResult<usize> {
+    fn rendition(&mut self, r: u8) -> io::Result<usize> {
         self.csi(&[
             b'0' + r / 100,
             b'0' + r / 10 % 10,
@@ -94,7 +94,7 @@ pub trait TermWrite {
         ])
     }
     /// Set foreground color
-    fn color(&mut self, color: Color) -> IoResult<usize> {
+    fn color(&mut self, color: Color) -> io::Result<usize> {
         let ansi = color.to_ansi_val();
         self.csi(&[
             b'3',
@@ -109,7 +109,7 @@ pub trait TermWrite {
         ])
     }
     /// Set background color
-    fn bg_color(&mut self, color: Color) -> IoResult<usize> {
+    fn bg_color(&mut self, color: Color) -> io::Result<usize> {
         let ansi = color.to_ansi_val();
         self.csi(&[
             b'4',
@@ -124,19 +124,19 @@ pub trait TermWrite {
         ])
     }
     /// Set rendition mode (SGR).
-    fn style(&mut self, mode: Style) -> IoResult<usize> {
+    fn style(&mut self, mode: Style) -> io::Result<usize> {
         self.rendition(mode as u8)
     }
 }
 
 impl<W: Write> TermWrite for W {
-    fn csi(&mut self, b: &[u8]) -> IoResult<usize> {
+    fn csi(&mut self, b: &[u8]) -> io::Result<usize> {
         Ok(try!(self.write(b"\x1B[")) + try!(self.write(b)))
     }
-    fn osc(&mut self, b: &[u8]) -> IoResult<usize> {
+    fn osc(&mut self, b: &[u8]) -> io::Result<usize> {
         Ok(try!(self.write(b"\x1B]")) + try!(self.write(b)))
     }
-    fn dsc(&mut self, b: &[u8]) -> IoResult<usize> {
+    fn dsc(&mut self, b: &[u8]) -> io::Result<usize> {
         Ok(try!(self.write(b"\x1BP")) + try!(self.write(b)))
     }
 }

@@ -19,6 +19,9 @@ mod termios;
 mod control;
 pub use control::TermWrite;
 
+mod async;
+pub use async::{AsyncReader, async_stdin};
+
 mod input;
 pub use input::{TermRead, Key};
 #[cfg(feature = "nightly")]

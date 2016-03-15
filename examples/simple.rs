@@ -7,6 +7,7 @@ fn main() {
     let stdout = stdout();
     let mut stdout = stdout.lock().into_raw_mode().unwrap();
     let stdin = stdin();
+    let stdin = stdin.lock();
 
     stdout.goto(5, 5).unwrap();
     stdout.clear().unwrap();

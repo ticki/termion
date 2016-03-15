@@ -24,7 +24,8 @@ Features
 - Redox support.
 - 256-color mode.
 - Panic-free error handling.
-- Special keys events.
+- Special keys events (modifiers, special keys, etc.).
+- Asynchronous key events.
 
 and much more.
 

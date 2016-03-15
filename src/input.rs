@@ -1,11 +1,14 @@
-use std::io::{Read, Write, Error, ErrorKind, Result as IoResult};
-use IntoRawMode;
+use std::io::{self, Read, Write};
+use std::thread;
+use std::sync::mpsc;
+
+use {IntoRawMode, AsyncReader};
 
 #[cfg(feature = "nightly")]
 use std::io::{Chars, CharsError};
 
 /// A key.
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[derive(Debug)]
 pub enum Key {
     /// Backspace.
     Backspace,
@@ -27,9 +30,8 @@ pub enum Key {
     Ctrl(char),
     /// Invalid character code.
     Invalid,
-    // TODO handle errors better?
     /// IO error.
-    Error,
+    Error(io::Error),
     /// Null byte.
     Null,
 
@@ -69,7 +71,7 @@ impl<I: Iterator<Item = Result<char, CharsError>>> Iterator for Keys<I> {
             None => None,
             Some('\0') => Some(Key::Null),
             Some(Ok(c)) => Some(Key::Char(c)),
-            Some(Err(_)) => Some(Key::Error),
+            Some(Err(e)) => Some(Key::Error(e)),
         }
     }
 }
@@ -84,7 +86,12 @@ pub trait TermRead {
     ///
     /// EOT and ETX will abort the prompt, returning `None`. Newline or carriage return will
     /// complete the password input.
-    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> IoResult<Option<String>>;
+    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> io::Result<Option<String>>;
+
+    /// Turn the reader into a asynchronous reader.
+    ///
+    /// This will spawn up another thread listening for event, buffering them in a mpsc queue.
+    fn into_async(self) -> AsyncReader where Self: Send;
 }
 
 impl<R: Read> TermRead for R {
@@ -95,7 +102,7 @@ impl<R: Read> TermRead for R {
         }
     }
 
-    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> IoResult<Option<String>> {
+    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> io::Result<Option<String>> {
         let _raw = try!(writer.into_raw_mode());
         let mut passbuf = Vec::with_capacity(30);
 
@@ -108,9 +115,31 @@ impl<R: Read> TermRead for R {
             }
         }
 
-        let passwd = try!(String::from_utf8(passbuf).map_err(|e| Error::new(ErrorKind::InvalidData, e)));
+        let passwd = try!(String::from_utf8(passbuf).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e)));
 
         Ok(Some(passwd))
+    }
+
+    fn into_async(self) -> AsyncReader where R: Send + 'static {
+        let (send, recv) = mpsc::channel();
+
+        thread::spawn(move || {
+            let mut reader = self;
+            loop {
+                let mut buf = [0];
+                if send.send(if let Err(k) = reader.read(&mut buf) {
+                    Err(k)
+                } else {
+                    Ok(buf[0])
+                }).is_err() {
+                    return;
+                };
+            }
+        });
+
+        AsyncReader {
+            recv: recv,
+        }
     }
 }
 
