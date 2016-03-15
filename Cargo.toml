@@ -3,7 +3,22 @@ name = "libterm"
 version = "0.1.0"
 authors = ["Ticki <Ticki@users.noreply.github.com>"]
 
-[dependencies]
+[target.i686-unknown-linux-gnu.dependencies]
+libc = "0.2.8"
+
+[target.x86_64-unknown-linux-gnu.dependencies]
+libc = "0.2.8"
+
+[target.i686-unknown-linux-musl.dependencies]
+libc = "0.2.8"
+
+[target.x86_64-unknown-linux-musl.dependencies]
+libc = "0.2.8"
+
+[target.i686-apple-darwin.dependencies]
+libc = "0.2.8"
+
+[target.x86_64-apple-darwin.dependencies]
 libc = "0.2.8"
 
 [features]
