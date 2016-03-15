@@ -30,6 +30,8 @@ pub enum Key {
     // TODO handle errors better?
     /// IO error.
     Error,
+    /// Null byte.
+    Null,
 
     #[allow(missing_docs)]
     #[doc(hidden)]
@@ -64,8 +66,9 @@ impl<I: Iterator<Item = Result<char, CharsError>>> Iterator for Keys<I> {
             Some(Ok('\x7F')) => Some(Key::Backspace),
             Some(Ok(c @ '\x01' ... '\x1A')) => Some(Key::Ctrl((c as u8 - 0x1  + b'a') as char)),
             Some(Ok(c @ '\x1C' ... '\x1F')) => Some(Key::Ctrl((c as u8 - 0x1C + b'4') as char)),
-            Some(Ok(c)) => Some(Key::Char(c)),
             None => None,
+            Some('\0') => Some(Key::Null),
+            Some(Ok(c)) => Some(Key::Char(c)),
             Some(Err(_)) => Some(Key::Error),
         }
     }
