@@ -1,6 +1,6 @@
-extern crate libterm;
+extern crate termion;
 
-use libterm::{TermWrite, IntoRawMode, async_stdin};
+use termion::{TermWrite, IntoRawMode, async_stdin};
 use std::io::{Read, Write, stdout, stdin};
 use std::thread;
 use std::time::Duration;

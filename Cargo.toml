@@ -1,5 +1,5 @@
 [package]
-name = "libterm"
+name = "termion"
 version = "0.1.0"
 authors = ["Ticki <Ticki@users.noreply.github.com>"]
 

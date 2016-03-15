@@ -1,4 +1,4 @@
-//! Libterm is a pure Rust library for reading, manipulating, and handling terminals.
+//! termion is a pure Rust library for reading, manipulating, and handling terminals.
 //!
 //! This crate is not stable, yet. However, if you do want stability, you should specify the
 //! revision (commit hash) in your `Cargo.toml`, this way builds are complete reproducible, and won't

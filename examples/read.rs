@@ -1,6 +1,6 @@
-extern crate libterm;
+extern crate termion;
 
-use libterm::TermRead;
+use termion::TermRead;
 use std::io::{Write, stdout, stdin};
 
 fn main() {

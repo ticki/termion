@@ -1,9 +1,9 @@
-extern crate libterm;
+extern crate termion;
 
 
 #[cfg(feature = "nightly")]
 fn main() {
-    use libterm::{TermRead, TermWrite, IntoRawMode, Key};
+    use termion::{TermRead, TermWrite, IntoRawMode, Key};
     use std::io::{Write, stdout, stdin};
 
     let stdin = stdin();
