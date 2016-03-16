@@ -5,6 +5,8 @@ A pure Rust library for handling, manipulating and reading information about ter
 
 Supports Redox and POSIX. Untested on Windows.
 
+[Documentation.](http://ticki.github.io/termion/termion/) | [Examples.](https://github.com/Ticki/termion/tree/master/examples)
+
 A note on stability
 -------------------
 
