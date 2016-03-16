@@ -13,11 +13,13 @@ struct TermSize {
 }
 
 // Since attributes on non-item statements is not stable yet, we use a function.
+#[cfg(not(target_os = "redox"))]
 #[cfg(target_pointer_width = "64")]
 fn tiocgwinsz() -> u64 {
     use termios::TIOCGWINSZ;
     TIOCGWINSZ as u64
 }
+#[cfg(not(target_os = "redox"))]
 #[cfg(target_pointer_width = "32")]
 fn tiocgwinsz() -> u32 {
     use termios::TIOCGWINSZ;
@@ -46,6 +48,7 @@ pub fn terminal_size() -> io::Result<(usize, usize)> {
 /// Get the size of the terminal.
 #[cfg(target_os = "redox")]
 pub fn terminal_size() -> io::Result<(usize, usize)> {
+    /*
     fn get_int(s: &'static str) -> io::Result<usize> {
         use std::env;
 
@@ -58,6 +61,8 @@ pub fn terminal_size() -> io::Result<(usize, usize)> {
     }
 
     Ok((try!(get_int("COLUMNS")), try!(get_int("LINES"))))
+    */
+    Ok((128,48))
 }
 
 #[cfg(test)]
