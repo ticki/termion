@@ -36,7 +36,8 @@ See `examples/`, and the documentation, which can be rendered using `cargo doc`.
 
 For a more complete example, see [a minesweeper implementation](https://github.com/redox-os/games-for-redox/blob/master/src/minesweeper.rs), that I made for Redox using termion.
 
-![minesweeper](image.png)
+<img src="image.png" width="150">
+
 
 TODO
 ----
