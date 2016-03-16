@@ -29,7 +29,7 @@ fn main() {
             Key::Down => println!("↓"),
             Key::Backspace => println!("×"),
             Key::Invalid => println!("???"),
-            Key::Error => println!("ERROR"),
+            Key::Error(_) => println!("ERROR"),
             _ => {},
         }
         stdout.flush().unwrap();
