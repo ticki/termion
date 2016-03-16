@@ -93,7 +93,7 @@ pub trait TermWrite {
             b'm',
         ])
     }
-    /// Set foreground color
+    /// Set foreground color.
     fn color(&mut self, color: Color) -> io::Result<usize> {
         let ansi = color.to_ansi_val();
         self.csi(&[
@@ -108,7 +108,7 @@ pub trait TermWrite {
             b'm',
         ])
     }
-    /// Set background color
+    /// Set background color.
     fn bg_color(&mut self, color: Color) -> io::Result<usize> {
         let ansi = color.to_ansi_val();
         self.csi(&[

@@ -35,7 +35,7 @@ pub enum Color {
     LightWhite,
     /// 216-color (r, g, b ≤ 5) RGB.
     Rgb(u8, u8, u8),
-    /// Grayscale (max value: 24)
+    /// Grayscale (max value: 24).
     Grayscale(u8),
 }
 

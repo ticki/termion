@@ -9,7 +9,7 @@ use std::thread;
 /// be buffered in a mpsc queue, which will eventually be read by the current thread.
 ///
 /// Note that this will acquire the Mutex lock on the standard input, making all future stdin
-/// construction hang the program.
+/// construction hang the program until the reader is dropped.
 pub fn async_stdin() -> AsyncReader {
     let (send, recv) = mpsc::channel();
 
