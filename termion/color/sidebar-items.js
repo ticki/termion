@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Color","A terminal color."]]});

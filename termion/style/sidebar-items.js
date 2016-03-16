@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Style","A SGR parameter (rendition mode)."]]});
