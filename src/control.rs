@@ -11,7 +11,7 @@ pub trait TermWrite {
     fn csi(&mut self, b: &[u8]) -> io::Result<usize>;
     /// Print OSC (operating system command) followed by a byte string.
     fn osc(&mut self, b: &[u8]) -> io::Result<usize>;
-    /// Print OSC (device control string) followed by a byte string.
+    /// Print DSC (device control string) followed by a byte string.
     fn dsc(&mut self, b: &[u8]) -> io::Result<usize>;
 
 
