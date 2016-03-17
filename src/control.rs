@@ -96,49 +96,32 @@ pub trait TermWrite {
     /// Set foreground color.
     fn color(&mut self, color: Color) -> io::Result<usize> {
         let ansi = color.to_ansi_val();
-        if ansi <= 7 {
-            self.csi(&[
-                b'3',
-                b'0' + ansi,
-                b'm',
-            ])
-        } else {
-            self.csi(&[
-                b'3',
-                b'8',
-                b';',
-                b'5',
-                b';',
-                b'0' + ansi / 100,
-                b'0' + ansi / 10 % 10,
-                b'0' + ansi % 10,
-                b'm',
-            ])
-        }
+        self.csi(&[
+            b'3',
+            b'8',
+            b';',
+            b'5',
+            b';',
+            b'0' + ansi / 100,
+            b'0' + ansi / 10 % 10,
+            b'0' + ansi % 10,
+            b'm',
+        ])
     }
     /// Set background color.
     fn bg_color(&mut self, color: Color) -> io::Result<usize> {
         let ansi = color.to_ansi_val();
-
-        if ansi <= 7 {
-            self.csi(&[
-                b'4',
-                b'0' + ansi,
-                b'm',
-            ])
-        } else {
-            self.csi(&[
-                b'4',
-                b'8',
-                b';',
-                b'5',
-                b';',
-                b'0' + ansi / 100,
-                b'0' + ansi / 10 % 10,
-                b'0' + ansi % 10,
-                b'm',
-            ])
-        }
+        self.csi(&[
+            b'4',
+            b'8',
+            b';',
+            b'5',
+            b';',
+            b'0' + ansi / 100,
+            b'0' + ansi / 10 % 10,
+            b'0' + ansi % 10,
+            b'm',
+        ])
     }
     /// Set rendition mode (SGR).
     fn style(&mut self, mode: Style) -> io::Result<usize> {
