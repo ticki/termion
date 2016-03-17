@@ -48,21 +48,12 @@ pub fn terminal_size() -> io::Result<(usize, usize)> {
 /// Get the size of the terminal.
 #[cfg(target_os = "redox")]
 pub fn terminal_size() -> io::Result<(usize, usize)> {
-    /*
-    fn get_int(s: &'static str) -> io::Result<usize> {
-        use std::env;
+    use std::env;
 
-        env::var(s).map_err(|e| match e {
-            env::VarError::NotPresent => io::Error::new(io::ErrorKind::NotFound, e),
-            env::VarError::NotUnicode(u) => io::Error::new(io::ErrorKind::InvalidData, u),
-        }).and_then(|x| {
-            x.parse().map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
-        })
-    }
+    let width = env::var("COLUMNS").unwrap_or(String::new()).parse::<usize>().unwrap_or(0);
+    let height = env::var("LINES").unwrap_or(String::new()).parse::<usize>().unwrap_or(0);
 
-    Ok((try!(get_int("COLUMNS")), try!(get_int("LINES"))))
-    */
-    Ok((128,48))
+    Ok((width, height))
 }
 
 #[cfg(test)]
