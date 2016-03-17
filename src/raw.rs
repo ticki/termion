@@ -4,14 +4,14 @@ use std::ops::{Deref, DerefMut};
 /// A terminal restorer, which keeps the previous state of the terminal, and restores it, when
 /// dropped.
 #[cfg(target_os = "redox")]
-pub struct RawTerminal<W> {
+pub struct RawTerminal<W: Write> {
     output: W,
 }
 
 #[cfg(target_os = "redox")]
 impl<W: Write> Drop for RawTerminal<W> {
     fn drop(&mut self) {
-        use TermControl;
+        use control::TermWrite;
         self.csi(b"R");
     }
 }
@@ -21,27 +21,27 @@ use termios::Termios;
 /// A terminal restorer, which keeps the previous state of the terminal, and restores it, when
 /// dropped.
 #[cfg(not(target_os = "redox"))]
-pub struct RawTerminal<W> {
+pub struct RawTerminal<W: Write> {
     prev_ios: Termios,
     output: W,
 }
 
 #[cfg(not(target_os = "redox"))]
-impl<W> Drop for RawTerminal<W> {
+impl<W: Write> Drop for RawTerminal<W> {
     fn drop(&mut self) {
         use termios::set_terminal_attr;
         set_terminal_attr(&mut self.prev_ios as *mut _);
     }
 }
 
-impl<W> Deref for RawTerminal<W> {
+impl<W: Write> Deref for RawTerminal<W> {
     type Target = W;
 
     fn deref(&self) -> &W {
         &self.output
     }
 }
-impl<W> DerefMut for RawTerminal<W> {
+impl<W: Write> DerefMut for RawTerminal<W> {
     fn deref_mut(&mut self) -> &mut W {
         &mut self.output
     }
@@ -58,7 +58,7 @@ impl<W: Write> Write for RawTerminal<W> {
 }
 
 /// Types which can be converted into "raw mode".
-pub trait IntoRawMode: Sized {
+pub trait IntoRawMode: Write + Sized {
     /// Switch to raw mode.
     ///
     /// Raw mode means that stdin won't be printed (it will instead have to be written manually by the
@@ -92,10 +92,10 @@ impl<W: Write> IntoRawMode for W {
         }
     }
     #[cfg(target_os = "redox")]
-    fn into_raw_mode(self) -> IoResult<RawTerminal<W>> {
-        use TermControl;
+    fn into_raw_mode(mut self) -> IoResult<RawTerminal<W>> {
+        use control::TermWrite;
 
-        self.csi("r").map(|_| RawTerminal {
+        self.csi(b"r").map(|_| RawTerminal {
             output: self,
         })
     }
