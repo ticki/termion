@@ -80,12 +80,22 @@ pub trait TermRead {
     #[cfg(feature = "nightly")]
     fn keys(self) -> Keys<Chars<Self>> where Self: Sized;
 
+    /// Read a line.
+    ///
+    /// EOT and ETX will abort the prompt, returning `None`. Newline or carriage return will
+    /// complete the input.
+    fn read_line(&mut self) -> io::Result<Option<String>>;
+
     /// Read a password.
     ///
     /// EOT and ETX will abort the prompt, returning `None`. Newline or carriage return will
-    /// complete the password input.
-    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> io::Result<Option<String>>;
+    /// complete the input.
+    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> io::Result<Option<String>> {
+        let _raw = try!(writer.into_raw_mode());
+        self.read_line()
+    }
 }
+
 
 impl<R: Read> TermRead for R {
     #[cfg(feature = "nightly")]
@@ -95,22 +105,20 @@ impl<R: Read> TermRead for R {
         }
     }
 
-    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> io::Result<Option<String>> {
-        let _raw = try!(writer.into_raw_mode());
-        let mut passbuf = Vec::with_capacity(30);
+    fn read_line(&mut self) -> io::Result<Option<String>> {
+        let mut buf = Vec::with_capacity(30);
 
         for c in self.bytes() {
             match c {
                 Err(e) => return Err(e),
                 Ok(0) | Ok(3) | Ok(4) => return Ok(None),
                 Ok(b'\n') | Ok(b'\r') => break,
-                Ok(c) => passbuf.push(c),
+                Ok(c) => buf.push(c),
             }
         }
 
-        let passwd = try!(String::from_utf8(passbuf).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e)));
-
-        Ok(Some(passwd))
+        let string = try!(String::from_utf8(buf).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e)));
+        Ok(Some(string))
     }
 }
 
