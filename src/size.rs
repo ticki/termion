@@ -48,21 +48,17 @@ pub fn terminal_size() -> io::Result<(usize, usize)> {
 /// Get the size of the terminal.
 #[cfg(target_os = "redox")]
 pub fn terminal_size() -> io::Result<(usize, usize)> {
-    /*
-    fn get_int(s: &'static str) -> io::Result<usize> {
-        use std::env;
+    use std::fs::File;
+    use std::os::unix::io::{IntoRawFd, FromRawFd};
 
-        env::var(s).map_err(|e| match e {
-            env::VarError::NotPresent => io::Error::new(io::ErrorKind::NotFound, e),
-            env::VarError::NotUnicode(u) => io::Error::new(io::ErrorKind::InvalidData, u),
-        }).and_then(|x| {
-            x.parse().map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
-        })
-    }
+    let stdin = unsafe { File::from_raw_fd(0) }; // Get stdin as a File
+    let path = stdin.path().map(|path| path.into_os_string().into_string().unwrap_or(String::new())).unwrap_or(String::new());
+    let res = path.split(":").nth(1).unwrap_or("");
+    let width = res.split("/").nth(0).unwrap_or("").parse::<usize>().unwrap_or(0);
+    let height = res.split("/").nth(1).unwrap_or("").parse::<usize>().unwrap_or(0);
+    stdin.into_raw_fd(); // Do not allow stdin to be closed
 
-    Ok((try!(get_int("COLUMNS")), try!(get_int("LINES"))))
-    */
-    Ok((128,48))
+    Ok((width, height))
 }
 
 #[cfg(test)]
