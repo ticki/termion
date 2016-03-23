@@ -1,8 +1,6 @@
 use std::io::{self, Read, Write};
-use std::thread;
-use std::sync::mpsc;
 
-use {IntoRawMode, AsyncReader};
+use IntoRawMode;
 
 #[cfg(feature = "nightly")]
 use std::io::{Chars, CharsError};
@@ -87,11 +85,6 @@ pub trait TermRead {
     /// EOT and ETX will abort the prompt, returning `None`. Newline or carriage return will
     /// complete the password input.
     fn read_passwd<W: Write>(&mut self, writer: &mut W) -> io::Result<Option<String>>;
-
-    /// Turn the reader into a asynchronous reader.
-    ///
-    /// This will spawn up another thread listening for event, buffering them in a mpsc queue.
-    fn into_async(self) -> AsyncReader where Self: Send;
 }
 
 impl<R: Read> TermRead for R {
@@ -118,28 +111,6 @@ impl<R: Read> TermRead for R {
         let passwd = try!(String::from_utf8(passbuf).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e)));
 
         Ok(Some(passwd))
-    }
-
-    fn into_async(self) -> AsyncReader where R: Send + 'static {
-        let (send, recv) = mpsc::channel();
-
-        thread::spawn(move || {
-            let mut reader = self;
-            loop {
-                let mut buf = [0];
-                if send.send(if let Err(k) = reader.read(&mut buf) {
-                    Err(k)
-                } else {
-                    Ok(buf[0])
-                }).is_err() {
-                    return;
-                };
-            }
-        });
-
-        AsyncReader {
-            recv: recv,
-        }
     }
 }
 

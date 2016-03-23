@@ -1,4 +1,4 @@
-use std::io::{Write, Error, ErrorKind, Result as IoResult};
+use std::io::{self, Write};
 use std::ops::{Deref, DerefMut};
 
 /// A terminal restorer, which keeps the previous state of the terminal, and restores it, when
@@ -12,7 +12,7 @@ pub struct RawTerminal<W: Write> {
 impl<W: Write> Drop for RawTerminal<W> {
     fn drop(&mut self) {
         use control::TermWrite;
-        self.csi(b"R");
+        let _ = self.csi(b"R");
     }
 }
 
@@ -48,11 +48,11 @@ impl<W: Write> DerefMut for RawTerminal<W> {
 }
 
 impl<W: Write> Write for RawTerminal<W> {
-    fn write(&mut self, buf: &[u8]) -> IoResult<usize> {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         self.output.write(buf)
     }
 
-    fn flush(&mut self) -> IoResult<()> {
+    fn flush(&mut self) -> io::Result<()> {
         self.output.flush()
     }
 }
@@ -64,18 +64,18 @@ pub trait IntoRawMode: Write + Sized {
     /// Raw mode means that stdin won't be printed (it will instead have to be written manually by the
     /// program). Furthermore, the input isn't canonicalised or buffered (that is, you can read from
     /// stdin one byte of a time). The output is neither modified in any way.
-    fn into_raw_mode(self) -> IoResult<RawTerminal<Self>>;
+    fn into_raw_mode(self) -> io::Result<RawTerminal<Self>>;
 }
 
 impl<W: Write> IntoRawMode for W {
     #[cfg(not(target_os = "redox"))]
-    fn into_raw_mode(self) -> IoResult<RawTerminal<W>> {
+    fn into_raw_mode(self) -> io::Result<RawTerminal<W>> {
         use termios::{cfmakeraw, get_terminal_attr, set_terminal_attr};
 
         let (mut ios, exit) = get_terminal_attr();
         let prev_ios = ios.clone();
         if exit != 0 {
-            return Err(Error::new(ErrorKind::Other, "Unable to get Termios attribute."));
+            return Err(io::Error::new(io::ErrorKind::Other, "Unable to get Termios attribute."));
         }
 
         unsafe {
@@ -83,7 +83,7 @@ impl<W: Write> IntoRawMode for W {
         }
 
         if set_terminal_attr(&mut ios as *mut _) != 0 {
-            Err(Error::new(ErrorKind::Other, "Unable to set Termios attribute."))
+            Err(io::Error::new(io::ErrorKind::Other, "Unable to set Termios attribute."))
         } else {
             Ok(RawTerminal {
                 prev_ios: prev_ios,
@@ -92,7 +92,7 @@ impl<W: Write> IntoRawMode for W {
         }
     }
     #[cfg(target_os = "redox")]
-    fn into_raw_mode(mut self) -> IoResult<RawTerminal<W>> {
+    fn into_raw_mode(mut self) -> io::Result<RawTerminal<W>> {
         use control::TermWrite;
 
         self.csi(b"r").map(|_| RawTerminal {
