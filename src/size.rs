@@ -48,15 +48,10 @@ pub fn terminal_size() -> io::Result<(usize, usize)> {
 /// Get the size of the terminal.
 #[cfg(target_os = "redox")]
 pub fn terminal_size() -> io::Result<(usize, usize)> {
-    use std::fs::File;
-    use std::os::unix::io::{IntoRawFd, FromRawFd};
+    use std::env;
 
-    let stdin = unsafe { File::from_raw_fd(0) }; // Get stdin as a File
-    let path = stdin.path().map(|path| path.into_os_string().into_string().unwrap_or(String::new())).unwrap_or(String::new());
-    let res = path.split(":").nth(1).unwrap_or("");
-    let width = res.split("/").nth(0).unwrap_or("").parse::<usize>().unwrap_or(0);
-    let height = res.split("/").nth(1).unwrap_or("").parse::<usize>().unwrap_or(0);
-    stdin.into_raw_fd(); // Do not allow stdin to be closed
+    let width = env::var("COLUMNS").unwrap_or(String::new()).parse::<usize>().unwrap_or(0);
+    let height = env::var("LINES").unwrap_or(String::new()).parse::<usize>().unwrap_or(0);
 
     Ok((width, height))
 }
