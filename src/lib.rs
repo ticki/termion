@@ -4,7 +4,7 @@
 //! revision (commit hash) in your `Cargo.toml`, this way builds are complete reproducible, and won't
 //! break.
 #![warn(missing_docs)]
-
+#![feature(io)]
 
 #[cfg(not(target_os = "redox"))]
 extern crate libc;
