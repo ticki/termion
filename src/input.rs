@@ -103,6 +103,7 @@ impl<R: Read> TermRead for R {
             match c {
                 Err(e) => return Err(e),
                 Ok(0) | Ok(3) | Ok(4) => return Ok(None),
+                Ok(0x7f) => { passbuf.pop(); },
                 Ok(b'\n') | Ok(b'\r') => break,
                 Ok(c) => passbuf.push(c),
             }
@@ -116,11 +117,12 @@ impl<R: Read> TermRead for R {
 
 #[cfg(test)]
 mod test {
+    use super::*;
+    use std::io;
+
     #[cfg(feature = "nightly")]
     #[test]
     fn test_keys() {
-        use {TermRead, Key};
-
         let mut i = b"\x1Bayo\x7F\x1B[D".keys();
 
         assert_eq!(i.next(), Some(Key::Alt('a')));
@@ -129,5 +131,25 @@ mod test {
         assert_eq!(i.next(), Some(Key::Backspace));
         assert_eq!(i.next(), Some(Key::Left));
         assert_eq!(i.next(), None);
+    }
+
+    #[test]
+    fn test_passwd() {
+        let test1 = "this is the first test";
+        let test2 = "this is the second test";
+        let mut sink = io::sink();
+
+        assert_eq!(&test1.as_bytes().read_passwd(&mut sink).unwrap().unwrap(), test1);
+        assert_eq!(&test2.as_bytes().read_passwd(&mut sink).unwrap().unwrap(), test2);
+    }
+
+    #[test]
+    fn test_passwd_backspace() {
+        let test1 = "this is the\x7f first\x7f\x7f test";
+        let test2 = "this is the seco\x7fnd test\x7f";
+        let mut sink = io::sink();
+
+        assert_eq!(&test1.as_bytes().read_passwd(&mut sink).unwrap().unwrap(), "this is th fir test");
+        assert_eq!(&test2.as_bytes().read_passwd(&mut sink).unwrap().unwrap(), "this is the secnd tes");
     }
 }
