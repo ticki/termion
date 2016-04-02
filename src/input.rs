@@ -112,7 +112,7 @@ impl<R: Read> TermRead for R {
             match c {
                 Err(e) => return Err(e),
                 Ok(0) | Ok(3) | Ok(4) => return Ok(None),
-                Ok(0x7f) => { passbuf.pop(); },
+                Ok(0x7f) => { buf.pop(); },
                 Ok(b'\n') | Ok(b'\r') => break,
                 Ok(c) => buf.push(c),
             }
@@ -141,23 +141,47 @@ mod test {
         assert_eq!(i.next(), None);
     }
 
-    #[test]
-    fn test_passwd() {
-        let test1 = "this is the first test";
-        let test2 = "this is the second test";
+    fn line_match(a: &str, b: Option<&str>) {
         let mut sink = io::sink();
 
-        assert_eq!(&test1.as_bytes().read_passwd(&mut sink).unwrap().unwrap(), test1);
-        assert_eq!(&test2.as_bytes().read_passwd(&mut sink).unwrap().unwrap(), test2);
+        let line = a.as_bytes().read_line().unwrap();
+        let pass = a.as_bytes().read_passwd(&mut sink).unwrap();
+
+        // godammit rustc
+
+        assert_eq!(line, pass);
+
+        if let Some(l) = line {
+            assert_eq!(Some(l.as_str()), b);
+        } else {
+            assert!(b.is_none());
+        }
     }
 
     #[test]
-    fn test_passwd_backspace() {
-        let test1 = "this is the\x7f first\x7f\x7f test";
-        let test2 = "this is the seco\x7fnd test\x7f";
-        let mut sink = io::sink();
+    fn test_read() {
+        let test1 = "this is the first test";
+        let test2 = "this is the second test";
 
-        assert_eq!(&test1.as_bytes().read_passwd(&mut sink).unwrap().unwrap(), "this is th fir test");
-        assert_eq!(&test2.as_bytes().read_passwd(&mut sink).unwrap().unwrap(), "this is the secnd tes");
+        line_match(test1, Some(test1));
+        line_match(test2, Some(test2));
+    }
+
+    #[test]
+    fn test_backspace() {
+        line_match("this is the\x7f first\x7f\x7f test", Some("this is th fir test"));
+        line_match("this is the seco\x7fnd test\x7f", Some("this is the secnd tes"));
+    }
+
+    #[test]
+    fn test_end() {
+        line_match("abc\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ", Some("abc"));
+        line_match("hello\rhttps://www.youtube.com/watch?v=yPYZpwSpKmA", Some("hello"));
+    }
+
+    #[test]
+    fn test_abort() {
+        line_match("abc\x03https://www.youtube.com/watch?v=dQw4w9WgXcQ", None);
+        line_match("hello\x04https://www.youtube.com/watch?v=yPYZpwSpKmA", None);
     }
 }
