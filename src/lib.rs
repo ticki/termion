@@ -5,6 +5,8 @@
 //! break.
 #![warn(missing_docs)]
 
+#![cfg_attr(feature = "nightly", feature(io))]
+
 
 #[cfg(not(target_os = "redox"))]
 extern crate libc;
