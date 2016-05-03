@@ -3,17 +3,17 @@ extern crate termion;
 use termion::{TermWrite, Color, Style};
 use std::io::{self, Write};
 
-const LINE_NUM_BG: Color = Color::Grayscale(5);
+const LINE_NUM_BG: Color = Color::Grayscale(3);
 const LINE_NUM_FG: Color = Color::Grayscale(18);
 const ERROR_FG: Color = Color::Grayscale(17);
-const INFO_LINE: &'static str = "│  ";
+const INFO_LINE: &'static str = "|  ";
 
 fn main() {
     let stdout = io::stdout();
     let mut stdout = stdout.lock();
 
     stdout.color(Color::LightGreen).unwrap();
-    stdout.write("—— src/test/ui/borrow-errors.rs at 82:18 ——\n".as_bytes()).unwrap();
+    stdout.write("-- src/test/ui/borrow-errors.rs at 82:18 --\n".as_bytes()).unwrap();
     stdout.reset().unwrap();
 
     stdout.color(Color::Red).unwrap();
@@ -42,7 +42,7 @@ fn main() {
     stdout.write(INFO_LINE.as_bytes()).unwrap();
     stdout.reset().unwrap();
     stdout.color(Color::Red).unwrap();
-    stdout.write("                  ━━━ ".as_bytes()).unwrap();
+    stdout.write("                  ^^^ ".as_bytes()).unwrap();
     stdout.reset().unwrap();
 
     stdout.color(ERROR_FG).unwrap();
@@ -61,7 +61,7 @@ fn main() {
     stdout.write(INFO_LINE.as_bytes()).unwrap();
     stdout.reset().unwrap();
     stdout.color(Color::Red).unwrap();
-    stdout.write("         ━━━ ".as_bytes()).unwrap();
+    stdout.write("         ^^^ ".as_bytes()).unwrap();
     stdout.reset().unwrap();
 
     stdout.color(ERROR_FG).unwrap();
@@ -85,7 +85,7 @@ fn main() {
     stdout.write(INFO_LINE.as_bytes()).unwrap();
     stdout.reset().unwrap();
     stdout.color(Color::Red).unwrap();
-    stdout.write("                  ━━━ ".as_bytes()).unwrap();
+    stdout.write("                  ^^^ ".as_bytes()).unwrap();
     stdout.reset().unwrap();
 
     stdout.color(ERROR_FG).unwrap();
@@ -104,7 +104,7 @@ fn main() {
     stdout.write(INFO_LINE.as_bytes()).unwrap();
     stdout.reset().unwrap();
     stdout.color(Color::Red).unwrap();
-    stdout.write("         ━━━ ".as_bytes()).unwrap();
+    stdout.write("         ^^^ ".as_bytes()).unwrap();
     stdout.reset().unwrap();
 
     stdout.color(ERROR_FG).unwrap();
@@ -128,7 +128,7 @@ fn main() {
     stdout.write(INFO_LINE.as_bytes()).unwrap();
     stdout.reset().unwrap();
     stdout.color(Color::Red).unwrap();
-    stdout.write(" ━ ".as_bytes()).unwrap();
+    stdout.write(" ^ ".as_bytes()).unwrap();
     stdout.reset().unwrap();
 
     stdout.color(ERROR_FG).unwrap();

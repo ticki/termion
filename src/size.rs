@@ -29,7 +29,7 @@ fn tiocgwinsz() -> u32 {
 
 /// Get the size of the terminal.
 #[cfg(not(target_os = "redox"))]
-pub fn terminal_size() -> io::Result<(usize, usize)> {
+pub fn terminal_size() -> io::Result<(u16, u16)> {
     use libc::ioctl;
     use libc::STDOUT_FILENO;
 
@@ -38,7 +38,7 @@ pub fn terminal_size() -> io::Result<(usize, usize)> {
         let mut size: TermSize = mem::zeroed();
 
         if ioctl(STDOUT_FILENO, tiocgwinsz(), &mut size as *mut _) == 0 {
-            Ok((size.col as usize, size.row as usize))
+            Ok((size.col as u16, size.row as u16))
         } else {
             Err(io::Error::new(io::ErrorKind::Other, "Unable to get the terminal size."))
         }
@@ -47,7 +47,7 @@ pub fn terminal_size() -> io::Result<(usize, usize)> {
 
 /// Get the size of the terminal.
 #[cfg(target_os = "redox")]
-pub fn terminal_size() -> io::Result<(usize, usize)> {
+pub fn terminal_size() -> io::Result<(u16, u16)> {
     use std::env;
 
     let width = try!(env::var("COLUMNS").map_err(|x| io::Error::new(io::ErrorKind::NotFound, x))).parse().unwrap_or(0);
