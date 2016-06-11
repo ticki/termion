@@ -51,7 +51,7 @@ pub trait TermWrite {
                        b'0' + (num / 100) as u8 % 10,
                        b'0' + (num / 10) as u8 % 10,
                        b'0' + num as u8 % 10,
-                       b'C'])
+                       b'D'])
         } else {
             Ok(0)
         }
@@ -64,7 +64,7 @@ pub trait TermWrite {
                        b'0' + (num / 100) as u8 % 10,
                        b'0' + (num / 10) as u8 % 10,
                        b'0' + num as u8 % 10,
-                       b'D'])
+                       b'C'])
         } else {
             Ok(0)
         }
