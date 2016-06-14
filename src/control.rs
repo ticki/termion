@@ -43,6 +43,32 @@ pub trait TermWrite {
     fn hide_cursor(&mut self) -> io::Result<usize> {
         self.csi(b"?25l")
     }
+    /// Move the cursor `num` spaces to the left.
+    fn move_cursor_left(&mut self, num: u32) -> io::Result<usize> {
+        if num > 0 {
+            self.csi(&[b'0' + (num / 10000) as u8,
+                       b'0' + (num / 1000) as u8 % 10,
+                       b'0' + (num / 100) as u8 % 10,
+                       b'0' + (num / 10) as u8 % 10,
+                       b'0' + num as u8 % 10,
+                       b'D'])
+        } else {
+            Ok(0)
+        }
+    }
+    /// Move the cursor `num` spaces to the right.
+    fn move_cursor_right(&mut self, num: u32) -> io::Result<usize> {
+        if num > 0 {
+            self.csi(&[b'0' + (num / 10000) as u8,
+                       b'0' + (num / 1000) as u8 % 10,
+                       b'0' + (num / 100) as u8 % 10,
+                       b'0' + (num / 10) as u8 % 10,
+                       b'0' + num as u8 % 10,
+                       b'C'])
+        } else {
+            Ok(0)
+        }
+    }
 
     // TODO
     // fn mode
