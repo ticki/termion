@@ -16,6 +16,7 @@ Features
 --------
 
 - Raw mode.
+- 256-color mode.
 - Cursor movement.
 - Color output.
 - Text formatting.
@@ -24,9 +25,9 @@ Features
 - Termios control.
 - Password input.
 - Redox support.
-- 256-color mode.
 - Panic-free error handling.
 - Special keys events (modifiers, special keys, etc.).
+- Allocation-free.
 - Asynchronous key events.
 
 and much more.

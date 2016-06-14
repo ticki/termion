@@ -41,6 +41,7 @@ impl<W: Write> Deref for RawTerminal<W> {
         &self.output
     }
 }
+
 impl<W: Write> DerefMut for RawTerminal<W> {
     fn deref_mut(&mut self) -> &mut W {
         &mut self.output
@@ -91,6 +92,7 @@ impl<W: Write> IntoRawMode for W {
             })
         }
     }
+
     #[cfg(target_os = "redox")]
     fn into_raw_mode(mut self) -> io::Result<RawTerminal<W>> {
         use control::TermWrite;

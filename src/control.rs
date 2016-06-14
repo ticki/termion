@@ -19,30 +19,37 @@ pub trait TermWrite {
     fn clear(&mut self) -> io::Result<usize> {
         self.csi(b"2J")
     }
+
     /// Clear everything _after_ the cursor.
     fn clear_after(&mut self) -> io::Result<usize> {
         self.csi(b"J")
     }
+
     /// Clear everything _before_ the cursor.
     fn clear_before(&mut self) -> io::Result<usize> {
         self.csi(b"1J")
     }
+
     /// Clear the current line.
     fn clear_line(&mut self) -> io::Result<usize> {
         self.csi(b"2K")
     }
+
     /// Clear from the cursor until newline.
     fn clear_until_newline(&mut self) -> io::Result<usize> {
         self.csi(b"K")
     }
+
     /// Show the cursor.
     fn show_cursor(&mut self) -> io::Result<usize> {
         self.csi(b"?25h")
     }
+
     /// Hide the cursor.
     fn hide_cursor(&mut self) -> io::Result<usize> {
         self.csi(b"?25l")
     }
+
     /// Move the cursor `num` spaces to the left.
     fn move_cursor_left(&mut self, num: u32) -> io::Result<usize> {
         if num > 0 {
@@ -80,6 +87,7 @@ pub trait TermWrite {
     fn reset(&mut self) -> io::Result<usize> {
         self.csi(b"m")
     }
+
     /// Restore the defaults.
     ///
     /// This will reset color, position, cursor state, and so on. It is recommended that you use
@@ -110,6 +118,7 @@ pub trait TermWrite {
             b'H',
         ])
     }
+
     /// Set graphic rendition.
     fn rendition(&mut self, r: u8) -> io::Result<usize> {
         self.csi(&[
@@ -119,6 +128,7 @@ pub trait TermWrite {
             b'm',
         ])
     }
+
     /// Set foreground color.
     fn color(&mut self, color: Color) -> io::Result<usize> {
         let ansi = color.to_ansi_val();
@@ -134,6 +144,7 @@ pub trait TermWrite {
             b'm',
         ])
     }
+
     /// Set background color.
     fn bg_color(&mut self, color: Color) -> io::Result<usize> {
         let ansi = color.to_ansi_val();
@@ -149,6 +160,7 @@ pub trait TermWrite {
             b'm',
         ])
     }
+
     /// Set rendition mode (SGR).
     fn style(&mut self, mode: Style) -> io::Result<usize> {
         self.rendition(mode as u8)
@@ -159,9 +171,11 @@ impl<W: Write> TermWrite for W {
     fn csi(&mut self, b: &[u8]) -> io::Result<usize> {
         Ok(try!(self.write(b"\x1B[")) + try!(self.write(b)))
     }
+
     fn osc(&mut self, b: &[u8]) -> io::Result<usize> {
         Ok(try!(self.write(b"\x1B]")) + try!(self.write(b)))
     }
+
     fn dsc(&mut self, b: &[u8]) -> io::Result<usize> {
         Ok(try!(self.write(b"\x1BP")) + try!(self.write(b)))
     }
