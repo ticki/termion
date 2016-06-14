@@ -156,6 +156,7 @@ mod test {
         buf.csi(b"blah").unwrap();
         assert_eq!(buf.get_ref(), b"\x1B[bluh\x1B[blah");
     }
+
     #[test]
     fn test_csi_partial() {
         let mut buf = [0; 3];
@@ -164,6 +165,7 @@ mod test {
         assert_eq!(buf.csi(b"").unwrap(), 0);
         assert_eq!(buf.csi(b"nooooo").unwrap(), 0);
     }
+
     #[test]
     fn test_osc() {
         let mut buf = Cursor::new(Vec::new());
@@ -174,6 +176,7 @@ mod test {
         buf.osc(b"blah").unwrap();
         assert_eq!(buf.get_ref(), b"\x1B]bluh\x1B]blah");
     }
+
     #[test]
     fn test_osc_partial() {
         let mut buf = [0; 3];
@@ -182,6 +185,7 @@ mod test {
         assert_eq!(buf.osc(b"").unwrap(), 0);
         assert_eq!(buf.osc(b"nooooo").unwrap(), 0);
     }
+
     #[test]
     fn test_dsc() {
         let mut buf = Cursor::new(Vec::new());
@@ -192,6 +196,7 @@ mod test {
         buf.dsc(b"blah").unwrap();
         assert_eq!(buf.get_ref(), b"\x1BPbluh\x1BPblah");
     }
+
     #[test]
     fn test_dsc_partial() {
         let mut buf = [0; 3];
@@ -200,6 +205,7 @@ mod test {
         assert_eq!(buf.dsc(b"").unwrap(), 0);
         assert_eq!(buf.dsc(b"nooooo").unwrap(), 0);
     }
+
     #[test]
     fn test_clear() {
         let mut buf = Cursor::new(Vec::new());
@@ -208,6 +214,7 @@ mod test {
         buf.clear().unwrap();
         assert_eq!(buf.get_ref(), b"\x1B[2J\x1B[2J");
     }
+
     #[test]
     fn test_goto() {
         let mut buf = Cursor::new(Vec::new());
@@ -216,6 +223,7 @@ mod test {
         buf.goto(24, 45).unwrap();
         assert_eq!(buf.get_ref(), b"\x1B[00044;00035H\x1B[00046;00025H");
     }
+
     #[test]
     fn test_style() {
         use Style;

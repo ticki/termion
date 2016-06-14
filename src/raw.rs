@@ -12,7 +12,7 @@ pub struct RawTerminal<W: Write> {
 impl<W: Write> Drop for RawTerminal<W> {
     fn drop(&mut self) {
         use control::TermWrite;
-        let _ = self.csi(b"R");
+        self.csi(b"R").unwrap();
     }
 }
 

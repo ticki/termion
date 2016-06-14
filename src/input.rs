@@ -2,11 +2,8 @@ use std::io::{self, Read, Write};
 
 use IntoRawMode;
 
-#[cfg(feature = "nightly")]
-use std::io::{Chars, CharsError};
-
 /// A key.
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Key {
     /// Backspace.
     Backspace,
@@ -28,8 +25,6 @@ pub enum Key {
     Ctrl(char),
     /// Invalid character code.
     Invalid,
-    /// IO error.
-    Error(io::Error),
     /// Null byte.
     Null,
 
@@ -45,12 +40,12 @@ pub struct Keys<I> {
 }
 
 #[cfg(feature = "nightly")]
-impl<I: Iterator<Item = Result<char, CharsError>>> Iterator for Keys<I> {
-    type Item = Key;
+impl<I: Iterator<Item = Result<char, io::CharsError>>> Iterator for Keys<I> {
+    type Item = Result<Key, io::CharsError>;
 
-    fn next(&mut self) -> Option<Key> {
-        match self.chars.next() {
-            Some(Ok('\x1B')) => Some(match self.chars.next() {
+    fn next(&mut self) -> Option<Result<Key, io::CharsError>> {
+        Some(match self.chars.next() {
+            Some(Ok('\x1B')) => Ok(match self.chars.next() {
                 Some(Ok('[')) => match self.chars.next() {
                     Some(Ok('D')) => Key::Left,
                     Some(Ok('C')) => Key::Right,
@@ -61,16 +56,16 @@ impl<I: Iterator<Item = Result<char, CharsError>>> Iterator for Keys<I> {
                 Some(Ok(c)) => Key::Alt(c),
                 Some(Err(_)) | None => Key::Invalid,
             }),
-            Some(Ok('\n')) | Some(Ok('\r')) => Some(Key::Char('\n')),
-            Some(Ok('\t')) => Some(Key::Char('\t')),
-            Some(Ok('\x7F')) => Some(Key::Backspace),
-            Some(Ok(c @ '\x01' ... '\x1A')) => Some(Key::Ctrl((c as u8 - 0x1  + b'a') as char)),
-            Some(Ok(c @ '\x1C' ... '\x1F')) => Some(Key::Ctrl((c as u8 - 0x1C + b'4') as char)),
-            None => None,
-            Some(Ok('\0')) => Some(Key::Null),
-            Some(Ok(c)) => Some(Key::Char(c)),
-            Some(Err(e)) => Some(Key::Error(io::Error::new(io::ErrorKind::InvalidData, e))),
-        }
+            Some(Ok('\n')) | Some(Ok('\r')) => Ok(Key::Char('\n')),
+            Some(Ok('\t')) => Ok(Key::Char('\t')),
+            Some(Ok('\x7F')) => Ok(Key::Backspace),
+            Some(Ok(c @ '\x01' ... '\x1A')) => Ok(Key::Ctrl((c as u8 - 0x1  + b'a') as char)),
+            Some(Ok(c @ '\x1C' ... '\x1F')) => Ok(Key::Ctrl((c as u8 - 0x1C + b'4') as char)),
+            Some(Ok('\0')) => Ok(Key::Null),
+            Some(Ok(c)) => Ok(Key::Char(c)),
+            Some(Err(e)) => Err(e),
+            None => return None,
+        })
     }
 }
 
@@ -78,7 +73,7 @@ impl<I: Iterator<Item = Result<char, CharsError>>> Iterator for Keys<I> {
 pub trait TermRead {
     /// An iterator over key inputs.
     #[cfg(feature = "nightly")]
-    fn keys(self) -> Keys<Chars<Self>> where Self: Sized;
+    fn keys(self) -> Keys<io::Chars<Self>> where Self: Sized;
 
     /// Read a line.
     ///
@@ -99,7 +94,7 @@ pub trait TermRead {
 
 impl<R: Read> TermRead for R {
     #[cfg(feature = "nightly")]
-    fn keys(self) -> Keys<Chars<R>> {
+    fn keys(self) -> Keys<io::Chars<R>> {
         Keys {
             chars: self.chars(),
         }
@@ -133,12 +128,12 @@ mod test {
     fn test_keys() {
         let mut i = b"\x1Bayo\x7F\x1B[D".keys();
 
-        assert_eq!(i.next(), Some(Key::Alt('a')));
-        assert_eq!(i.next(), Some(Key::Char('y')));
-        assert_eq!(i.next(), Some(Key::Char('o')));
-        assert_eq!(i.next(), Some(Key::Backspace));
-        assert_eq!(i.next(), Some(Key::Left));
-        assert_eq!(i.next(), None);
+        assert_eq!(i.next().unwrap().unwrap(), Key::Alt('a'));
+        assert_eq!(i.next().unwrap().unwrap(), Key::Char('y'));
+        assert_eq!(i.next().unwrap().unwrap(), Key::Char('o'));
+        assert_eq!(i.next().unwrap().unwrap(), Key::Backspace);
+        assert_eq!(i.next().unwrap().unwrap(), Key::Left);
+        assert!(i.next().is_none());
     }
 
     fn line_match(a: &str, b: Option<&str>) {

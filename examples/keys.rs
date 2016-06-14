@@ -1,6 +1,5 @@
 extern crate termion;
 
-
 #[cfg(feature = "nightly")]
 fn main() {
     use termion::{TermRead, TermWrite, IntoRawMode, Key};
@@ -18,7 +17,7 @@ fn main() {
     for c in stdin.keys() {
         stdout.goto(5, 5).unwrap();
         stdout.clear_line().unwrap();
-        match c {
+        match c.unwrap() {
             Key::Char('q') => break,
             Key::Char(c) => println!("{}", c),
             Key::Alt(c) => println!("^{}", c),
@@ -29,7 +28,6 @@ fn main() {
             Key::Down => println!("↓"),
             Key::Backspace => println!("×"),
             Key::Invalid => println!("???"),
-            Key::Error(_) => println!("ERROR"),
             _ => {},
         }
         stdout.flush().unwrap();
@@ -37,6 +35,7 @@ fn main() {
 
     stdout.show_cursor().unwrap();
 }
+
 #[cfg(not(feature = "nightly"))]
 fn main() {
     println!("To run this example, you need to enable the `nightly` feature. Use Rust nightly and compile with `--features nightly`.")
