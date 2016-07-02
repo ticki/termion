@@ -19,22 +19,22 @@ macro_rules! derive_color {
 }
 
 
-derive_color!("", Black, 0x0);
-derive_color!("", Red, 0x1);
-derive_color!("", Green, 0x2);
-derive_color!("", Yellow, 0x3);
-derive_color!("", Blue, 0x4);
-derive_color!("", Magenta, 0x5);
-derive_color!("", Cyan, 0x6);
-derive_color!("", White, 0x7);
-derive_color!("", LightBlack, 0x8);
-derive_color!("", LightRed, 0x9);
-derive_color!("", LightGreen, 0xA);
-derive_color!("", LightYellow, 0xB);
-derive_color!("", LightBlue, 0xC);
-derive_color!("", LightMagenta, 0xD);
-derive_color!("", LightCyan, 0xE);
-derive_color!("", LightWhite, 0xF);
+derive_color!("Black.", Black, 0x0);
+derive_color!("Red.", Red, 0x1);
+derive_color!("Green.", Green, 0x2);
+derive_color!("Yellow.", Yellow, 0x3);
+derive_color!("Blue.", Blue, 0x4);
+derive_color!("Magenta.", Magenta, 0x5);
+derive_color!("Cyan.", Cyan, 0x6);
+derive_color!("White.", White, 0x7);
+derive_color!("High-intensity light black.", LightBlack, 0x8);
+derive_color!("High-intensity light red.", LightRed, 0x9);
+derive_color!("High-intensity light green.", LightGreen, 0xA);
+derive_color!("High-intensity light yellow.", LightYellow, 0xB);
+derive_color!("High-intensity light blue.", LightBlue, 0xC);
+derive_color!("High-intensity light magenta.", LightMagenta, 0xD);
+derive_color!("High-intensity light cyan.", LightCyan, 0xE);
+derive_color!("High-intensity light white.", LightWhite, 0xF);
 
 /// 216-color (r, g, b ≤ 5) RGB.
 pub fn rgb(r: u8, g: u8, b: u8) -> AnsiValue {

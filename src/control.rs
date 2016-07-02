@@ -79,10 +79,6 @@ pub trait TermWrite {
         }
     }
 
-    // TODO
-    // fn mode
-
-
     /// Reset the rendition mode.
     ///
     /// This will reset both the current style and color.
