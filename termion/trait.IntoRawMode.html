@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
+    
 
     
     
@@ -43,17 +44,17 @@
 
     <section id='main' class="content trait">
 <h1 class='fqn'><span class='in-band'>Trait <a href='index.html'>termion</a>::<wbr><a class='trait' href=''>IntoRawMode</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-261' class='srclink' href='../src/termion/src/raw.rs.html#61-68' title='goto source code'>[src]</a></span></h1>
-<pre class='rust trait'>pub trait IntoRawMode: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a> {
-    fn <a href='#tymethod.into_raw_mode' class='fnname'>into_raw_mode</a>(self) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>IoResult</a>&lt;<a class='struct' href='../termion/struct.RawTerminal.html' title='termion::RawTerminal'>RawTerminal</a>&lt;Self&gt;&gt;;
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-268' class='srclink' href='../src/termion/raw.rs.html#62-69' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait IntoRawMode: <a class='trait' href='https://doc.rust-lang.org/nightly/std/io/trait.Write.html' title='std::io::Write'>Write</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a> {
+    fn <a href='#tymethod.into_raw_mode' class='fnname'>into_raw_mode</a>(self) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='struct' href='../termion/struct.RawTerminal.html' title='termion::RawTerminal'>RawTerminal</a>&lt;Self&gt;&gt;;
 }</pre><div class='docblock'><p>Types which can be converted into &quot;raw mode&quot;.</p>
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.into_raw_mode' class='method stab '><code>fn <a href='#tymethod.into_raw_mode' class='fnname'>into_raw_mode</a>(self) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>IoResult</a>&lt;<a class='struct' href='../termion/struct.RawTerminal.html' title='termion::RawTerminal'>RawTerminal</a>&lt;Self&gt;&gt;</code></h3><div class='docblock'><p>Switch to raw mode.</p>
+        <h3 id='tymethod.into_raw_mode' class='method stab '><code>fn <a href='#tymethod.into_raw_mode' class='fnname'>into_raw_mode</a>(self) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='struct' href='../termion/struct.RawTerminal.html' title='termion::RawTerminal'>RawTerminal</a>&lt;Self&gt;&gt;</code></h3><div class='docblock'><p>Switch to raw mode.</p>
 
 <p>Raw mode means that stdin won&#39;t be printed (it will instead have to be written manually by the
 program). Furthermore, the input isn&#39;t canonicalised or buffered (that is, you can read from
@@ -61,9 +62,10 @@ stdin one byte of a time). The output is neither modified in any way.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    </ul><script type="text/javascript" async
-                              src="../implementors/termion/trait.IntoRawMode.js">
-                      </script></section>
+    <li><code>impl&lt;W:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/std/io/trait.Write.html' title='std::io::Write'>Write</a>&gt; IntoRawMode for W</code></li>
+</ul><script type="text/javascript" async
+                         src="../implementors/termion/trait.IntoRawMode.js">
+                 </script></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -86,6 +88,8 @@ stdin one byte of a time). The output is neither modified in any way.</p>
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 

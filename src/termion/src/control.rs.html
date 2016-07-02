@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -284,7 +285,7 @@
     <span class='kw'>fn</span> <span class='ident'>csi</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>b</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span>;
     <span class='doccomment'>/// Print OSC (operating system command) followed by a byte string.</span>
     <span class='kw'>fn</span> <span class='ident'>osc</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>b</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span>;
-    <span class='doccomment'>/// Print OSC (device control string) followed by a byte string.</span>
+    <span class='doccomment'>/// Print DSC (device control string) followed by a byte string.</span>
     <span class='kw'>fn</span> <span class='ident'>dsc</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>b</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span>;
 
 
@@ -366,7 +367,7 @@
             <span class='string'>b&#39;m&#39;</span>,
         ])
     }
-    <span class='doccomment'>/// Set foreground color</span>
+    <span class='doccomment'>/// Set foreground color.</span>
     <span class='kw'>fn</span> <span class='ident'>color</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>color</span>: <span class='ident'>Color</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>ansi</span> <span class='op'>=</span> <span class='ident'>color</span>.<span class='ident'>to_ansi_val</span>();
         <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='kw-2'>&amp;</span>[
@@ -381,7 +382,7 @@
             <span class='string'>b&#39;m&#39;</span>,
         ])
     }
-    <span class='doccomment'>/// Set background color</span>
+    <span class='doccomment'>/// Set background color.</span>
     <span class='kw'>fn</span> <span class='ident'>bg_color</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>color</span>: <span class='ident'>Color</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>ansi</span> <span class='op'>=</span> <span class='ident'>color</span>.<span class='ident'>to_ansi_val</span>();
         <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='kw-2'>&amp;</span>[

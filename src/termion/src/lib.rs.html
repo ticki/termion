@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -79,19 +80,15 @@
 <span id="36">36</span>
 <span id="37">37</span>
 <span id="38">38</span>
-<span id="39">39</span>
-<span id="40">40</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! termion is a pure Rust library for reading, manipulating, and handling terminals.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! This crate is not stable, yet. However, if you do want stability, you should specify the</span>
 <span class='doccomment'>//! revision (commit hash) in your `Cargo.toml`, this way builds are complete reproducible, and won&#39;t</span>
 <span class='doccomment'>//! break.</span>
-
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nightly&quot;</span>,
-            <span class='ident'>feature</span>(<span class='ident'>io</span>))]</span>
-
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>warn</span>(<span class='ident'>missing_docs</span>)]</span>
+
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nightly&quot;</span>, <span class='ident'>feature</span>(<span class='ident'>io</span>))]</span>
 
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;redox&quot;</span>))]</span>

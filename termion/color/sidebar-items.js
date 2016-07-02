@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Color","A terminal color."]]});
+initSidebarItems({"enum":[["Palette","A color palette."]],"fn":[["grayscale","Grayscale color."],["rgb","216-color (r, g, b ≤ 5) RGB."]],"struct":[["AnsiValue","An arbitrary ANSI color value."],["Black",""],["Blue",""],["Cyan",""],["Green",""],["LightBlack",""],["LightBlue",""],["LightCyan",""],["LightGreen",""],["LightMagenta",""],["LightRed",""],["LightWhite",""],["LightYellow",""],["Magenta",""],["Red",""],["White",""],["Yellow",""]],"trait":[["Color","A terminal color."]]});

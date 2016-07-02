@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -128,7 +129,7 @@
 <span class='doccomment'>/// be buffered in a mpsc queue, which will eventually be read by the current thread.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// Note that this will acquire the Mutex lock on the standard input, making all future stdin</span>
-<span class='doccomment'>/// construction hang the program.</span>
+<span class='doccomment'>/// construction hang the program until the reader is dropped.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>async_stdin</span>() <span class='op'>-&gt;</span> <span class='ident'>AsyncReader</span> {
     <span class='kw'>let</span> (<span class='ident'>send</span>, <span class='ident'>recv</span>) <span class='op'>=</span> <span class='ident'>mpsc</span>::<span class='ident'>channel</span>();
 

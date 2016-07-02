@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
+    
 
     
     
@@ -43,10 +44,10 @@
 
     <section id='main' class="content fn">
 <h1 class='fqn'><span class='in-band'>Function <a href='index.html'>termion</a>::<wbr><a class='fn' href=''>async_stdin</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-113' class='srclink' href='../src/termion/src/async.rs.html#13-28' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-119' class='srclink' href='../src/termion/async.rs.html#13-28' title='goto source code'>[src]</a></span></h1>
 <pre class='rust fn'>pub fn async_stdin() -&gt; <a class='struct' href='../termion/struct.AsyncReader.html' title='termion::AsyncReader'>AsyncReader</a></pre><div class='docblock'><p>Construct an asynchronous handle to the standard input.</p>
 
 <p>This allows you to read from standard input <em>without blocking</em> the current thread.
@@ -54,7 +55,7 @@ Specifically, it works by firing up another thread to handle the event stream, w
 be buffered in a mpsc queue, which will eventually be read by the current thread.</p>
 
 <p>Note that this will acquire the Mutex lock on the standard input, making all future stdin
-construction hang the program.</p>
+construction hang the program until the reader is dropped.</p>
 </div></section>
     <section id='search' class="content hidden"></section>
 
@@ -78,6 +79,8 @@ construction hang the program.</p>
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 

@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -108,10 +109,6 @@
 <span id="65">65</span>
 <span id="66">66</span>
 <span id="67">67</span>
-<span id="68">68</span>
-<span id="69">69</span>
-<span id="70">70</span>
-<span id="71">71</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
 
@@ -128,11 +125,13 @@
 }
 
 <span class='comment'>// Since attributes on non-item statements is not stable yet, we use a function.</span>
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;redox&quot;</span>))]</span>
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_pointer_width</span> <span class='op'>=</span> <span class='string'>&quot;64&quot;</span>)]</span>
 <span class='kw'>fn</span> <span class='ident'>tiocgwinsz</span>() <span class='op'>-&gt;</span> <span class='ident'>u64</span> {
     <span class='kw'>use</span> <span class='ident'>termios</span>::<span class='ident'>TIOCGWINSZ</span>;
     <span class='ident'>TIOCGWINSZ</span> <span class='kw'>as</span> <span class='ident'>u64</span>
 }
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;redox&quot;</span>))]</span>
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_pointer_width</span> <span class='op'>=</span> <span class='string'>&quot;32&quot;</span>)]</span>
 <span class='kw'>fn</span> <span class='ident'>tiocgwinsz</span>() <span class='op'>-&gt;</span> <span class='ident'>u32</span> {
     <span class='kw'>use</span> <span class='ident'>termios</span>::<span class='ident'>TIOCGWINSZ</span>;
@@ -161,18 +160,12 @@
 <span class='doccomment'>/// Get the size of the terminal.</span>
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;redox&quot;</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>terminal_size</span>() <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='ident'>usize</span>, <span class='ident'>usize</span>)<span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>get_int</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>env</span>;
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>env</span>;
 
-        <span class='ident'>env</span>::<span class='ident'>var</span>(<span class='ident'>s</span>).<span class='ident'>map_err</span>(<span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> <span class='kw'>match</span> <span class='ident'>e</span> {
-            <span class='ident'>env</span>::<span class='ident'>VarError</span>::<span class='ident'>NotPresent</span> <span class='op'>=&gt;</span> <span class='ident'>io</span>::<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>io</span>::<span class='ident'>ErrorKind</span>::<span class='ident'>NotFound</span>, <span class='ident'>e</span>),
-            <span class='ident'>env</span>::<span class='ident'>VarError</span>::<span class='ident'>NotUnicode</span>(<span class='ident'>u</span>) <span class='op'>=&gt;</span> <span class='ident'>io</span>::<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>io</span>::<span class='ident'>ErrorKind</span>::<span class='ident'>InvalidData</span>, <span class='ident'>u</span>),
-        }).<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> {
-            <span class='ident'>x</span>.<span class='ident'>parse</span>().<span class='ident'>map_err</span>(<span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> <span class='ident'>io</span>::<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>io</span>::<span class='ident'>ErrorKind</span>::<span class='ident'>InvalidData</span>, <span class='ident'>e</span>))
-        })
-    }
+    <span class='kw'>let</span> <span class='ident'>width</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>env</span>::<span class='ident'>var</span>(<span class='string'>&quot;COLUMNS&quot;</span>).<span class='ident'>map_err</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>io</span>::<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>io</span>::<span class='ident'>ErrorKind</span>::<span class='ident'>NotFound</span>, <span class='ident'>x</span>))).<span class='ident'>parse</span>().<span class='ident'>unwrap_or</span>(<span class='number'>0</span>);
+    <span class='kw'>let</span> <span class='ident'>height</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>env</span>::<span class='ident'>var</span>(<span class='string'>&quot;LINES&quot;</span>).<span class='ident'>map_err</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>io</span>::<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>io</span>::<span class='ident'>ErrorKind</span>::<span class='ident'>NotFound</span>, <span class='ident'>x</span>))).<span class='ident'>parse</span>().<span class='ident'>unwrap_or</span>(<span class='number'>0</span>);
 
-    <span class='prelude-val'>Ok</span>((<span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>get_int</span>(<span class='string'>&quot;COLUMNS&quot;</span>)), <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>get_int</span>(<span class='string'>&quot;LINES&quot;</span>))))
+    <span class='prelude-val'>Ok</span>((<span class='ident'>width</span>, <span class='ident'>height</span>))
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
