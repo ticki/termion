@@ -10,49 +10,60 @@ use color::Color;
 pub trait TermWrite {
 
     /// Print the CSI (control sequence introducer) followed by a byte string.
+    #[inline]
     fn csi(&mut self, b: &[u8]) -> io::Result<usize>;
     /// Print OSC (operating system command) followed by a byte string.
+    #[inline]
     fn osc(&mut self, b: &[u8]) -> io::Result<usize>;
     /// Print DSC (device control string) followed by a byte string.
+    #[inline]
     fn dsc(&mut self, b: &[u8]) -> io::Result<usize>;
 
 
     /// Clear the entire screen.
+    #[inline]
     fn clear(&mut self) -> io::Result<usize> {
         self.csi(b"2J")
     }
 
     /// Clear everything _after_ the cursor.
+    #[inline]
     fn clear_after(&mut self) -> io::Result<usize> {
         self.csi(b"J")
     }
 
     /// Clear everything _before_ the cursor.
+    #[inline]
     fn clear_before(&mut self) -> io::Result<usize> {
         self.csi(b"1J")
     }
 
     /// Clear the current line.
+    #[inline]
     fn clear_line(&mut self) -> io::Result<usize> {
         self.csi(b"2K")
     }
 
     /// Clear from the cursor until newline.
+    #[inline]
     fn clear_until_newline(&mut self) -> io::Result<usize> {
         self.csi(b"K")
     }
 
     /// Show the cursor.
+    #[inline]
     fn show_cursor(&mut self) -> io::Result<usize> {
         self.csi(b"?25h")
     }
 
     /// Hide the cursor.
+    #[inline]
     fn hide_cursor(&mut self) -> io::Result<usize> {
         self.csi(b"?25l")
     }
 
     /// Move the cursor `num` spaces to the left.
+    #[inline]
     fn move_cursor_left(&mut self, num: u32) -> io::Result<usize> {
         if num > 0 {
             self.csi(&[b'0' + (num / 10000) as u8,
@@ -66,6 +77,7 @@ pub trait TermWrite {
         }
     }
     /// Move the cursor `num` spaces to the right.
+    #[inline]
     fn move_cursor_right(&mut self, num: u32) -> io::Result<usize> {
         if num > 0 {
             self.csi(&[b'0' + (num / 10000) as u8,
@@ -82,6 +94,7 @@ pub trait TermWrite {
     /// Reset the rendition mode.
     ///
     /// This will reset both the current style and color.
+    #[inline]
     fn reset(&mut self) -> io::Result<usize> {
         self.csi(b"m")
     }
@@ -90,6 +103,7 @@ pub trait TermWrite {
     ///
     /// This will reset color, position, cursor state, and so on. It is recommended that you use
     /// this before you exit your program, to avoid messing up the user's terminal.
+    #[inline]
     fn restore(&mut self) -> io::Result<usize> {
         Ok(try!(self.reset()) + try!(self.clear()) + try!(self.goto(0, 0)) + try!(self.show_cursor()))
     }
@@ -97,6 +111,7 @@ pub trait TermWrite {
     /// Go to a given position.
     ///
     /// The position is 0-based.
+    #[inline]
     fn goto(&mut self, mut x: u16, mut y: u16) -> io::Result<usize> {
         x += 1;
         y += 1;
@@ -118,6 +133,7 @@ pub trait TermWrite {
     }
 
     /// Set graphic rendition.
+    #[inline]
     fn rendition(&mut self, r: u8) -> io::Result<usize> {
         self.csi(&[
             b'0' + r / 100,
@@ -128,6 +144,7 @@ pub trait TermWrite {
     }
 
     /// Set foreground color.
+    #[inline]
     fn color<C: Color>(&mut self, color: C) -> io::Result<usize> {
         let ansi = color.to_ansi_val();
         self.csi(&[
@@ -144,6 +161,7 @@ pub trait TermWrite {
     }
 
     /// Set background color.
+    #[inline]
     fn bg_color<C: Color>(&mut self, color: C) -> io::Result<usize> {
         let ansi = color.to_ansi_val();
         self.csi(&[
@@ -160,20 +178,24 @@ pub trait TermWrite {
     }
 
     /// Set rendition mode (SGR).
+    #[inline]
     fn style(&mut self, mode: Style) -> io::Result<usize> {
         self.rendition(mode as u8)
     }
 }
 
 impl<W: Write> TermWrite for W {
+    #[inline]
     fn csi(&mut self, b: &[u8]) -> io::Result<usize> {
         Ok(try!(self.write(b"\x1B[")) + try!(self.write(b)))
     }
 
+    #[inline]
     fn osc(&mut self, b: &[u8]) -> io::Result<usize> {
         Ok(try!(self.write(b"\x1B]")) + try!(self.write(b)))
     }
 
+    #[inline]
     fn dsc(&mut self, b: &[u8]) -> io::Result<usize> {
         Ok(try!(self.write(b"\x1BP")) + try!(self.write(b)))
     }
