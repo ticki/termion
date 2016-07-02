@@ -1,5 +1,7 @@
 use std::io::{self, Write};
-use {Color, Style};
+
+use Style;
+use color::Color;
 
 /// Extension to the `Write` trait.
 ///
@@ -130,7 +132,7 @@ pub trait TermWrite {
     }
 
     /// Set foreground color.
-    fn color(&mut self, color: Color) -> io::Result<usize> {
+    fn color<C: Color>(&mut self, color: C) -> io::Result<usize> {
         let ansi = color.to_ansi_val();
         self.csi(&[
             b'3',
@@ -146,7 +148,7 @@ pub trait TermWrite {
     }
 
     /// Set background color.
-    fn bg_color(&mut self, color: Color) -> io::Result<usize> {
+    fn bg_color<C: Color>(&mut self, color: C) -> io::Result<usize> {
         let ansi = color.to_ansi_val();
         self.csi(&[
             b'4',

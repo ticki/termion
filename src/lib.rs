@@ -31,8 +31,12 @@ pub use raw::{IntoRawMode, RawTerminal};
 mod size;
 pub use size::terminal_size;
 
-mod color;
-pub use color::Color;
+/// ANSI colors.
+pub mod color;
+
+/// Deprecated reexport.
+#[deprecated]
+pub use color::Palette as Color;
 
 mod style;
 pub use style::Style;
