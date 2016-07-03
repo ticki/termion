@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["RawTerminal","A terminal restorer, which keeps the previous state of the terminal, and restores it, when dropped."]],"trait":[["IntoRawMode","Types which can be converted into \"raw mode\"."]]});

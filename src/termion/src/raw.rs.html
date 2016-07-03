@@ -157,6 +157,8 @@
 <span id="113">113</span>
 <span id="114">114</span>
 <span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='self'>self</span>, <span class='ident'>Write</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ops</span>::{<span class='ident'>Deref</span>, <span class='ident'>DerefMut</span>};
@@ -172,7 +174,7 @@
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>RawTerminal</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
         <span class='kw'>use</span> <span class='ident'>control</span>::<span class='ident'>TermWrite</span>;
-        <span class='kw'>let</span> _ <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='string'>b&quot;R&quot;</span>);
+        <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='string'>b&quot;R&quot;</span>).<span class='ident'>unwrap</span>();
     }
 }
 
@@ -201,6 +203,7 @@
         <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>output</span>
     }
 }
+
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span> <span class='ident'>DerefMut</span> <span class='kw'>for</span> <span class='ident'>RawTerminal</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>deref_mut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span> {
         <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>output</span>
@@ -224,7 +227,7 @@
     <span class='doccomment'>/// Raw mode means that stdin won&#39;t be printed (it will instead have to be written manually by the</span>
     <span class='doccomment'>/// program). Furthermore, the input isn&#39;t canonicalised or buffered (that is, you can read from</span>
     <span class='doccomment'>/// stdin one byte of a time). The output is neither modified in any way.</span>
-    <span class='kw'>fn</span> <span class='ident'>into_raw_mode</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>RawTerminal</span><span class='op'>&lt;</span><span class='kw'>Self</span><span class='op'>&gt;&gt;</span>;
+    <span class='kw'>fn</span> <span class='ident'>into_raw_mode</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>RawTerminal</span><span class='op'>&lt;</span><span class='self'>Self</span><span class='op'>&gt;&gt;</span>;
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span> <span class='ident'>IntoRawMode</span> <span class='kw'>for</span> <span class='ident'>W</span> {
@@ -251,6 +254,7 @@
             })
         }
     }
+
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;redox&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>into_raw_mode</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>RawTerminal</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;&gt;</span> {
         <span class='kw'>use</span> <span class='ident'>control</span>::<span class='ident'>TermWrite</span>;
@@ -263,7 +267,7 @@
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>test</span> {
-    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='op'>*</span>;
+    <span class='kw'>use</span> <span class='kw'>super</span>::<span class='op'>*</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>Write</span>, <span class='ident'>stdout</span>};
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -297,6 +301,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 

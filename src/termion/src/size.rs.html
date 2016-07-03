@@ -141,7 +141,7 @@
 
 <span class='doccomment'>/// Get the size of the terminal.</span>
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;redox&quot;</span>))]</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>terminal_size</span>() <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='ident'>usize</span>, <span class='ident'>usize</span>)<span class='op'>&gt;</span> {
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>terminal_size</span>() <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='ident'>u16</span>, <span class='ident'>u16</span>)<span class='op'>&gt;</span> {
     <span class='kw'>use</span> <span class='ident'>libc</span>::<span class='ident'>ioctl</span>;
     <span class='kw'>use</span> <span class='ident'>libc</span>::<span class='ident'>STDOUT_FILENO</span>;
 
@@ -150,7 +150,7 @@
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>size</span>: <span class='ident'>TermSize</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>zeroed</span>();
 
         <span class='kw'>if</span> <span class='ident'>ioctl</span>(<span class='ident'>STDOUT_FILENO</span>, <span class='ident'>tiocgwinsz</span>(), <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>size</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> _) <span class='op'>==</span> <span class='number'>0</span> {
-            <span class='prelude-val'>Ok</span>((<span class='ident'>size</span>.<span class='ident'>col</span> <span class='kw'>as</span> <span class='ident'>usize</span>, <span class='ident'>size</span>.<span class='ident'>row</span> <span class='kw'>as</span> <span class='ident'>usize</span>))
+            <span class='prelude-val'>Ok</span>((<span class='ident'>size</span>.<span class='ident'>col</span> <span class='kw'>as</span> <span class='ident'>u16</span>, <span class='ident'>size</span>.<span class='ident'>row</span> <span class='kw'>as</span> <span class='ident'>u16</span>))
         } <span class='kw'>else</span> {
             <span class='prelude-val'>Err</span>(<span class='ident'>io</span>::<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>io</span>::<span class='ident'>ErrorKind</span>::<span class='ident'>Other</span>, <span class='string'>&quot;Unable to get the terminal size.&quot;</span>))
         }
@@ -159,7 +159,7 @@
 
 <span class='doccomment'>/// Get the size of the terminal.</span>
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;redox&quot;</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>terminal_size</span>() <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='ident'>usize</span>, <span class='ident'>usize</span>)<span class='op'>&gt;</span> {
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>terminal_size</span>() <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='ident'>u16</span>, <span class='ident'>u16</span>)<span class='op'>&gt;</span> {
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>env</span>;
 
     <span class='kw'>let</span> <span class='ident'>width</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>env</span>::<span class='ident'>var</span>(<span class='string'>&quot;COLUMNS&quot;</span>).<span class='ident'>map_err</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>io</span>::<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>io</span>::<span class='ident'>ErrorKind</span>::<span class='ident'>NotFound</span>, <span class='ident'>x</span>))).<span class='ident'>parse</span>().<span class='ident'>unwrap_or</span>(<span class='number'>0</span>);
@@ -170,7 +170,7 @@
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>test</span> {
-    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='op'>*</span>;
+    <span class='kw'>use</span> <span class='kw'>super</span>::<span class='op'>*</span>;
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_size</span>() {
@@ -201,6 +201,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 

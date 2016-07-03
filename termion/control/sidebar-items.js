@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["TermWrite","Extension to the `Write` trait."]]});

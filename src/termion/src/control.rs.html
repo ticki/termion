@@ -271,9 +271,79 @@
 <span id="227">227</span>
 <span id="228">228</span>
 <span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='self'>self</span>, <span class='ident'>Write</span>};
-<span class='kw'>use</span> {<span class='ident'>Color</span>, <span class='ident'>Style</span>};
+
+<span class='kw'>use</span> <span class='ident'>Style</span>;
+<span class='kw'>use</span> <span class='ident'>color</span>::<span class='ident'>Color</span>;
 
 <span class='doccomment'>/// Extension to the `Write` trait.</span>
 <span class='doccomment'>///</span>
@@ -282,56 +352,100 @@
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>TermWrite</span> {
 
     <span class='doccomment'>/// Print the CSI (control sequence introducer) followed by a byte string.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>csi</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>b</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span>;
     <span class='doccomment'>/// Print OSC (operating system command) followed by a byte string.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>osc</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>b</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span>;
     <span class='doccomment'>/// Print DSC (device control string) followed by a byte string.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>dsc</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>b</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span>;
 
 
     <span class='doccomment'>/// Clear the entire screen.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>clear</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='string'>b&quot;2J&quot;</span>)
     }
+
     <span class='doccomment'>/// Clear everything _after_ the cursor.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>clear_after</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='string'>b&quot;J&quot;</span>)
     }
+
     <span class='doccomment'>/// Clear everything _before_ the cursor.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>clear_before</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='string'>b&quot;1J&quot;</span>)
     }
+
     <span class='doccomment'>/// Clear the current line.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>clear_line</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='string'>b&quot;2K&quot;</span>)
     }
+
     <span class='doccomment'>/// Clear from the cursor until newline.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>clear_until_newline</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='string'>b&quot;K&quot;</span>)
     }
+
     <span class='doccomment'>/// Show the cursor.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>show_cursor</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='string'>b&quot;?25h&quot;</span>)
     }
+
     <span class='doccomment'>/// Hide the cursor.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>hide_cursor</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='string'>b&quot;?25l&quot;</span>)
     }
 
-    <span class='comment'>// TODO</span>
-    <span class='comment'>// fn mode</span>
-
+    <span class='doccomment'>/// Move the cursor `num` spaces to the left.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>move_cursor_left</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>num</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
+        <span class='kw'>if</span> <span class='ident'>num</span> <span class='op'>&gt;</span> <span class='number'>0</span> {
+            <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='kw-2'>&amp;</span>[<span class='string'>b&#39;0&#39;</span> <span class='op'>+</span> (<span class='ident'>num</span> <span class='op'>/</span> <span class='number'>10000</span>) <span class='kw'>as</span> <span class='ident'>u8</span>,
+                       <span class='string'>b&#39;0&#39;</span> <span class='op'>+</span> (<span class='ident'>num</span> <span class='op'>/</span> <span class='number'>1000</span>) <span class='kw'>as</span> <span class='ident'>u8</span> <span class='op'>%</span> <span class='number'>10</span>,
+                       <span class='string'>b&#39;0&#39;</span> <span class='op'>+</span> (<span class='ident'>num</span> <span class='op'>/</span> <span class='number'>100</span>) <span class='kw'>as</span> <span class='ident'>u8</span> <span class='op'>%</span> <span class='number'>10</span>,
+                       <span class='string'>b&#39;0&#39;</span> <span class='op'>+</span> (<span class='ident'>num</span> <span class='op'>/</span> <span class='number'>10</span>) <span class='kw'>as</span> <span class='ident'>u8</span> <span class='op'>%</span> <span class='number'>10</span>,
+                       <span class='string'>b&#39;0&#39;</span> <span class='op'>+</span> <span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>u8</span> <span class='op'>%</span> <span class='number'>10</span>,
+                       <span class='string'>b&#39;D&#39;</span>])
+        } <span class='kw'>else</span> {
+            <span class='prelude-val'>Ok</span>(<span class='number'>0</span>)
+        }
+    }
+    <span class='doccomment'>/// Move the cursor `num` spaces to the right.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>move_cursor_right</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>num</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
+        <span class='kw'>if</span> <span class='ident'>num</span> <span class='op'>&gt;</span> <span class='number'>0</span> {
+            <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='kw-2'>&amp;</span>[<span class='string'>b&#39;0&#39;</span> <span class='op'>+</span> (<span class='ident'>num</span> <span class='op'>/</span> <span class='number'>10000</span>) <span class='kw'>as</span> <span class='ident'>u8</span>,
+                       <span class='string'>b&#39;0&#39;</span> <span class='op'>+</span> (<span class='ident'>num</span> <span class='op'>/</span> <span class='number'>1000</span>) <span class='kw'>as</span> <span class='ident'>u8</span> <span class='op'>%</span> <span class='number'>10</span>,
+                       <span class='string'>b&#39;0&#39;</span> <span class='op'>+</span> (<span class='ident'>num</span> <span class='op'>/</span> <span class='number'>100</span>) <span class='kw'>as</span> <span class='ident'>u8</span> <span class='op'>%</span> <span class='number'>10</span>,
+                       <span class='string'>b&#39;0&#39;</span> <span class='op'>+</span> (<span class='ident'>num</span> <span class='op'>/</span> <span class='number'>10</span>) <span class='kw'>as</span> <span class='ident'>u8</span> <span class='op'>%</span> <span class='number'>10</span>,
+                       <span class='string'>b&#39;0&#39;</span> <span class='op'>+</span> <span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>u8</span> <span class='op'>%</span> <span class='number'>10</span>,
+                       <span class='string'>b&#39;C&#39;</span>])
+        } <span class='kw'>else</span> {
+            <span class='prelude-val'>Ok</span>(<span class='number'>0</span>)
+        }
+    }
 
     <span class='doccomment'>/// Reset the rendition mode.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// This will reset both the current style and color.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>reset</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='string'>b&quot;m&quot;</span>)
     }
+
     <span class='doccomment'>/// Restore the defaults.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// This will reset color, position, cursor state, and so on. It is recommended that you use</span>
     <span class='doccomment'>/// this before you exit your program, to avoid messing up the user&#39;s terminal.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>restore</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>reset</span>()) <span class='op'>+</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>clear</span>()) <span class='op'>+</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>goto</span>(<span class='number'>0</span>, <span class='number'>0</span>)) <span class='op'>+</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>show_cursor</span>()))
     }
@@ -339,6 +453,7 @@
     <span class='doccomment'>/// Go to a given position.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// The position is 0-based.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>goto</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='kw-2'>mut</span> <span class='ident'>x</span>: <span class='ident'>u16</span>, <span class='kw-2'>mut</span> <span class='ident'>y</span>: <span class='ident'>u16</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='ident'>x</span> <span class='op'>+=</span> <span class='number'>1</span>;
         <span class='ident'>y</span> <span class='op'>+=</span> <span class='number'>1</span>;
@@ -358,7 +473,9 @@
             <span class='string'>b&#39;H&#39;</span>,
         ])
     }
+
     <span class='doccomment'>/// Set graphic rendition.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>rendition</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>r</span>: <span class='ident'>u8</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='kw-2'>&amp;</span>[
             <span class='string'>b&#39;0&#39;</span> <span class='op'>+</span> <span class='ident'>r</span> <span class='op'>/</span> <span class='number'>100</span>,
@@ -367,8 +484,10 @@
             <span class='string'>b&#39;m&#39;</span>,
         ])
     }
+
     <span class='doccomment'>/// Set foreground color.</span>
-    <span class='kw'>fn</span> <span class='ident'>color</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>color</span>: <span class='ident'>Color</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>color</span><span class='op'>&lt;</span><span class='ident'>C</span>: <span class='ident'>Color</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>color</span>: <span class='ident'>C</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>ansi</span> <span class='op'>=</span> <span class='ident'>color</span>.<span class='ident'>to_ansi_val</span>();
         <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='kw-2'>&amp;</span>[
             <span class='string'>b&#39;3&#39;</span>,
@@ -382,8 +501,10 @@
             <span class='string'>b&#39;m&#39;</span>,
         ])
     }
+
     <span class='doccomment'>/// Set background color.</span>
-    <span class='kw'>fn</span> <span class='ident'>bg_color</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>color</span>: <span class='ident'>Color</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>bg_color</span><span class='op'>&lt;</span><span class='ident'>C</span>: <span class='ident'>Color</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>color</span>: <span class='ident'>C</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>ansi</span> <span class='op'>=</span> <span class='ident'>color</span>.<span class='ident'>to_ansi_val</span>();
         <span class='self'>self</span>.<span class='ident'>csi</span>(<span class='kw-2'>&amp;</span>[
             <span class='string'>b&#39;4&#39;</span>,
@@ -397,19 +518,26 @@
             <span class='string'>b&#39;m&#39;</span>,
         ])
     }
+
     <span class='doccomment'>/// Set rendition mode (SGR).</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>style</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>mode</span>: <span class='ident'>Style</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>rendition</span>(<span class='ident'>mode</span> <span class='kw'>as</span> <span class='ident'>u8</span>)
     }
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span> <span class='ident'>TermWrite</span> <span class='kw'>for</span> <span class='ident'>W</span> {
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>csi</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>b</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>write</span>(<span class='string'>b&quot;\x1B[&quot;</span>)) <span class='op'>+</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>write</span>(<span class='ident'>b</span>)))
     }
+
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>osc</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>b</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>write</span>(<span class='string'>b&quot;\x1B]&quot;</span>)) <span class='op'>+</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>write</span>(<span class='ident'>b</span>)))
     }
+
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>dsc</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>b</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>write</span>(<span class='string'>b&quot;\x1BP&quot;</span>)) <span class='op'>+</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>write</span>(<span class='ident'>b</span>)))
     }
@@ -417,7 +545,7 @@
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>test</span> {
-    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='op'>*</span>;
+    <span class='kw'>use</span> <span class='kw'>super</span>::<span class='op'>*</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Cursor</span>;
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -430,6 +558,7 @@
         <span class='ident'>buf</span>.<span class='ident'>csi</span>(<span class='string'>b&quot;blah&quot;</span>).<span class='ident'>unwrap</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>get_ref</span>(), <span class='string'>b&quot;\x1B[bluh\x1B[blah&quot;</span>);
     }
+
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_csi_partial</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> [<span class='number'>0</span>; <span class='number'>3</span>];
@@ -438,6 +567,7 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>csi</span>(<span class='string'>b&quot;&quot;</span>).<span class='ident'>unwrap</span>(), <span class='number'>0</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>csi</span>(<span class='string'>b&quot;nooooo&quot;</span>).<span class='ident'>unwrap</span>(), <span class='number'>0</span>);
     }
+
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_osc</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>Cursor</span>::<span class='ident'>new</span>(<span class='ident'>Vec</span>::<span class='ident'>new</span>());
@@ -448,6 +578,7 @@
         <span class='ident'>buf</span>.<span class='ident'>osc</span>(<span class='string'>b&quot;blah&quot;</span>).<span class='ident'>unwrap</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>get_ref</span>(), <span class='string'>b&quot;\x1B]bluh\x1B]blah&quot;</span>);
     }
+
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_osc_partial</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> [<span class='number'>0</span>; <span class='number'>3</span>];
@@ -456,6 +587,7 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>osc</span>(<span class='string'>b&quot;&quot;</span>).<span class='ident'>unwrap</span>(), <span class='number'>0</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>osc</span>(<span class='string'>b&quot;nooooo&quot;</span>).<span class='ident'>unwrap</span>(), <span class='number'>0</span>);
     }
+
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_dsc</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>Cursor</span>::<span class='ident'>new</span>(<span class='ident'>Vec</span>::<span class='ident'>new</span>());
@@ -466,6 +598,7 @@
         <span class='ident'>buf</span>.<span class='ident'>dsc</span>(<span class='string'>b&quot;blah&quot;</span>).<span class='ident'>unwrap</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>get_ref</span>(), <span class='string'>b&quot;\x1BPbluh\x1BPblah&quot;</span>);
     }
+
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_dsc_partial</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> [<span class='number'>0</span>; <span class='number'>3</span>];
@@ -474,6 +607,7 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>dsc</span>(<span class='string'>b&quot;&quot;</span>).<span class='ident'>unwrap</span>(), <span class='number'>0</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>dsc</span>(<span class='string'>b&quot;nooooo&quot;</span>).<span class='ident'>unwrap</span>(), <span class='number'>0</span>);
     }
+
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_clear</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>Cursor</span>::<span class='ident'>new</span>(<span class='ident'>Vec</span>::<span class='ident'>new</span>());
@@ -482,6 +616,7 @@
         <span class='ident'>buf</span>.<span class='ident'>clear</span>().<span class='ident'>unwrap</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>get_ref</span>(), <span class='string'>b&quot;\x1B[2J\x1B[2J&quot;</span>);
     }
+
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_goto</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>Cursor</span>::<span class='ident'>new</span>(<span class='ident'>Vec</span>::<span class='ident'>new</span>());
@@ -490,6 +625,7 @@
         <span class='ident'>buf</span>.<span class='ident'>goto</span>(<span class='number'>24</span>, <span class='number'>45</span>).<span class='ident'>unwrap</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>get_ref</span>(), <span class='string'>b&quot;\x1B[00044;00035H\x1B[00046;00025H&quot;</span>);
     }
+
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_style</span>() {
         <span class='kw'>use</span> <span class='ident'>Style</span>;
@@ -525,6 +661,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
