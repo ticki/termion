@@ -17,6 +17,23 @@ Supports Redox, Mac OS X, and Linux (or, in general, ANSI terminals).
 Although small breaking changes might happen, I will try my best to avoid them,
 and this crate can generally be considered stable.
 
+## Cargo.toml
+
+For nightly, add
+
+```toml
+[dependencies.termion]
+git = "https://github.com/ticki/termion"
+```
+
+For stable,
+
+```toml
+[dependencies.termion]
+git = "https://github.com/ticki/termion"
+default-features = false
+```
+
 ## Features
 
 - Raw mode.

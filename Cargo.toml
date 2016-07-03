@@ -7,4 +7,5 @@ authors = ["Ticki <Ticki@users.noreply.github.com>"]
 libc = "0.2.8"
 
 [features]
+default = ["nightly"]
 nightly = []
