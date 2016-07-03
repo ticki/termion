@@ -10,7 +10,7 @@ standalone library directly talking to the TTY.
 
 Supports Redox, Mac OS X, and Linux (or, in general, ANSI terminals).
 
-[Documentation.](http://ticki.github.io/termion/termion/) | [Examples.](https://github.com/Ticki/termion/tree/master/examples)
+[Documentation.](http://ticki.github.io/termion/) | [Examples.](https://github.com/Ticki/termion/tree/master/examples)
 
 ## A note on stability
 
