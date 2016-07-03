@@ -23,14 +23,14 @@ For nightly, add
 
 ```toml
 [dependencies.termion]
-git = "https://github.com/ticki/termion"
+git = "https://github.com/ticki/termion.git"
 ```
 
 For stable,
 
 ```toml
 [dependencies.termion]
-git = "https://github.com/ticki/termion"
+git = "https://github.com/ticki/termion.git"
 default-features = false
 ```
 
