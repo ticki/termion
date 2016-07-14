@@ -121,7 +121,7 @@ pub trait TermWrite {
         }
     }
 
-    /// Scroll the window up.
+    /// Scroll the window `num` spaces up.
     #[inline]
     fn scroll_up(&mut self, num: u32) -> io::Result<usize> {
         if num > 0 {
@@ -136,7 +136,7 @@ pub trait TermWrite {
         }
     }
 
-    /// Scroll the window down.
+    /// Scroll the window `num` spaces down.
     #[inline]
     fn scroll_down(&mut self, num: u32) -> io::Result<usize> {
         if num > 0 {
