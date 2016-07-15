@@ -15,6 +15,20 @@ pub enum Key {
     Up,
     /// Down arrow.
     Down,
+    /// Home key.
+    Home,
+    /// End key.
+    End,
+    /// Page Up key.
+    PageUp,
+    /// Page Down key.
+    PageDown,
+    /// Delete key.
+    Delete,
+    /// Insert key.
+    Insert,
+    /// Function keys.
+    F(u8),
     /// Normal character.
     Char(char),
     /// Alt modified character.
@@ -27,6 +41,7 @@ pub enum Key {
     Invalid,
     /// Null byte.
     Null,
+
 
     #[allow(missing_docs)]
     #[doc(hidden)]
@@ -46,11 +61,50 @@ impl<I: Iterator<Item = Result<char, io::CharsError>>> Iterator for Keys<I> {
     fn next(&mut self) -> Option<Result<Key, io::CharsError>> {
         Some(match self.chars.next() {
             Some(Ok('\x1B')) => Ok(match self.chars.next() {
+                Some(Ok('O')) => match self.chars.next() {
+                    Some(Ok('P')) => Key::F(1),
+                    Some(Ok('Q')) => Key::F(2),
+                    Some(Ok('R')) => Key::F(3),
+                    Some(Ok('S')) => Key::F(4),
+                    _ => Key::Invalid,
+                },
                 Some(Ok('[')) => match self.chars.next() {
                     Some(Ok('D')) => Key::Left,
                     Some(Ok('C')) => Key::Right,
                     Some(Ok('A')) => Key::Up,
                     Some(Ok('B')) => Key::Down,
+                    Some(Ok('H')) => Key::Home,
+                    Some(Ok('F')) => Key::End,
+                    Some(Ok(c @ '1' ... '6')) => match self.chars.next() {
+                        Some(Ok('~')) => match c {
+                            '1' => Key::Home,
+                            '2' => Key::Insert,
+                            '3' => Key::Delete,
+                            '4' => Key::End,
+                            '5' => Key::PageUp,
+                            '6' => Key::PageDown,
+                            _ => Key::Invalid,
+                        },
+                        Some(Ok(k @ '0' ... '9')) => match self.chars.next() {
+                            Some(Ok('~')) => match (c, k) {
+                                ('1', '1') => Key::F(1),
+                                ('1', '2') => Key::F(2),
+                                ('1', '3') => Key::F(3),
+                                ('1', '4') => Key::F(4),
+                                ('1', '5') => Key::F(5),
+                                ('1', '7') => Key::F(6),
+                                ('1', '8') => Key::F(7),
+                                ('1', '9') => Key::F(8),
+                                ('2', '0') => Key::F(9),
+                                ('2', '1') => Key::F(10),
+                                ('2', '3') => Key::F(11),
+                                ('2', '4') => Key::F(12),
+                                _ => Key::Invalid,
+                            },
+                            _ => Key::Invalid,
+                        },
+                        _ => Key::Invalid,
+                    },
                     _ => Key::Invalid,
                 },
                 Some(Ok(c)) => Key::Alt(c),
