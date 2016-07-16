@@ -88,19 +88,10 @@ impl<I: Iterator<Item = Result<char, io::CharsError>>> Iterator for Keys<I> {
                             _ => Key::Invalid,
                         },
                         Some(Ok(k @ '0' ... '9')) => match self.chars.next() {
-                            Some(Ok('~')) => match (c, k) {
-                                ('1', '1') => Key::F(1),
-                                ('1', '2') => Key::F(2),
-                                ('1', '3') => Key::F(3),
-                                ('1', '4') => Key::F(4),
-                                ('1', '5') => Key::F(5),
-                                ('1', '7') => Key::F(6),
-                                ('1', '8') => Key::F(7),
-                                ('1', '9') => Key::F(8),
-                                ('2', '0') => Key::F(9),
-                                ('2', '1') => Key::F(10),
-                                ('2', '3') => Key::F(11),
-                                ('2', '4') => Key::F(12),
+                            Some(Ok('~')) => match 10 * (c as u8 - b'0') + (k as u8 - b'0') {
+                                v @ 11 ... 15 => Key::F(v - 10),
+                                v @ 17 ... 21 => Key::F(v - 11),
+                                v @ 23 ... 24 => Key::F(v - 12),
                                 _ => Key::Invalid,
                             },
                             _ => Key::Invalid,
