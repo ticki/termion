@@ -28,6 +28,8 @@ pub enum Key {
     /// Insert key.
     Insert,
     /// Function keys.
+    ///
+    /// Only function keys 1 through 12 are supported.
     F(u8),
     /// Normal character.
     Char(char),
