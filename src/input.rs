@@ -80,9 +80,9 @@ impl<I: Iterator<Item = Result<char, io::CharsError>>> Iterator for Keys<I> {
                     Some(Ok(c @ '1' ... '8')) => match self.chars.next() {
                         Some(Ok('~')) => match c {
                             '1' | '7' => Key::Home,
-                            '2' | '8' => Key::Insert,
+                            '2'=> Key::Insert,
                             '3' => Key::Delete,
-                            '4' => Key::End,
+                            '4' | '8' => Key::End,
                             '5' => Key::PageUp,
                             '6' => Key::PageDown,
                             _ => Key::Invalid,
@@ -183,6 +183,36 @@ mod test {
         assert!(i.next().is_none());
     }
 
+    #[cfg(feature = "nightly")]
+    #[test]
+    fn test_function_keys() {
+        let mut st = b"\x1BOP\x1BOQ\x1BOR\x1BOS".keys();
+        for i in 1 .. 5 {
+            assert_eq!(st.next().unwrap().unwrap(), Key::F(i));
+        }
+
+        let mut st = b"\x1B[11~\x1B[12~\x1B[13~\x1B[14~\x1B[15~\
+        \x1B[17~\x1B[18~\x1B[19~\x1B[20~\x1B[21~\x1B[23~\x1B[24~".keys();
+        for i in 1 .. 13 {
+            assert_eq!(st.next().unwrap().unwrap(), Key::F(i));
+        }
+    }
+
+    #[cfg(feature = "nightly")]
+    #[test]
+    fn test_special_keys() {
+        let mut st = b"\x1B[2~\x1B[H\x1B[7~\x1B[5~\x1B[3~\x1B[F\x1B[8~\x1B[6~".keys();
+        assert_eq!(st.next().unwrap().unwrap(), Key::Insert);
+        assert_eq!(st.next().unwrap().unwrap(), Key::Home);
+        assert_eq!(st.next().unwrap().unwrap(), Key::Home);
+        assert_eq!(st.next().unwrap().unwrap(), Key::PageUp);
+        assert_eq!(st.next().unwrap().unwrap(), Key::Delete);
+        assert_eq!(st.next().unwrap().unwrap(), Key::End);
+        assert_eq!(st.next().unwrap().unwrap(), Key::End);
+        assert_eq!(st.next().unwrap().unwrap(), Key::PageDown);
+        assert!(st.next().is_none());
+    }
+
     fn line_match(a: &str, b: Option<&str>) {
         let mut sink = io::sink();
 
@@ -226,4 +256,5 @@ mod test {
         line_match("abc\x03https://www.youtube.com/watch?v=dQw4w9WgXcQ", None);
         line_match("hello\x04https://www.youtube.com/watch?v=yPYZpwSpKmA", None);
     }
+
 }
