@@ -15,6 +15,22 @@ pub enum Key {
     Up,
     /// Down arrow.
     Down,
+    /// Home key.
+    Home,
+    /// End key.
+    End,
+    /// Page Up key.
+    PageUp,
+    /// Page Down key.
+    PageDown,
+    /// Delete key.
+    Delete,
+    /// Insert key.
+    Insert,
+    /// Function keys.
+    ///
+    /// Only function keys 1 through 12 are supported.
+    F(u8),
     /// Normal character.
     Char(char),
     /// Alt modified character.
@@ -27,6 +43,7 @@ pub enum Key {
     Invalid,
     /// Null byte.
     Null,
+
 
     #[allow(missing_docs)]
     #[doc(hidden)]
@@ -46,11 +63,41 @@ impl<I: Iterator<Item = Result<char, io::CharsError>>> Iterator for Keys<I> {
     fn next(&mut self) -> Option<Result<Key, io::CharsError>> {
         Some(match self.chars.next() {
             Some(Ok('\x1B')) => Ok(match self.chars.next() {
+                Some(Ok('O')) => match self.chars.next() {
+                    Some(Ok('P')) => Key::F(1),
+                    Some(Ok('Q')) => Key::F(2),
+                    Some(Ok('R')) => Key::F(3),
+                    Some(Ok('S')) => Key::F(4),
+                    _ => Key::Invalid,
+                },
                 Some(Ok('[')) => match self.chars.next() {
                     Some(Ok('D')) => Key::Left,
                     Some(Ok('C')) => Key::Right,
                     Some(Ok('A')) => Key::Up,
                     Some(Ok('B')) => Key::Down,
+                    Some(Ok('H')) => Key::Home,
+                    Some(Ok('F')) => Key::End,
+                    Some(Ok(c @ '1' ... '8')) => match self.chars.next() {
+                        Some(Ok('~')) => match c {
+                            '1' | '7' => Key::Home,
+                            '2'=> Key::Insert,
+                            '3' => Key::Delete,
+                            '4' | '8' => Key::End,
+                            '5' => Key::PageUp,
+                            '6' => Key::PageDown,
+                            _ => Key::Invalid,
+                        },
+                        Some(Ok(k @ '0' ... '9')) => match self.chars.next() {
+                            Some(Ok('~')) => match 10 * (c as u8 - b'0') + (k as u8 - b'0') {
+                                v @ 11 ... 15 => Key::F(v - 10),
+                                v @ 17 ... 21 => Key::F(v - 11),
+                                v @ 23 ... 24 => Key::F(v - 12),
+                                _ => Key::Invalid,
+                            },
+                            _ => Key::Invalid,
+                        },
+                        _ => Key::Invalid,
+                    },
                     _ => Key::Invalid,
                 },
                 Some(Ok(c)) => Key::Alt(c),
@@ -136,6 +183,36 @@ mod test {
         assert!(i.next().is_none());
     }
 
+    #[cfg(feature = "nightly")]
+    #[test]
+    fn test_function_keys() {
+        let mut st = b"\x1BOP\x1BOQ\x1BOR\x1BOS".keys();
+        for i in 1 .. 5 {
+            assert_eq!(st.next().unwrap().unwrap(), Key::F(i));
+        }
+
+        let mut st = b"\x1B[11~\x1B[12~\x1B[13~\x1B[14~\x1B[15~\
+        \x1B[17~\x1B[18~\x1B[19~\x1B[20~\x1B[21~\x1B[23~\x1B[24~".keys();
+        for i in 1 .. 13 {
+            assert_eq!(st.next().unwrap().unwrap(), Key::F(i));
+        }
+    }
+
+    #[cfg(feature = "nightly")]
+    #[test]
+    fn test_special_keys() {
+        let mut st = b"\x1B[2~\x1B[H\x1B[7~\x1B[5~\x1B[3~\x1B[F\x1B[8~\x1B[6~".keys();
+        assert_eq!(st.next().unwrap().unwrap(), Key::Insert);
+        assert_eq!(st.next().unwrap().unwrap(), Key::Home);
+        assert_eq!(st.next().unwrap().unwrap(), Key::Home);
+        assert_eq!(st.next().unwrap().unwrap(), Key::PageUp);
+        assert_eq!(st.next().unwrap().unwrap(), Key::Delete);
+        assert_eq!(st.next().unwrap().unwrap(), Key::End);
+        assert_eq!(st.next().unwrap().unwrap(), Key::End);
+        assert_eq!(st.next().unwrap().unwrap(), Key::PageDown);
+        assert!(st.next().is_none());
+    }
+
     fn line_match(a: &str, b: Option<&str>) {
         let mut sink = io::sink();
 
@@ -179,4 +256,5 @@ mod test {
         line_match("abc\x03https://www.youtube.com/watch?v=dQw4w9WgXcQ", None);
         line_match("hello\x04https://www.youtube.com/watch?v=yPYZpwSpKmA", None);
     }
+
 }
