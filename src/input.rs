@@ -15,7 +15,7 @@ impl<I: Iterator<Item = Result<u8, io::Error>>> Iterator for Keys<I> {
     fn next(&mut self) -> Option<Result<Key, io::Error>> {
         loop {
             match self.iter.next() {
-                Some(Ok(Event::KeyEvent(k))) => return Some(Ok(k)),
+                Some(Ok(Event::Key(k))) => return Some(Ok(k)),
                 Some(Ok(_)) => continue,
                 e @ Some(Err(_)) => e,
                 None => return None,

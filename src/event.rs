@@ -6,20 +6,20 @@ use std::str;
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Event {
     /// A key press.
-    KeyEvent(Key),
+    Key(Key),
     /// A mouse button press, release or wheel use at specific coordinates.
-    MouseEvent(Mouse, u16, u16),
+    Mouse(MouseEvent),
     /// An event that cannot currently be evaluated.
     Unsupported,
 }
 
 /// A mouse related event.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum Mouse {
+pub enum MouseEvent {
     /// A mouse button was pressed.
-    Press(MouseButton),
+    Press(MouseButton, u16, u16),
     /// A mouse button was released.
-    Release,
+    Release(u16, u16),
 }
 
 /// A mouse button.
@@ -86,6 +86,7 @@ pub enum Key {
     __IsNotComplete
 }
 
+/// Parse an Event from `item` and possibly subsequent bytes through `iter`.
 pub fn parse_event<I>(item: Result<u8, Error>, iter: &mut I) -> Result<Event, Error>
 where I: Iterator<Item = Result<u8, Error>>
 {
@@ -95,51 +96,47 @@ where I: Iterator<Item = Result<u8, Error>>
             Ok(match iter.next() {
                 Some(Ok(b'O')) => {
                     match iter.next() {
-                        Some(Ok(b'P')) => Event::KeyEvent(Key::F(1)),
-                        Some(Ok(b'Q')) => Event::KeyEvent(Key::F(2)),
-                        Some(Ok(b'R')) => Event::KeyEvent(Key::F(3)),
-                        Some(Ok(b'S')) => Event::KeyEvent(Key::F(4)),
+                        Some(Ok(val @ b'P' ... b'S')) => Event::Key(Key::F(1 + val - b'P')),
                         _ => return error,
                     }
                 }
                 Some(Ok(b'[')) => {
                     match iter.next() {
-                        Some(Ok(b'D')) => Event::KeyEvent(Key::Left),
-                        Some(Ok(b'C')) => Event::KeyEvent(Key::Right),
-                        Some(Ok(b'A')) => Event::KeyEvent(Key::Up),
-                        Some(Ok(b'B')) => Event::KeyEvent(Key::Down),
-                        Some(Ok(b'H')) => Event::KeyEvent(Key::Home),
-                        Some(Ok(b'F')) => Event::KeyEvent(Key::End),
+                        Some(Ok(b'D')) => Event::Key(Key::Left),
+                        Some(Ok(b'C')) => Event::Key(Key::Right),
+                        Some(Ok(b'A')) => Event::Key(Key::Up),
+                        Some(Ok(b'B')) => Event::Key(Key::Down),
+                        Some(Ok(b'H')) => Event::Key(Key::Home),
+                        Some(Ok(b'F')) => Event::Key(Key::End),
                         Some(Ok(b'M')) => {
-                            // X10 emulation mouse encoding: ESC [ CB Cx Cy (6 characters only)
+                            // X10 emulation mouse encoding: ESC [ CB Cx Cy (6 characters only).
                             let cb = iter.next().unwrap().unwrap() as i8 - 32;
-                            // (1, 1) are the coords for upper left
-                            let cx = (iter.next().unwrap().unwrap() as u8 - 1).saturating_sub(32);
-                            let cy = (iter.next().unwrap().unwrap() as u8 - 1).saturating_sub(32);
-                            Event::MouseEvent(match cb & 0b11 {
+                            // (1, 1) are the coords for upper left.
+                            let cx = (iter.next().unwrap().unwrap() as u8 - 1).saturating_sub(32) as u16;
+                            let cy = (iter.next().unwrap().unwrap() as u8 - 1).saturating_sub(32) as u16;
+                            Event::Mouse(match cb & 0b11 {
                                 0 => {
-                                    if cb & 64 != 0 {
-                                        Mouse::Press(MouseButton::WheelUp)
+                                    if cb & 0x40 != 0 {
+                                        MouseEvent::Press(MouseButton::WheelUp, cx, cy)
                                     } else {
-                                        Mouse::Press(MouseButton::Left)
+                                        MouseEvent::Press(MouseButton::Left, cx, cy)
                                     }
                                 }
                                 1 => {
-                                    if cb & 64 != 0 {
-                                        Mouse::Press(MouseButton::WheelDown)
+                                    if cb & 0x40 != 0 {
+                                        MouseEvent::Press(MouseButton::WheelDown, cx, cy)
                                     } else {
-                                        Mouse::Press(MouseButton::Middle)
+                                        MouseEvent::Press(MouseButton::Middle, cx, cy)
                                     }
                                 }
-                                2 => Mouse::Press(MouseButton::Right),
-                                3 => Mouse::Release,
+                                2 => MouseEvent::Press(MouseButton::Right, cx, cy),
+                                3 => MouseEvent::Release(cx, cy),
                                 _ => return error,
-                            },
-                            cx as u16,
-                            cy as u16)
+                            })
                         }
                         Some(Ok(b'<')) => {
-                            // xterm mouse encoding: ESC [ < Cb ; Cx ; Cy ; (M or m)
+                            // xterm mouse encoding:
+                            // ESC [ < Cb ; Cx ; Cy ; (M or m)
                             let mut buf = Vec::new();
                             let mut c = iter.next().unwrap().unwrap();
                                 while match c {
@@ -164,17 +161,15 @@ where I: Iterator<Item = Result<u8, Error>>
                                 65 => MouseButton::WheelDown,
                                 _ => return error,
                             };
-                            Event::MouseEvent(match c {
-                                b'M' => Mouse::Press(button),
-                                b'm' => Mouse::Release,
+                            Event::Mouse(match c {
+                                b'M' => MouseEvent::Press(button, cx, cy),
+                                b'm' => MouseEvent::Release(cx, cy),
                                 _ => return error,
 
-                            },
-                            cx,
-                            cy)
+                            })
                         }
                         Some(Ok(c @ b'0'...b'9')) => {
-                            // numbered escape code
+                            // Numbered escape code.
                             let mut buf = Vec::new();
                             buf.push(c);
                             let mut c = iter.next().unwrap().unwrap();
@@ -187,7 +182,8 @@ where I: Iterator<Item = Result<u8, Error>>
                             }
 
                             match c {
-                                // rxvt mouse encoding: ESC [ Cb ; Cx ; Cy ; M
+                                // rxvt mouse encoding:
+                                // ESC [ Cb ; Cx ; Cy ; M
                                 b'M' => {
                                     let str_buf = String::from_utf8(buf).unwrap();
                                     let ref mut nums = str_buf.split(';');
@@ -197,30 +193,30 @@ where I: Iterator<Item = Result<u8, Error>>
                                     let cy = nums.next().unwrap().parse::<u16>().unwrap() - 1;
 
                                     let event = match cb {
-                                        32 => Mouse::Press(MouseButton::Left),
-                                        33 => Mouse::Press(MouseButton::Middle),
-                                        34 => Mouse::Press(MouseButton::Right),
-                                        35 => Mouse::Release,
-                                        96 => Mouse::Press(MouseButton::WheelUp),
-                                        97 => Mouse::Press(MouseButton::WheelUp),
+                                        32 => MouseEvent::Press(MouseButton::Left, cx, cy),
+                                        33 => MouseEvent::Press(MouseButton::Middle, cx, cy),
+                                        34 => MouseEvent::Press(MouseButton::Right, cx, cy),
+                                        35 => MouseEvent::Release(cx, cy),
+                                        96 => MouseEvent::Press(MouseButton::WheelUp, cx, cy),
+                                        97 => MouseEvent::Press(MouseButton::WheelUp, cx, cy),
                                         _ => return error,
                                     };
 
-                                    Event::MouseEvent(event, cx, cy)
+                                    Event::Mouse(event)
                                 },
-                                // special key code
+                                // Special key code.
                                 b'~' => {
                                     let num: u8 = String::from_utf8(buf).unwrap().parse().unwrap();
                                     match num {
-                                        1 | 7 => Event::KeyEvent(Key::Home),
-                                        2 => Event::KeyEvent(Key::Insert),
-                                        3 => Event::KeyEvent(Key::Delete),
-                                        4 | 8 => Event::KeyEvent(Key::End),
-                                        5 => Event::KeyEvent(Key::PageUp),
-                                        6 => Event::KeyEvent(Key::PageDown),
-                                        v @ 11...15 => Event::KeyEvent(Key::F(v - 10)),
-                                        v @ 17...21 => Event::KeyEvent(Key::F(v - 11)),
-                                        v @ 23...24 => Event::KeyEvent(Key::F(v - 12)),
+                                        1 | 7 => Event::Key(Key::Home),
+                                        2 => Event::Key(Key::Insert),
+                                        3 => Event::Key(Key::Delete),
+                                        4 | 8 => Event::Key(Key::End),
+                                        5 => Event::Key(Key::PageUp),
+                                        6 => Event::Key(Key::PageDown),
+                                        v @ 11...15 => Event::Key(Key::F(v - 10)),
+                                        v @ 17...21 => Event::Key(Key::F(v - 11)),
+                                        v @ 23...24 => Event::Key(Key::F(v - 12)),
                                         _ => return error,
                                     }
                                 }
@@ -232,29 +228,30 @@ where I: Iterator<Item = Result<u8, Error>>
                 }
                 Some(Ok(c)) => {
                     let ch = parse_utf8_char(c, iter);
-                    Event::KeyEvent(Key::Alt(try!(ch)))
+                    Event::Key(Key::Alt(try!(ch)))
                 }
                 Some(Err(_)) | None => return error,
             })
         }
-        Ok(b'\n') | Ok(b'\r') => Ok(Event::KeyEvent(Key::Char('\n'))),
-        Ok(b'\t') => Ok(Event::KeyEvent(Key::Char('\t'))),
-        Ok(b'\x7F') => Ok(Event::KeyEvent(Key::Backspace)),
-        Ok(c @ b'\x01'...b'\x1A') => Ok(Event::KeyEvent(Key::Ctrl((c as u8 - 0x1 + b'a') as char))),
+        Ok(b'\n') | Ok(b'\r') => Ok(Event::Key(Key::Char('\n'))),
+        Ok(b'\t') => Ok(Event::Key(Key::Char('\t'))),
+        Ok(b'\x7F') => Ok(Event::Key(Key::Backspace)),
+        Ok(c @ b'\x01'...b'\x1A') => Ok(Event::Key(Key::Ctrl((c as u8 - 0x1 + b'a') as char))),
         Ok(c @ b'\x1C'...b'\x1F') => {
-            Ok(Event::KeyEvent(Key::Ctrl((c as u8 - 0x1C + b'4') as char)))
+            Ok(Event::Key(Key::Ctrl((c as u8 - 0x1C + b'4') as char)))
         }
-        Ok(b'\0') => Ok(Event::KeyEvent(Key::Null)),
+        Ok(b'\0') => Ok(Event::Key(Key::Null)),
         Ok(c) => {
             Ok({
                 let ch = parse_utf8_char(c, iter);
-                Event::KeyEvent(Key::Char(try!(ch)))
+                Event::Key(Key::Char(try!(ch)))
             })
         }
         Err(e) => Err(e),
     }
 }
 
+/// Parse `c` as either a single byte ASCII char or a variable size UTF-8 char.
 fn parse_utf8_char<I>(c: u8, iter: &mut I) -> Result<char, Error>
 where I: Iterator<Item = Result<u8, Error>>
 {

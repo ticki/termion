@@ -27,10 +27,10 @@ mod input;
 pub use input::{TermRead, Events, Keys};
 
 mod event;
-pub use event::{Key, Mouse, MouseButton, Event};
+pub use event::{Key, MouseEvent, MouseButton, Event};
 
 mod raw;
-pub use raw::{IntoRawMode, RawTerminal};
+pub use raw::{IntoRawMode, RawTerminal, MouseTerminal};
 
 mod size;
 pub use size::terminal_size;
