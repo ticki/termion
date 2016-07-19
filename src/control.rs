@@ -91,6 +91,66 @@ pub trait TermWrite {
         }
     }
 
+    /// Move the cursor `num` spaces up.
+    #[inline]
+    fn move_cursor_up(&mut self, num: u32) -> io::Result<usize> {
+        if num > 0 {
+            self.csi(&[b'0' + (num / 10000) as u8,
+                       b'0' + (num / 1000) as u8 % 10,
+                       b'0' + (num / 100) as u8 % 10,
+                       b'0' + (num / 10) as u8 % 10,
+                       b'0' + num as u8 % 10,
+                       b'A'])
+        } else {
+            Ok(0)
+        }
+    }
+
+    /// Move the cursor `num` spaces down.
+    #[inline]
+    fn move_cursor_down(&mut self, num: u32) -> io::Result<usize> {
+        if num > 0 {
+            self.csi(&[b'0' + (num / 10000) as u8,
+                       b'0' + (num / 1000) as u8 % 10,
+                       b'0' + (num / 100) as u8 % 10,
+                       b'0' + (num / 10) as u8 % 10,
+                       b'0' + num as u8 % 10,
+                       b'B'])
+        } else {
+            Ok(0)
+        }
+    }
+
+    /// Scroll the window `num` spaces up.
+    #[inline]
+    fn scroll_up(&mut self, num: u32) -> io::Result<usize> {
+        if num > 0 {
+            self.csi(&[b'0' + (num / 10000) as u8,
+                       b'0' + (num / 1000) as u8 % 10,
+                       b'0' + (num / 100) as u8 % 10,
+                       b'0' + (num / 10) as u8 % 10,
+                       b'0' + num as u8 % 10,
+                       b'S'])
+        } else {
+            Ok(0)
+        }
+    }
+
+    /// Scroll the window `num` spaces down.
+    #[inline]
+    fn scroll_down(&mut self, num: u32) -> io::Result<usize> {
+        if num > 0 {
+            self.csi(&[b'0' + (num / 10000) as u8,
+                       b'0' + (num / 1000) as u8 % 10,
+                       b'0' + (num / 100) as u8 % 10,
+                       b'0' + (num / 10) as u8 % 10,
+                       b'0' + num as u8 % 10,
+                       b'T'])
+        } else {
+            Ok(0)
+        }
+    }
+
     /// Reset the rendition mode.
     ///
     /// This will reset both the current style and color.
