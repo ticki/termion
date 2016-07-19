@@ -19,19 +19,9 @@ and this crate can generally be considered stable.
 
 ## Cargo.toml
 
-For nightly, add
-
 ```toml
 [dependencies.termion]
 git = "https://github.com/ticki/termion.git"
-```
-
-For stable,
-
-```toml
-[dependencies.termion]
-git = "https://github.com/ticki/termion.git"
-default-features = false
 ```
 
 ## Features
@@ -51,6 +41,7 @@ default-features = false
 - Special keys events (modifiers, special keys, etc.).
 - Allocation-free.
 - Asynchronous key events.
+- Mouse input
 - Carefully tested.
 
 and much more.
@@ -91,10 +82,6 @@ For a more complete example, see [a minesweeper implementation](https://github.c
 
 <img src="image.png" width="200">
 
-
-## TODO
-
-- Mouse input
 
 ## License
 

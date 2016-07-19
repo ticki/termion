@@ -1,6 +1,9 @@
 use std::io::{self, Write};
 use std::ops::{Deref, DerefMut};
 
+const ENTER_MOUSE_SEQUENCE: &'static[u8] = b"\x1b[?1000h\x1b[?1002h\x1b[?1015h\x1b[?1006h";
+const EXIT_MOUSE_SEQUENCE: &'static[u8] = b"\x1b[?1006l\x1b[?1015l\x1b[?1002l\x1b[?1000l";
+
 /// A terminal restorer, which keeps the previous state of the terminal, and restores it, when
 /// dropped.
 #[cfg(target_os = "redox")]
@@ -12,6 +15,7 @@ pub struct RawTerminal<W: Write> {
 impl<W: Write> Drop for RawTerminal<W> {
     fn drop(&mut self) {
         use control::TermWrite;
+        try!(self.write(EXIT_MOUSE_SEQUENCE));
         self.csi(b"R").unwrap();
     }
 }
@@ -30,6 +34,7 @@ pub struct RawTerminal<W: Write> {
 impl<W: Write> Drop for RawTerminal<W> {
     fn drop(&mut self) {
         use termios::set_terminal_attr;
+        self.write(EXIT_MOUSE_SEQUENCE).unwrap();
         set_terminal_attr(&mut self.prev_ios as *mut _);
     }
 }
@@ -86,10 +91,12 @@ impl<W: Write> IntoRawMode for W {
         if set_terminal_attr(&mut ios as *mut _) != 0 {
             Err(io::Error::new(io::ErrorKind::Other, "Unable to set Termios attribute."))
         } else {
-            Ok(RawTerminal {
+            let mut res = RawTerminal {
                 prev_ios: prev_ios,
                 output: self,
-            })
+            };
+            try!(res.write(ENTER_MOUSE_SEQUENCE));
+            Ok(res)
         }
     }
 
@@ -97,8 +104,12 @@ impl<W: Write> IntoRawMode for W {
     fn into_raw_mode(mut self) -> io::Result<RawTerminal<W>> {
         use control::TermWrite;
 
-        self.csi(b"r").map(|_| RawTerminal {
+        self.csi(b"r").map(|_| {
+            let mut res = RawTerminal {
             output: self,
+            };
+            try!(res.write(ENTER_MOUSE_SEQUENCE));
+            res
         })
     }
 }

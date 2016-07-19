@@ -11,9 +11,6 @@
 //! For more information refer to the [README](https://github.com/ticki/termion).
 #![warn(missing_docs)]
 
-#![cfg_attr(feature = "nightly", feature(io))]
-
-
 #[cfg(not(target_os = "redox"))]
 extern crate libc;
 
@@ -27,9 +24,10 @@ mod async;
 pub use async::{AsyncReader, async_stdin};
 
 mod input;
-pub use input::{TermRead, Key};
-#[cfg(feature = "nightly")]
-pub use input::Keys;
+pub use input::{TermRead, Events, Keys};
+
+mod event;
+pub use event::{Key, Mouse, MouseButton, Event};
 
 mod raw;
 pub use raw::{IntoRawMode, RawTerminal};
