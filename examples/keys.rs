@@ -1,6 +1,5 @@
 extern crate termion;
 
-#[cfg(feature = "nightly")]
 fn main() {
     use termion::{TermRead, TermWrite, IntoRawMode, Key};
     use std::io::{Write, stdout, stdin};
@@ -27,16 +26,10 @@ fn main() {
             Key::Up => println!("↑"),
             Key::Down => println!("↓"),
             Key::Backspace => println!("×"),
-            Key::Invalid => println!("???"),
             _ => {},
         }
         stdout.flush().unwrap();
     }
 
     stdout.show_cursor().unwrap();
-}
-
-#[cfg(not(feature = "nightly"))]
-fn main() {
-    println!("To run this example, you need to enable the `nightly` feature. Use Rust nightly and compile with `--features nightly`.")
 }

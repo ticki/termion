@@ -5,7 +5,3 @@ authors = ["Ticki <Ticki@users.noreply.github.com>"]
 
 [target.'cfg(not(target_os = "redox"))'.dependencies]
 libc = "0.2.8"
-
-[features]
-default = ["nightly"]
-nightly = []

@@ -1,126 +1,53 @@
 use std::io::{self, Read, Write};
+use event::{parse_event, Event, Key};
 
 use IntoRawMode;
 
-/// A key.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum Key {
-    /// Backspace.
-    Backspace,
-    /// Left arrow.
-    Left,
-    /// Right arrow.
-    Right,
-    /// Up arrow.
-    Up,
-    /// Down arrow.
-    Down,
-    /// Home key.
-    Home,
-    /// End key.
-    End,
-    /// Page Up key.
-    PageUp,
-    /// Page Down key.
-    PageDown,
-    /// Delete key.
-    Delete,
-    /// Insert key.
-    Insert,
-    /// Function keys.
-    ///
-    /// Only function keys 1 through 12 are supported.
-    F(u8),
-    /// Normal character.
-    Char(char),
-    /// Alt modified character.
-    Alt(char),
-    /// Ctrl modified character.
-    ///
-    /// Note that certain keys may not be modifiable with `ctrl`, due to limitations of terminals.
-    Ctrl(char),
-    /// Invalid character code.
-    Invalid,
-    /// Null byte.
-    Null,
-
-
-    #[allow(missing_docs)]
-    #[doc(hidden)]
-    __IsNotComplete
-}
 
 /// An iterator over input keys.
-#[cfg(feature = "nightly")]
 pub struct Keys<I> {
-    chars: I,
+    iter: Events<I>,
 }
 
-#[cfg(feature = "nightly")]
-impl<I: Iterator<Item = Result<char, io::CharsError>>> Iterator for Keys<I> {
-    type Item = Result<Key, io::CharsError>;
+impl<I: Iterator<Item = Result<u8, io::Error>>> Iterator for Keys<I> {
+    type Item = Result<Key, io::Error>;
 
-    fn next(&mut self) -> Option<Result<Key, io::CharsError>> {
-        Some(match self.chars.next() {
-            Some(Ok('\x1B')) => Ok(match self.chars.next() {
-                Some(Ok('O')) => match self.chars.next() {
-                    Some(Ok('P')) => Key::F(1),
-                    Some(Ok('Q')) => Key::F(2),
-                    Some(Ok('R')) => Key::F(3),
-                    Some(Ok('S')) => Key::F(4),
-                    _ => Key::Invalid,
-                },
-                Some(Ok('[')) => match self.chars.next() {
-                    Some(Ok('D')) => Key::Left,
-                    Some(Ok('C')) => Key::Right,
-                    Some(Ok('A')) => Key::Up,
-                    Some(Ok('B')) => Key::Down,
-                    Some(Ok('H')) => Key::Home,
-                    Some(Ok('F')) => Key::End,
-                    Some(Ok(c @ '1' ... '8')) => match self.chars.next() {
-                        Some(Ok('~')) => match c {
-                            '1' | '7' => Key::Home,
-                            '2'=> Key::Insert,
-                            '3' => Key::Delete,
-                            '4' | '8' => Key::End,
-                            '5' => Key::PageUp,
-                            '6' => Key::PageDown,
-                            _ => Key::Invalid,
-                        },
-                        Some(Ok(k @ '0' ... '9')) => match self.chars.next() {
-                            Some(Ok('~')) => match 10 * (c as u8 - b'0') + (k as u8 - b'0') {
-                                v @ 11 ... 15 => Key::F(v - 10),
-                                v @ 17 ... 21 => Key::F(v - 11),
-                                v @ 23 ... 24 => Key::F(v - 12),
-                                _ => Key::Invalid,
-                            },
-                            _ => Key::Invalid,
-                        },
-                        _ => Key::Invalid,
-                    },
-                    _ => Key::Invalid,
-                },
-                Some(Ok(c)) => Key::Alt(c),
-                Some(Err(_)) | None => Key::Invalid,
-            }),
-            Some(Ok('\n')) | Some(Ok('\r')) => Ok(Key::Char('\n')),
-            Some(Ok('\t')) => Ok(Key::Char('\t')),
-            Some(Ok('\x7F')) => Ok(Key::Backspace),
-            Some(Ok(c @ '\x01' ... '\x1A')) => Ok(Key::Ctrl((c as u8 - 0x1  + b'a') as char)),
-            Some(Ok(c @ '\x1C' ... '\x1F')) => Ok(Key::Ctrl((c as u8 - 0x1C + b'4') as char)),
-            Some(Ok('\0')) => Ok(Key::Null),
-            Some(Ok(c)) => Ok(Key::Char(c)),
-            Some(Err(e)) => Err(e),
-            None => return None,
-        })
+    fn next(&mut self) -> Option<Result<Key, io::Error>> {
+        loop {
+            match self.iter.next() {
+                Some(Ok(Event::Key(k))) => return Some(Ok(k)),
+                Some(Ok(_)) => continue,
+                e @ Some(Err(_)) => e,
+                None => return None,
+            };
+        }
+    }
+}
+
+/// An iterator over input events.
+pub struct Events<I> {
+    bytes: I,
+}
+
+impl<I: Iterator<Item = Result<u8, io::Error>>> Iterator for Events<I> {
+    type Item = Result<Event, io::Error>;
+
+    fn next(&mut self) -> Option<Result<Event, io::Error>> {
+        let ref mut iter = self.bytes;
+        match iter.next() {
+            Some(item) => Some(parse_event(item, iter).or(Ok(Event::Unsupported))),
+            None => None,
+        }
     }
 }
 
 /// Extension to `Read` trait.
 pub trait TermRead {
+    /// An iterator over input events.
+    fn events(self) -> Events<io::Bytes<Self>> where Self: Sized;
+
     /// An iterator over key inputs.
-    #[cfg(feature = "nightly")]
-    fn keys(self) -> Keys<io::Chars<Self>> where Self: Sized;
+    fn keys(self) -> Keys<io::Bytes<Self>> where Self: Sized;
 
     /// Read a line.
     ///
@@ -140,10 +67,14 @@ pub trait TermRead {
 
 
 impl<R: Read> TermRead for R {
-    #[cfg(feature = "nightly")]
-    fn keys(self) -> Keys<io::Chars<R>> {
+    fn events(self) -> Events<io::Bytes<R>> {
+        Events {
+            bytes: self.bytes(),
+        }
+    }
+    fn keys(self) -> Keys<io::Bytes<R>> {
         Keys {
-            chars: self.chars(),
+            iter: self.events(),
         }
     }
 
@@ -169,8 +100,8 @@ impl<R: Read> TermRead for R {
 mod test {
     use super::*;
     use std::io;
+    use event::{Key, Event, MouseEvent, MouseButton};
 
-    #[cfg(feature = "nightly")]
     #[test]
     fn test_keys() {
         let mut i = b"\x1Bayo\x7F\x1B[D".keys();
@@ -183,7 +114,25 @@ mod test {
         assert!(i.next().is_none());
     }
 
-    #[cfg(feature = "nightly")]
+    #[test]
+    fn test_events() {
+        let mut i = b"\x1B[\x00bc\x7F\x1B[D\
+                    \x1B[M\x00\x22\x24\x1B[<0;2;4;M\x1B[32;2;4M\x1B[<0;2;4;m\x1B[35;2;4Mb".events();
+
+        assert_eq!(i.next().unwrap().unwrap(), Event::Unsupported);
+        assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Char('b')));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Char('c')));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Backspace));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Left));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::WheelUp, 1, 3)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::Left, 1, 3)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::Left, 1, 3)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Release(1, 3)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Release(1, 3)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Char('b')));
+        assert!(i.next().is_none());
+    }
+
     #[test]
     fn test_function_keys() {
         let mut st = b"\x1BOP\x1BOQ\x1BOR\x1BOS".keys();
@@ -198,7 +147,6 @@ mod test {
         }
     }
 
-    #[cfg(feature = "nightly")]
     #[test]
     fn test_special_keys() {
         let mut st = b"\x1B[2~\x1B[H\x1B[7~\x1B[5~\x1B[3~\x1B[F\x1B[8~\x1B[6~".keys();
