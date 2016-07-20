@@ -28,7 +28,7 @@ pub struct RawTerminal<W: Write> {
 
 #[cfg(not(target_os = "redox"))]
 impl<W> RawTerminal<W>
-where W: Write
+    where W: Write
 {
     /// Enable mouse support.
     pub fn with_mouse(mut self) -> io::Result<MouseTerminal<W>> {
@@ -73,9 +73,9 @@ impl<W: Write> Write for RawTerminal<W> {
 pub trait IntoRawMode: Write + Sized {
     /// Switch to raw mode.
     ///
-    /// Raw mode means that stdin won't be printed (it will instead have to be written manually by the
-    /// program). Furthermore, the input isn't canonicalised or buffered (that is, you can read from
-    /// stdin one byte of a time). The output is neither modified in any way.
+    /// Raw mode means that stdin won't be printed (it will instead have to be written manually by
+    /// the program). Furthermore, the input isn't canonicalised or buffered (that is, you can
+    /// read from stdin one byte of a time). The output is neither modified in any way.
     fn into_raw_mode(self) -> io::Result<RawTerminal<Self>>;
 }
 
@@ -110,19 +110,17 @@ impl<W: Write> IntoRawMode for W {
         use control::TermWrite;
 
         self.csi(b"r").map(|_| {
-            let mut res = RawTerminal {
-                output: self,
-            };
+            let mut res = RawTerminal { output: self };
             res
         })
     }
 }
 
 /// A sequence of escape codes to enable terminal mouse support.
-const ENTER_MOUSE_SEQUENCE: &'static[u8] = b"\x1b[?1000h\x1b[?1002h\x1b[?1015h\x1b[?1006h";
+const ENTER_MOUSE_SEQUENCE: &'static [u8] = b"\x1b[?1000h\x1b[?1002h\x1b[?1015h\x1b[?1006h";
 
 /// A sequence of escape codes to disable terminal mouse support.
-const EXIT_MOUSE_SEQUENCE: &'static[u8] = b"\x1b[?1006l\x1b[?1015l\x1b[?1002l\x1b[?1000l";
+const EXIT_MOUSE_SEQUENCE: &'static [u8] = b"\x1b[?1006l\x1b[?1015l\x1b[?1002l\x1b[?1000l";
 
 /// A `RawTerminal` with added mouse support.
 ///
