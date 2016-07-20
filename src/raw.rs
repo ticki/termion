@@ -177,4 +177,10 @@ mod test {
 
         out.write(b"this is a test, muahhahahah").unwrap();
     }
+
+    #[test]
+    fn test_enable_mouse() {
+        let mut out = stdout().into_raw_mode().unwrap().with_mouse().unwrap();
+        out.write(b"abcde\x1B[<1;1;0;Mfgh").unwrap();
+    }
 }

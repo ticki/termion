@@ -272,3 +272,14 @@ where I: Iterator<Item = Result<u8, Error>>
         }
     }
 }
+
+#[test]
+fn test_parse_utf8() {
+    let st = "abcéŷ¤£€ù%323";
+    let ref mut bytes = st.bytes().map(|x| Ok(x));
+    let chars = st.chars();
+    for c in chars {
+        let b = bytes.next().unwrap().unwrap();
+        assert!(c == parse_utf8_char(b, bytes).unwrap());
+    }
+}

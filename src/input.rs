@@ -100,6 +100,7 @@ impl<R: Read> TermRead for R {
 mod test {
     use super::*;
     use std::io;
+    use event::{Key, Event, MouseEvent, MouseButton};
 
     #[test]
     fn test_keys() {
@@ -110,6 +111,25 @@ mod test {
         assert_eq!(i.next().unwrap().unwrap(), Key::Char('o'));
         assert_eq!(i.next().unwrap().unwrap(), Key::Backspace);
         assert_eq!(i.next().unwrap().unwrap(), Key::Left);
+        assert!(i.next().is_none());
+    }
+
+    #[test]
+    fn test_events() {
+        let mut i = b"\x1B[\x00bc\x7F\x1B[D\
+                    \x1B[M\x00\x22\x24\x1B[<0;2;4;M\x1B[32;2;4M\x1B[<0;2;4;m\x1B[35;2;4Mb".events();
+
+        assert_eq!(i.next().unwrap().unwrap(), Event::Unsupported);
+        assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Char('b')));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Char('c')));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Backspace));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Left));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::WheelUp, 1, 3)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::Left, 1, 3)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::Left, 1, 3)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Release(1, 3)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Release(1, 3)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Char('b')));
         assert!(i.next().is_none());
     }
 
