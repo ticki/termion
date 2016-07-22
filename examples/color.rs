@@ -17,6 +17,9 @@ fn main() {
     stdout.style(Style::Bold).unwrap();
     println!("Blue'n'Bold");
 
+    stdout.color(color::true_rgb(255, 100, 0)).unwrap();
+    println!("TRUECOLOR");
+
     stdout.reset().unwrap();
     stdout.style(Style::Italic).unwrap();
     println!("Just plain italic")

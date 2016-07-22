@@ -27,7 +27,7 @@ git = "https://github.com/ticki/termion.git"
 ## Features
 
 - Raw mode.
-- 256-color mode.
+- 256-color and true color modes.
 - Cursor movement.
 - Color output.
 - Calculating ANSI escapes.

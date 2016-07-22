@@ -146,35 +146,13 @@ pub trait TermWrite {
     /// Set foreground color.
     #[inline]
     fn color<C: Color>(&mut self, color: C) -> io::Result<usize> {
-        let ansi = color.to_ansi_val();
-        self.csi(&[
-            b'3',
-            b'8',
-            b';',
-            b'5',
-            b';',
-            b'0' + ansi / 100,
-            b'0' + ansi / 10 % 10,
-            b'0' + ansi % 10,
-            b'm',
-        ])
+        self.csi(color.to_escape_code(false).as_bytes())
     }
 
     /// Set background color.
     #[inline]
     fn bg_color<C: Color>(&mut self, color: C) -> io::Result<usize> {
-        let ansi = color.to_ansi_val();
-        self.csi(&[
-            b'4',
-            b'8',
-            b';',
-            b'5',
-            b';',
-            b'0' + ansi / 100,
-            b'0' + ansi / 10 % 10,
-            b'0' + ansi % 10,
-            b'm',
-        ])
+        self.csi(color.to_escape_code(true).as_bytes())
     }
 
     /// Set rendition mode (SGR).
