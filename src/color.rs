@@ -1,7 +1,7 @@
 /// A terminal color.
 pub trait Color {
-    /// Convert this to its ANSI value.
-    fn to_ansi_val(self) -> u8;
+    /// Get an escape code corresponding to the color value.
+    fn to_escape_code(self, is_background: bool) -> String;
 }
 
 macro_rules! derive_color {
@@ -11,13 +11,19 @@ macro_rules! derive_color {
 
         impl Color for $name {
             #[inline]
-            fn to_ansi_val(self) -> u8 {
-                $value
+            fn to_escape_code(self, is_background: bool) -> String {
+                ansi_escape_code($value, is_background)
             }
         }
     };
 }
 
+/// Compute the escape code for an ANSI coded color.
+#[inline]
+fn ansi_escape_code(number: u8, is_background: bool) -> String {
+    let bg_code = if is_background { 48 } else { 38 };
+    format!("{};5;{}m", bg_code, number)
+}
 
 derive_color!("Black.", Black, 0x0);
 derive_color!("Red.", Red, 0x1);
@@ -62,9 +68,33 @@ pub struct AnsiValue(pub u8);
 
 impl Color for AnsiValue {
     #[inline]
-    fn to_ansi_val(self) -> u8 {
-        self.0
+    fn to_escape_code(self, is_background: bool) -> String {
+        ansi_escape_code(self.0, is_background)
     }
+}
+
+/// A true 24 bit color value.
+#[derive(Clone, Copy)]
+pub struct TrueColorValue{
+    /// Red component.
+    pub r: u8,
+    /// Green component.
+    pub g: u8,
+    /// Blue component.
+    pub b: u8,
+}
+
+impl Color for TrueColorValue {
+    #[inline]
+    fn to_escape_code(self, is_background: bool) -> String {
+        let bg_code = if is_background { 48 } else { 38 };
+        format!("{};2;{};{};{}m", bg_code, self.r, self.g, self.b)
+    }
+}
+
+/// 24 bit true RGB.
+pub fn true_rgb(r: u8, g: u8, b: u8) -> TrueColorValue {
+    TrueColorValue{r: r, g: g, b: b}
 }
 
 /// A color palette.
@@ -107,31 +137,34 @@ pub enum Palette {
     LightWhite,
     /// 216-color (r, g, b ≤ 5) RGB.
     Rgb(u8, u8, u8),
+    /// 24 bit true RGB color.
+    TrueRgb(u8, u8, u8),
     /// Grayscale (max value: 24).
     Grayscale(u8),
 }
 
 impl Color for Palette {
-    fn to_ansi_val(self) -> u8 {
+    fn to_escape_code(self, is_background: bool) -> String {
         match self {
-            Palette::Black => Black.to_ansi_val(),
-            Palette::Red => Red.to_ansi_val(),
-            Palette::Green => Green.to_ansi_val(),
-            Palette::Yellow => Yellow.to_ansi_val(),
-            Palette::Blue => Blue.to_ansi_val(),
-            Palette::Magenta => Magenta.to_ansi_val(),
-            Palette::Cyan => Cyan.to_ansi_val(),
-            Palette::White => White.to_ansi_val(),
-            Palette::LightBlack => LightBlack.to_ansi_val(),
-            Palette::LightRed => LightRed.to_ansi_val(),
-            Palette::LightGreen => LightGreen.to_ansi_val(),
-            Palette::LightYellow => LightYellow.to_ansi_val(),
-            Palette::LightBlue => LightBlue.to_ansi_val(),
-            Palette::LightMagenta => LightMagenta.to_ansi_val(),
-            Palette::LightCyan => LightCyan.to_ansi_val(),
-            Palette::LightWhite => LightWhite.to_ansi_val(),
-            Palette::Rgb(r, g, b) => rgb(r, g, b).to_ansi_val(),
-            Palette::Grayscale(shade) => grayscale(shade).to_ansi_val(),
+            Palette::Rgb(r, g, b) => rgb(r, g, b).to_escape_code(is_background),
+            Palette::TrueRgb(r, g, b) => true_rgb(r, g, b).to_escape_code(is_background),
+            Palette::Grayscale(shade) => grayscale(shade).to_escape_code(is_background),
+            Palette::Black => Black.to_escape_code(is_background),
+            Palette::Red => Red.to_escape_code(is_background),
+            Palette::Green => Green.to_escape_code(is_background),
+            Palette::Yellow => Yellow.to_escape_code(is_background),
+            Palette::Blue => Blue.to_escape_code(is_background),
+            Palette::Magenta => Magenta.to_escape_code(is_background),
+            Palette::Cyan => Cyan.to_escape_code(is_background),
+            Palette::White => White.to_escape_code(is_background),
+            Palette::LightBlack => LightBlack.to_escape_code(is_background),
+            Palette::LightRed => LightRed.to_escape_code(is_background),
+            Palette::LightGreen => LightGreen.to_escape_code(is_background),
+            Palette::LightYellow => LightYellow.to_escape_code(is_background),
+            Palette::LightBlue => LightBlue.to_escape_code(is_background),
+            Palette::LightMagenta => LightMagenta.to_escape_code(is_background),
+            Palette::LightCyan => LightCyan.to_escape_code(is_background),
+            Palette::LightWhite => LightWhite.to_escape_code(is_background),
         }
     }
 }
@@ -142,37 +175,45 @@ mod test {
 
     #[test]
     fn test_rgb() {
-        assert_eq!(rgb(2, 3, 4).to_ansi_val(), 110);
-        assert_eq!(rgb(2, 1, 4).to_ansi_val(), 98);
-        assert_eq!(rgb(5, 1, 4).to_ansi_val(), 206);
+        assert_eq!(rgb(2, 3, 4).to_escape_code(true), "48;5;110m");
+        assert_eq!(rgb(2, 1, 4).to_escape_code(false), "38;5;98m");
+        assert_eq!(rgb(5, 1, 4).to_escape_code(false), "38;5;206m");
+    }
+
+    #[test]
+    fn test_true_rgb() {
+        assert_eq!(true_rgb(2, 3, 4).to_escape_code(true), "48;2;2;3;4m");
+        assert_eq!(true_rgb(2, 1, 4).to_escape_code(false), "38;2;2;1;4m");
+        assert_eq!(true_rgb(100, 1, 255).to_escape_code(false), "38;2;100;1;255m");
     }
 
     #[test]
     fn test_grayscale() {
-        assert_eq!(grayscale(2).to_ansi_val(), 234);
-        assert_eq!(grayscale(5).to_ansi_val(), 237);
+        assert_eq!(grayscale(2).to_escape_code(true), "48;5;234m");
+        assert_eq!(grayscale(5).to_escape_code(true), "48;5;237m");
     }
 
     #[test]
     fn test_normal() {
-        assert_eq!(Black.to_ansi_val(), 0);
-        assert_eq!(Green.to_ansi_val(), 2);
-        assert_eq!(White.to_ansi_val(), 7);
+        assert_eq!(Black.to_escape_code(true), "48;5;0m");
+        assert_eq!(Green.to_escape_code(true), "48;5;2m");
+        assert_eq!(White.to_escape_code(true), "48;5;7m");
     }
 
     #[test]
     fn test_hi() {
-        assert_eq!(LightRed.to_ansi_val(), 9);
-        assert_eq!(LightCyan.to_ansi_val(), 0xE);
-        assert_eq!(LightWhite.to_ansi_val(), 0xF);
+        assert_eq!(LightRed.to_escape_code(true), "48;5;9m");
+        assert_eq!(LightCyan.to_escape_code(true), "48;5;14m");
+        assert_eq!(LightWhite.to_escape_code(true), "48;5;15m");
     }
 
     #[test]
     fn test_palette() {
-        assert_eq!(Palette::Black.to_ansi_val(), Black.to_ansi_val());
-        assert_eq!(Palette::Red.to_ansi_val(), Red.to_ansi_val());
-        assert_eq!(Palette::LightBlue.to_ansi_val(), LightBlue.to_ansi_val());
-        assert_eq!(Palette::Rgb(2, 2, 2).to_ansi_val(), rgb(2, 2, 2).to_ansi_val());
+        assert_eq!(Palette::Black.to_escape_code(false), Black.to_escape_code(false));
+        assert_eq!(Palette::Red.to_escape_code(true), Red.to_escape_code(true));
+        assert_eq!(Palette::LightBlue.to_escape_code(true), LightBlue.to_escape_code(true));
+        assert_eq!(Palette::Rgb(2, 2, 2).to_escape_code(true), rgb(2, 2, 2).to_escape_code(true));
+        assert_eq!(Palette::TrueRgb(5, 68, 255).to_escape_code(true), true_rgb(5, 68, 255).to_escape_code(true));
     }
 
     #[cfg(debug)]
@@ -200,20 +241,20 @@ mod test {
     #[should_panic]
     #[test]
     fn test_palette_rgb_bound_check_1() {
-        Palette::Rgb(3, 6, 1).to_ansi_val();
+        Palette::Rgb(3, 6, 1).to_escape_code(true);
     }
 
     #[cfg(debug)]
     #[should_panic]
     #[test]
     fn test_palette_rgb_bound_check_2() {
-        Palette::Rgb(3, 9, 1).to_ansi_val();
+        Palette::Rgb(3, 9, 1).to_escape_code(true);
     }
 
     #[cfg(debug)]
     #[should_panic]
     #[test]
     fn test_palette_grayscale_bound_check_2() {
-        Palette::Grayscale(25).to_ansi_val();
+        Palette::Grayscale(25).to_escape_code(true);
     }
 }
