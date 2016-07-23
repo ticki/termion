@@ -19,8 +19,12 @@ pub enum Event {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum MouseEvent {
     /// A mouse button was pressed.
+    ///
+    /// The coordinates are one-based.
     Press(MouseButton, u16, u16),
     /// A mouse button was released.
+    ///
+    /// The coordinates are one-based.
     Release(u16, u16),
 }
 
@@ -114,8 +118,8 @@ where I: Iterator<Item = Result<u8, Error>>
                             // X10 emulation mouse encoding: ESC [ CB Cx Cy (6 characters only).
                             let cb = iter.next().unwrap().unwrap() as i8 - 32;
                             // (1, 1) are the coords for upper left.
-                            let cx = (iter.next().unwrap().unwrap() as u8 - 1).saturating_sub(32) as u16;
-                            let cy = (iter.next().unwrap().unwrap() as u8 - 1).saturating_sub(32) as u16;
+                            let cy = (iter.next().unwrap().unwrap() as u8).saturating_sub(32) as u16;
+                            let cx = (iter.next().unwrap().unwrap() as u8).saturating_sub(32) as u16;
                             Event::Mouse(match cb & 0b11 {
                                 0 => {
                                     if cb & 0x40 != 0 {
@@ -152,8 +156,8 @@ where I: Iterator<Item = Result<u8, Error>>
                             let ref mut nums = str_buf.split(';');
 
                             let cb = nums.next().unwrap().parse::<u16>().unwrap();
-                            let cx = nums.next().unwrap().parse::<u16>().unwrap() - 1;
-                            let cy = nums.next().unwrap().parse::<u16>().unwrap() - 1;
+                            let cy = nums.next().unwrap().parse::<u16>().unwrap();
+                            let cx = nums.next().unwrap().parse::<u16>().unwrap();
 
                             let button = match cb {
                                 0 => MouseButton::Left,
