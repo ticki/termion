@@ -1,21 +1,22 @@
 extern crate termion;
 
-fn main() {
-    use termion::{TermRead, TermWrite, IntoRawMode, Key};
-    use std::io::{Write, stdout, stdin};
+use termion::event::Key;
+use termion::input::TermRead;
+use termion::raw::IntoRawMode;
+use std::io::{Write, stdout, stdin};
 
+fn main() {
     let stdin = stdin();
     let mut stdout = stdout().into_raw_mode().unwrap();
 
-    stdout.clear().unwrap();
-    stdout.goto(0, 0).unwrap();
-    stdout.write(b"q to exit. Type stuff, use alt, and so on.").unwrap();
-    stdout.hide_cursor().unwrap();
-    stdout.flush().unwrap();
+    write!(stdout, "{}{}q to exit. Type stuff, use alt, and so on.{}",
+           termion::clear::All,
+           termion::cursor::Goto(1, 1),
+           termion::cursor::Hide).unwrap();
 
     for c in stdin.keys() {
-        stdout.goto(5, 5).unwrap();
-        stdout.clear_line().unwrap();
+        write!(stdout, "{}{}", termion::cursor::Goto(1, 1), termion::clear::CurrentLine).unwrap();
+
         match c.unwrap() {
             Key::Char('q') => break,
             Key::Char(c) => println!("{}", c),
@@ -31,5 +32,5 @@ fn main() {
         stdout.flush().unwrap();
     }
 
-    stdout.show_cursor().unwrap();
+    write!(stdout, "{}", termion::cursor::Show).unwrap();
 }

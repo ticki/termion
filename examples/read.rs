@@ -1,6 +1,6 @@
 extern crate termion;
 
-use termion::TermRead;
+use termion::input::TermRead;
 use std::io::{Write, stdout, stdin};
 
 fn main() {

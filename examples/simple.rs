@@ -1,6 +1,7 @@
 extern crate termion;
 
-use termion::{TermWrite, IntoRawMode, Color, Style};
+use termion::color;
+use termion::raw::IntoRawMode;
 use std::io::{Read, Write, stdout, stdin};
 
 fn main() {
@@ -10,19 +11,9 @@ fn main() {
     let stdin = stdin();
     let stdin = stdin.lock();
 
-    // Move the cursor to (5, 5)
-    stdout.goto(5, 5).unwrap();
-    // Clear the screen.
-    stdout.clear().unwrap();
-    // Set style to bold.
-    stdout.style(Style::Bold).unwrap();
-    // Write some guiding stuff
-    stdout.write(b"yo, 'q' will exit.").unwrap();
-    // Reset the style.
-    stdout.reset().unwrap();
-    // Flush and goto (20, 10)
+    write!(stdout, "{}{}{}yo, 'q' will exit.{}{}", termion::clear::All, termion::cursor::Goto(5, 5),
+           termion::style::Bold, termion::style::Reset, termion::cursor::Goto(20, 10)).unwrap();
     stdout.flush().unwrap();
-    stdout.goto(20, 10).unwrap();
 
     let mut bytes = stdin.bytes();
     loop {
@@ -32,11 +23,11 @@ fn main() {
             // Quit
             b'q' => return,
             // Clear the screen
-            b'c' => stdout.clear(),
+            b'c' => write!(stdout, "{}", termion::clear::All),
             // Set red color
-            b'r' => stdout.color(Color::Rgb(5, 0, 0)),
+            b'r' => write!(stdout, "{}", color::Fg(color::Rgb(5, 0, 0))),
             // Write it to stdout.
-            a => stdout.write(&[a]),
+            a => write!(stdout, "{}", a),
         }.unwrap();
 
         stdout.flush().unwrap();
