@@ -2,6 +2,10 @@
 name = "termion"
 version = "1.0.0"
 authors = ["Ticki <Ticki@users.noreply.github.com>"]
+description = "A bindless library for manipulating terminals."
+repository = "ticki/termion"
+license = "MIT"
+keywords = ["tty", "color", "terminal", "console", "tui", "size", "cursor", "clear", "ansi", "escape", "codes", "termios", "truecolor", "mouse", "isatty", "raw", "text", "password", "redox", "async"]
 
 [target.'cfg(not(target_os = "redox"))'.dependencies]
 libc = "0.2.8"

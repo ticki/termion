@@ -53,8 +53,6 @@ version of Termion.
 - TrueColor.
 - 256-color mode.
 - Cursor movement.
-- Color output.
-- Calculating ANSI escapes.
 - Text formatting.
 - Console size.
 - Control sequences.
