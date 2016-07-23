@@ -1,24 +1,22 @@
 extern crate termion;
 
-fn main() {
-    use termion::{TermRead, TermWrite, IntoRawMode, Key, Event, MouseEvent};
-    use std::io::{Write, stdout, stdin};
+use termion::event::{Key, Event, MouseEvent};
+use termion::input::TermRead;
+use termion::raw::IntoRawMode;
+use std::io::{Write, stdout, stdin};
 
+fn main() {
     let stdin = stdin();
     let mut stdout = stdout().into_raw_mode().unwrap().with_mouse().unwrap();
 
-    stdout.clear().unwrap();
-    stdout.goto(0, 0).unwrap();
-    stdout.write(b"q to exit. Type stuff, use alt, click around...").unwrap();
-    stdout.flush().unwrap();
+    write!(stdout, "{}{}q to exit. Type stuff, use alt, click around...", termion::clear::All, termion::cursor::Goto(1, 1)).unwrap();
 
-    let mut x = 0;
-    let mut y = 0;
+    let mut x = 1;
+    let mut y = 1;
 
     for c in stdin.events() {
-        stdout.goto(5, 5).unwrap();
-        stdout.clear_line().unwrap();
         let evt = c.unwrap();
+        writeln!(stdout, "{:?}{}{}", evt, termion::cursor::Goto(5, 5), termion::clear::CurrentLine).unwrap();
         match evt {
             Event::Key(Key::Char('q')) => break,
             Event::Mouse(me) => {
@@ -32,10 +30,9 @@ fn main() {
             }
             _ => {}
         }
-        println!("{:?}", evt);
-        stdout.goto(x, y).unwrap();
+        writeln!(stdout, "{:?}{}", evt, termion::cursor::Goto(x, y)).unwrap();
         stdout.flush().unwrap();
     }
 
-    stdout.show_cursor().unwrap();
+    write!(stdout, "{}", termion::cursor::Show).unwrap();
 }

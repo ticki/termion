@@ -2,8 +2,9 @@
 
 extern crate termion;
 
+use termion::event::Key;
+use termion::input::TermRead;
 use termion::raw::IntoRawMode;
-use termion::input::{TermRead, Key};
 use std::io::{Write, stdout, stdin};
 
 fn rainbow<W: Write>(stdout: &mut W, blue: u8) {

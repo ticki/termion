@@ -1,3 +1,7 @@
+//! Scrolling.
+
+use std::fmt;
+
 /// Scroll up.
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Up(pub u16);

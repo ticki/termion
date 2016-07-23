@@ -1,3 +1,5 @@
+//! Mouse and key events.
+
 use std::io::{Error, ErrorKind};
 use std::ascii::AsciiExt;
 use std::str;
@@ -273,6 +275,7 @@ where I: Iterator<Item = Result<u8, Error>>
     }
 }
 
+#[cfg(test)]
 #[test]
 fn test_parse_utf8() {
     let st = "abcéŷ¤£€ù%323";

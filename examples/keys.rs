@@ -1,6 +1,7 @@
 extern crate termion;
 
-use termion::input::{TermRead, Key};
+use termion::event::Key;
+use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 use std::io::{Write, stdout, stdin};
 
