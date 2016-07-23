@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["AfterCursor","Clear everything after the cursor."],["All","Clear the entire screen."],["BeforeCursor","Clear everything before the cursor."],["CurrentLine","Clear the current line."],["UntilNewline","Clear from cursor to newline."]]});

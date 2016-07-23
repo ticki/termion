@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Color` trait in crate `termion`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Color">
+
+    <title>termion::color::Color - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>termion</a>::<wbr><a href='index.html'>color</a></p><script>window.sidebarCurrent = {name: 'Color', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>termion</a>::<wbr><a href='index.html'>color</a>::<wbr><a class='trait' href=''>Color</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-128' class='srclink' href='../../src/termion/src/color.rs.html#6-11' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait Color {
+    fn <a href='#tymethod.write_fg' class='fnname'>write_fg</a>(&amp;self, f: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a>;
+    fn <a href='#tymethod.write_bg' class='fnname'>write_bg</a>(&amp;self, f: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a>;
+}</pre><div class='docblock'><p>A terminal color.</p>
+</div>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.write_fg' class='method stab '><code>fn <a href='#tymethod.write_fg' class='fnname'>write_fg</a>(&amp;self, f: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h3><div class='docblock'><p>Write the foreground version of this color.</p>
+</div><h3 id='tymethod.write_bg' class='method stab '><code>fn <a href='#tymethod.write_bg' class='fnname'>write_bg</a>(&amp;self, f: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h3><div class='docblock'><p>Write the background version of this color.</p>
+</div></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    <li><code>impl Color for <a class='struct' href='../../termion/color/struct.Black.html' title='termion::color::Black'>Black</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.Red.html' title='termion::color::Red'>Red</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.Green.html' title='termion::color::Green'>Green</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.Yellow.html' title='termion::color::Yellow'>Yellow</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.Blue.html' title='termion::color::Blue'>Blue</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.Magenta.html' title='termion::color::Magenta'>Magenta</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.Cyan.html' title='termion::color::Cyan'>Cyan</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.White.html' title='termion::color::White'>White</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.LightBlack.html' title='termion::color::LightBlack'>LightBlack</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.LightRed.html' title='termion::color::LightRed'>LightRed</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.LightGreen.html' title='termion::color::LightGreen'>LightGreen</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.LightYellow.html' title='termion::color::LightYellow'>LightYellow</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.LightBlue.html' title='termion::color::LightBlue'>LightBlue</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.LightMagenta.html' title='termion::color::LightMagenta'>LightMagenta</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.LightCyan.html' title='termion::color::LightCyan'>LightCyan</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.LightWhite.html' title='termion::color::LightWhite'>LightWhite</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.AnsiValue.html' title='termion::color::AnsiValue'>AnsiValue</a></code></li>
+<li><code>impl Color for <a class='struct' href='../../termion/color/struct.Rgb.html' title='termion::color::Rgb'>Rgb</a></code></li>
+</ul><script type="text/javascript" async
+                         src="../../implementors/termion/color/trait.Color.js">
+                 </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "termion";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

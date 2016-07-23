@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `termion` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, termion">
+
+    <title>termion - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'></p><script>window.sidebarCurrent = {name: 'termion', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>termion</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-0' class='srclink' href='../src/termion/src/lib.rs.html#1-38' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Termion is a pure Rust, bindless library for low-level handling, manipulating
+and reading information about terminals. This provides a full-featured
+alternative to Termbox.</p>
+
+<p>Termion aims to be simple and yet expressive. It is bindless, meaning that it
+is not a front-end to some other library (e.g., ncurses or termbox), but a
+standalone library directly talking to the TTY.</p>
+
+<p>Supports Redox, Mac OS X, and Linux (or, in general, ANSI terminals).</p>
+
+<p>For more information refer to the <a href="https://github.com/ticki/termion">README</a>.</p>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='clear/index.html'
+                                  title='termion::clear'>clear</a></td>
+                           <td class='docblock short'>
+                                <p>Clearing the screen.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='color/index.html'
+                                  title='termion::color'>color</a></td>
+                           <td class='docblock short'>
+                                <p>Colors.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='cursor/index.html'
+                                  title='termion::cursor'>cursor</a></td>
+                           <td class='docblock short'>
+                                <p>Cursor.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='event/index.html'
+                                  title='termion::event'>event</a></td>
+                           <td class='docblock short'>
+                                <p>Mouse and key events.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='input/index.html'
+                                  title='termion::input'>input</a></td>
+                           <td class='docblock short'>
+                                <p>Input.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='raw/index.html'
+                                  title='termion::raw'>raw</a></td>
+                           <td class='docblock short'>
+                                <p>Raw mode.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='scroll/index.html'
+                                  title='termion::scroll'>scroll</a></td>
+                           <td class='docblock short'>
+                                <p>Scrolling.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='style/index.html'
+                                  title='termion::style'>style</a></td>
+                           <td class='docblock short'>
+                                <p>Style.</p>
+                           </td>
+                       </tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.AsyncReader.html'
+                                  title='termion::AsyncReader'>AsyncReader</a></td>
+                           <td class='docblock short'>
+                                <p>An asynchronous reader.</p>
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.async_stdin.html'
+                                  title='termion::async_stdin'>async_stdin</a></td>
+                           <td class='docblock short'>
+                                <p>Construct an asynchronous handle to the standard input.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.is_tty.html'
+                                  title='termion::is_tty'>is_tty</a></td>
+                           <td class='docblock short'>
+                                <p>Is this stream an TTY?</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.terminal_size.html'
+                                  title='termion::terminal_size'>terminal_size</a></td>
+                           <td class='docblock short'>
+                                <p>Get the size of the terminal.</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "termion";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

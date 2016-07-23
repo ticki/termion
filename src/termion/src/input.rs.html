@@ -224,83 +224,137 @@
 <span id="180">180</span>
 <span id="181">181</span>
 <span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
 </pre><pre class='rust '>
+<span class='doccomment'>//! Input.</span>
+
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='self'>self</span>, <span class='ident'>Read</span>, <span class='ident'>Write</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ops</span>;
 
-<span class='kw'>use</span> <span class='ident'>IntoRawMode</span>;
-
-<span class='doccomment'>/// A key.</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>Copy</span>, <span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>Hash</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Key</span> {
-    <span class='doccomment'>/// Backspace.</span>
-    <span class='ident'>Backspace</span>,
-    <span class='doccomment'>/// Left arrow.</span>
-    <span class='ident'>Left</span>,
-    <span class='doccomment'>/// Right arrow.</span>
-    <span class='ident'>Right</span>,
-    <span class='doccomment'>/// Up arrow.</span>
-    <span class='ident'>Up</span>,
-    <span class='doccomment'>/// Down arrow.</span>
-    <span class='ident'>Down</span>,
-    <span class='doccomment'>/// Normal character.</span>
-    <span class='ident'>Char</span>(<span class='ident'>char</span>),
-    <span class='doccomment'>/// Alt modified character.</span>
-    <span class='ident'>Alt</span>(<span class='ident'>char</span>),
-    <span class='doccomment'>/// Ctrl modified character.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Note that certain keys may not be modifiable with `ctrl`, due to limitations of terminals.</span>
-    <span class='ident'>Ctrl</span>(<span class='ident'>char</span>),
-    <span class='doccomment'>/// Invalid character code.</span>
-    <span class='ident'>Invalid</span>,
-    <span class='doccomment'>/// Null byte.</span>
-    <span class='ident'>Null</span>,
-
-    <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>missing_docs</span>)]</span>
-    <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
-    <span class='ident'>__IsNotComplete</span>
-}
+<span class='kw'>use</span> <span class='ident'>event</span>::{<span class='ident'>parse_event</span>, <span class='ident'>Event</span>, <span class='ident'>Key</span>};
+<span class='kw'>use</span> <span class='ident'>raw</span>::<span class='ident'>IntoRawMode</span>;
 
 <span class='doccomment'>/// An iterator over input keys.</span>
-<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nightly&quot;</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Keys</span><span class='op'>&lt;</span><span class='ident'>I</span><span class='op'>&gt;</span> {
-    <span class='ident'>chars</span>: <span class='ident'>I</span>,
+    <span class='ident'>iter</span>: <span class='ident'>Events</span><span class='op'>&lt;</span><span class='ident'>I</span><span class='op'>&gt;</span>,
 }
 
-<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nightly&quot;</span>)]</span>
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>I</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span> <span class='op'>=</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>char</span>, <span class='ident'>io</span>::<span class='ident'>CharsError</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span> <span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='ident'>Keys</span><span class='op'>&lt;</span><span class='ident'>I</span><span class='op'>&gt;</span> {
-    <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Key</span>, <span class='ident'>io</span>::<span class='ident'>CharsError</span><span class='op'>&gt;</span>;
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>I</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span> <span class='op'>=</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span>, <span class='ident'>io</span>::<span class='ident'>Error</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span> <span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='ident'>Keys</span><span class='op'>&lt;</span><span class='ident'>I</span><span class='op'>&gt;</span> {
+    <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Key</span>, <span class='ident'>io</span>::<span class='ident'>Error</span><span class='op'>&gt;</span>;
 
-    <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Key</span>, <span class='ident'>io</span>::<span class='ident'>CharsError</span><span class='op'>&gt;&gt;</span> {
-        <span class='prelude-val'>Some</span>(<span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>next</span>() {
-            <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='string'>&#39;\x1B&#39;</span>)) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>next</span>() {
-                <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='string'>&#39;[&#39;</span>)) <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>next</span>() {
-                    <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='string'>&#39;D&#39;</span>)) <span class='op'>=&gt;</span> <span class='ident'>Key</span>::<span class='ident'>Left</span>,
-                    <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='string'>&#39;C&#39;</span>)) <span class='op'>=&gt;</span> <span class='ident'>Key</span>::<span class='ident'>Right</span>,
-                    <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='string'>&#39;A&#39;</span>)) <span class='op'>=&gt;</span> <span class='ident'>Key</span>::<span class='ident'>Up</span>,
-                    <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='string'>&#39;B&#39;</span>)) <span class='op'>=&gt;</span> <span class='ident'>Key</span>::<span class='ident'>Down</span>,
-                    _ <span class='op'>=&gt;</span> <span class='ident'>Key</span>::<span class='ident'>Invalid</span>,
-                },
-                <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='ident'>c</span>)) <span class='op'>=&gt;</span> <span class='ident'>Key</span>::<span class='ident'>Alt</span>(<span class='ident'>c</span>),
-                <span class='prelude-val'>Some</span>(<span class='prelude-val'>Err</span>(_)) <span class='op'>|</span> <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>Key</span>::<span class='ident'>Invalid</span>,
-            }),
-            <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='string'>&#39;\n&#39;</span>)) <span class='op'>|</span> <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='string'>&#39;\r&#39;</span>)) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>Key</span>::<span class='ident'>Char</span>(<span class='string'>&#39;\n&#39;</span>)),
-            <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='string'>&#39;\t&#39;</span>)) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>Key</span>::<span class='ident'>Char</span>(<span class='string'>&#39;\t&#39;</span>)),
-            <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='string'>&#39;\x7F&#39;</span>)) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>Key</span>::<span class='ident'>Backspace</span>),
-            <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='ident'>c</span> @ <span class='string'>&#39;\x01&#39;</span> ... <span class='string'>&#39;\x1A&#39;</span>)) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>Key</span>::<span class='ident'>Ctrl</span>((<span class='ident'>c</span> <span class='kw'>as</span> <span class='ident'>u8</span> <span class='op'>-</span> <span class='number'>0x1</span>  <span class='op'>+</span> <span class='string'>b&#39;a&#39;</span>) <span class='kw'>as</span> <span class='ident'>char</span>)),
-            <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='ident'>c</span> @ <span class='string'>&#39;\x1C&#39;</span> ... <span class='string'>&#39;\x1F&#39;</span>)) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>Key</span>::<span class='ident'>Ctrl</span>((<span class='ident'>c</span> <span class='kw'>as</span> <span class='ident'>u8</span> <span class='op'>-</span> <span class='number'>0x1C</span> <span class='op'>+</span> <span class='string'>b&#39;4&#39;</span>) <span class='kw'>as</span> <span class='ident'>char</span>)),
-            <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='string'>&#39;\0&#39;</span>)) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>Key</span>::<span class='ident'>Null</span>),
-            <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='ident'>c</span>)) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>Key</span>::<span class='ident'>Char</span>(<span class='ident'>c</span>)),
-            <span class='prelude-val'>Some</span>(<span class='prelude-val'>Err</span>(<span class='ident'>e</span>)) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>),
-            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>None</span>,
-        })
+    <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Key</span>, <span class='ident'>io</span>::<span class='ident'>Error</span><span class='op'>&gt;&gt;</span> {
+        <span class='kw'>loop</span> {
+            <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>iter</span>.<span class='ident'>next</span>() {
+                <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='ident'>Event</span>::<span class='ident'>Key</span>(<span class='ident'>k</span>))) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='ident'>k</span>)),
+                <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(_)) <span class='op'>=&gt;</span> <span class='kw'>continue</span>,
+                <span class='ident'>e</span> @ <span class='prelude-val'>Some</span>(<span class='prelude-val'>Err</span>(_)) <span class='op'>=&gt;</span> <span class='ident'>e</span>,
+                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>None</span>,
+            };
+        }
+    }
+}
+
+<span class='doccomment'>/// An iterator over input events.</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Events</span><span class='op'>&lt;</span><span class='ident'>I</span><span class='op'>&gt;</span> {
+    <span class='ident'>bytes</span>: <span class='ident'>I</span>,
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>I</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span> <span class='op'>=</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span>, <span class='ident'>io</span>::<span class='ident'>Error</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span> <span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='ident'>Events</span><span class='op'>&lt;</span><span class='ident'>I</span><span class='op'>&gt;</span> {
+    <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Event</span>, <span class='ident'>io</span>::<span class='ident'>Error</span><span class='op'>&gt;</span>;
+
+    <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Event</span>, <span class='ident'>io</span>::<span class='ident'>Error</span><span class='op'>&gt;&gt;</span> {
+        <span class='kw'>let</span> <span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>iter</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>bytes</span>;
+        <span class='kw'>match</span> <span class='ident'>iter</span>.<span class='ident'>next</span>() {
+            <span class='prelude-val'>Some</span>(<span class='ident'>item</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='ident'>parse_event</span>(<span class='ident'>item</span>, <span class='ident'>iter</span>).<span class='ident'>or</span>(<span class='prelude-val'>Ok</span>(<span class='ident'>Event</span>::<span class='ident'>Unsupported</span>))),
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>,
+        }
     }
 }
 
 <span class='doccomment'>/// Extension to `Read` trait.</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>TermRead</span> {
+    <span class='doccomment'>/// An iterator over input events.</span>
+    <span class='kw'>fn</span> <span class='ident'>events</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Events</span><span class='op'>&lt;</span><span class='ident'>io</span>::<span class='ident'>Bytes</span><span class='op'>&lt;</span><span class='self'>Self</span><span class='op'>&gt;&gt;</span> <span class='kw'>where</span> <span class='self'>Self</span>: <span class='ident'>Sized</span>;
+
     <span class='doccomment'>/// An iterator over key inputs.</span>
-    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nightly&quot;</span>)]</span>
-    <span class='kw'>fn</span> <span class='ident'>keys</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Keys</span><span class='op'>&lt;</span><span class='ident'>io</span>::<span class='ident'>Chars</span><span class='op'>&lt;</span><span class='self'>Self</span><span class='op'>&gt;&gt;</span> <span class='kw'>where</span> <span class='self'>Self</span>: <span class='ident'>Sized</span>;
+    <span class='kw'>fn</span> <span class='ident'>keys</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Keys</span><span class='op'>&lt;</span><span class='ident'>io</span>::<span class='ident'>Bytes</span><span class='op'>&lt;</span><span class='self'>Self</span><span class='op'>&gt;&gt;</span> <span class='kw'>where</span> <span class='self'>Self</span>: <span class='ident'>Sized</span>;
 
     <span class='doccomment'>/// Read a line.</span>
     <span class='doccomment'>///</span>
@@ -318,12 +372,15 @@
     }
 }
 
-
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>R</span>: <span class='ident'>Read</span><span class='op'>&gt;</span> <span class='ident'>TermRead</span> <span class='kw'>for</span> <span class='ident'>R</span> {
-    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nightly&quot;</span>)]</span>
-    <span class='kw'>fn</span> <span class='ident'>keys</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Keys</span><span class='op'>&lt;</span><span class='ident'>io</span>::<span class='ident'>Chars</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>events</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Events</span><span class='op'>&lt;</span><span class='ident'>io</span>::<span class='ident'>Bytes</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;&gt;</span> {
+        <span class='ident'>Events</span> {
+            <span class='ident'>bytes</span>: <span class='self'>self</span>.<span class='ident'>bytes</span>(),
+        }
+    }
+    <span class='kw'>fn</span> <span class='ident'>keys</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Keys</span><span class='op'>&lt;</span><span class='ident'>io</span>::<span class='ident'>Bytes</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;&gt;</span> {
         <span class='ident'>Keys</span> {
-            <span class='ident'>chars</span>: <span class='self'>self</span>.<span class='ident'>chars</span>(),
+            <span class='ident'>iter</span>: <span class='self'>self</span>.<span class='ident'>events</span>(),
         }
     }
 
@@ -345,12 +402,63 @@
     }
 }
 
+<span class='doccomment'>/// A sequence of escape codes to enable terminal mouse support.</span>
+<span class='kw'>const</span> <span class='ident'>ENTER_MOUSE_SEQUENCE</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='macro'>csi</span><span class='macro'>!</span>(<span class='string'>&quot;?1000h\x1b[?1002h\x1b[?1015h\x1b[?1006h&quot;</span>);
+
+<span class='doccomment'>/// A sequence of escape codes to disable terminal mouse support.</span>
+<span class='kw'>const</span> <span class='ident'>EXIT_MOUSE_SEQUENCE</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='macro'>csi</span><span class='macro'>!</span>(<span class='string'>&quot;?1006l\x1b[?1015l\x1b[?1002l\x1b[?1000l&quot;</span>);
+
+<span class='doccomment'>/// A terminal with added mouse support.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// This can be obtained through the `From` implementations.</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>MouseTerminal</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span> {
+    <span class='ident'>term</span>: <span class='ident'>W</span>,
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>MouseTerminal</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='kw-2'>mut</span> <span class='ident'>from</span>: <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='ident'>MouseTerminal</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;</span> {
+        <span class='ident'>from</span>.<span class='ident'>write</span>(<span class='ident'>ENTER_MOUSE_SEQUENCE</span>.<span class='ident'>as_bytes</span>()).<span class='ident'>unwrap</span>();
+
+        <span class='ident'>MouseTerminal</span> { <span class='ident'>term</span>: <span class='ident'>from</span> }
+    }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>MouseTerminal</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='self'>self</span>.<span class='ident'>term</span>.<span class='ident'>write</span>(<span class='ident'>EXIT_MOUSE_SEQUENCE</span>.<span class='ident'>as_bytes</span>()).<span class='ident'>unwrap</span>();
+    }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span> <span class='ident'>ops</span>::<span class='ident'>Deref</span> <span class='kw'>for</span> <span class='ident'>MouseTerminal</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;</span> {
+    <span class='kw'>type</span> <span class='ident'>Target</span> <span class='op'>=</span> <span class='ident'>W</span>;
+
+    <span class='kw'>fn</span> <span class='ident'>deref</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>W</span> {
+        <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>term</span>
+    }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span> <span class='ident'>ops</span>::<span class='ident'>DerefMut</span> <span class='kw'>for</span> <span class='ident'>MouseTerminal</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>deref_mut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span> {
+        <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>term</span>
+    }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span> <span class='ident'>Write</span> <span class='kw'>for</span> <span class='ident'>MouseTerminal</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>buf</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>term</span>.<span class='ident'>write</span>(<span class='ident'>buf</span>)
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>flush</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>term</span>.<span class='ident'>flush</span>()
+    }
+}
+
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>test</span> {
     <span class='kw'>use</span> <span class='kw'>super</span>::<span class='op'>*</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
+    <span class='kw'>use</span> <span class='ident'>event</span>::{<span class='ident'>Key</span>, <span class='ident'>Event</span>, <span class='ident'>MouseEvent</span>, <span class='ident'>MouseButton</span>};
 
-    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nightly&quot;</span>)]</span>
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_keys</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='string'>b&quot;\x1Bayo\x7F\x1B[D&quot;</span>.<span class='ident'>keys</span>();
@@ -361,6 +469,53 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Key</span>::<span class='ident'>Backspace</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Key</span>::<span class='ident'>Left</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>is_none</span>());
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_events</span>() {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='string'>b&quot;\x1B[\x00bc\x7F\x1B[D\
+                    \x1B[M\x00\x22\x24\x1B[&lt;0;2;4;M\x1B[32;2;4M\x1B[&lt;0;2;4;m\x1B[35;2;4Mb&quot;</span>.<span class='ident'>events</span>();
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Event</span>::<span class='ident'>Unsupported</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Event</span>::<span class='ident'>Key</span>(<span class='ident'>Key</span>::<span class='ident'>Char</span>(<span class='string'>&#39;b&#39;</span>)));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Event</span>::<span class='ident'>Key</span>(<span class='ident'>Key</span>::<span class='ident'>Char</span>(<span class='string'>&#39;c&#39;</span>)));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Event</span>::<span class='ident'>Key</span>(<span class='ident'>Key</span>::<span class='ident'>Backspace</span>));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Event</span>::<span class='ident'>Key</span>(<span class='ident'>Key</span>::<span class='ident'>Left</span>));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Event</span>::<span class='ident'>Mouse</span>(<span class='ident'>MouseEvent</span>::<span class='ident'>Press</span>(<span class='ident'>MouseButton</span>::<span class='ident'>WheelUp</span>, <span class='number'>4</span>, <span class='number'>2</span>)));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Event</span>::<span class='ident'>Mouse</span>(<span class='ident'>MouseEvent</span>::<span class='ident'>Press</span>(<span class='ident'>MouseButton</span>::<span class='ident'>Left</span>, <span class='number'>4</span>, <span class='number'>2</span>)));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Event</span>::<span class='ident'>Mouse</span>(<span class='ident'>MouseEvent</span>::<span class='ident'>Press</span>(<span class='ident'>MouseButton</span>::<span class='ident'>Left</span>, <span class='number'>3</span>, <span class='number'>1</span>)));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Event</span>::<span class='ident'>Mouse</span>(<span class='ident'>MouseEvent</span>::<span class='ident'>Release</span>(<span class='number'>4</span>, <span class='number'>2</span>)));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Event</span>::<span class='ident'>Mouse</span>(<span class='ident'>MouseEvent</span>::<span class='ident'>Release</span>(<span class='number'>3</span>, <span class='number'>1</span>)));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Event</span>::<span class='ident'>Key</span>(<span class='ident'>Key</span>::<span class='ident'>Char</span>(<span class='string'>&#39;b&#39;</span>)));
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>is_none</span>());
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_function_keys</span>() {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>st</span> <span class='op'>=</span> <span class='string'>b&quot;\x1BOP\x1BOQ\x1BOR\x1BOS&quot;</span>.<span class='ident'>keys</span>();
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>1</span> .. <span class='number'>5</span> {
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>st</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Key</span>::<span class='ident'>F</span>(<span class='ident'>i</span>));
+        }
+
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>st</span> <span class='op'>=</span> <span class='string'>b&quot;\x1B[11~\x1B[12~\x1B[13~\x1B[14~\x1B[15~\
+        \x1B[17~\x1B[18~\x1B[19~\x1B[20~\x1B[21~\x1B[23~\x1B[24~&quot;</span>.<span class='ident'>keys</span>();
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>1</span> .. <span class='number'>13</span> {
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>st</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Key</span>::<span class='ident'>F</span>(<span class='ident'>i</span>));
+        }
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_special_keys</span>() {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>st</span> <span class='op'>=</span> <span class='string'>b&quot;\x1B[2~\x1B[H\x1B[7~\x1B[5~\x1B[3~\x1B[F\x1B[8~\x1B[6~&quot;</span>.<span class='ident'>keys</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>st</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Key</span>::<span class='ident'>Insert</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>st</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Key</span>::<span class='ident'>Home</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>st</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Key</span>::<span class='ident'>Home</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>st</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Key</span>::<span class='ident'>PageUp</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>st</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Key</span>::<span class='ident'>Delete</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>st</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Key</span>::<span class='ident'>End</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>st</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Key</span>::<span class='ident'>End</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>st</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='ident'>Key</span>::<span class='ident'>PageDown</span>);
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>st</span>.<span class='ident'>next</span>().<span class='ident'>is_none</span>());
     }
 
     <span class='kw'>fn</span> <span class='ident'>line_match</span>(<span class='ident'>a</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>b</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span>) {
@@ -406,6 +561,7 @@
         <span class='ident'>line_match</span>(<span class='string'>&quot;abc\x03https://www.youtube.com/watch?v=dQw4w9WgXcQ&quot;</span>, <span class='prelude-val'>None</span>);
         <span class='ident'>line_match</span>(<span class='string'>&quot;hello\x04https://www.youtube.com/watch?v=yPYZpwSpKmA&quot;</span>, <span class='prelude-val'>None</span>);
     }
+
 }
 </pre>
 </section>

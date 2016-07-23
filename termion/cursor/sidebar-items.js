@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Down","Move cursor down."],["Goto","Goto some position ((1,1)-based)."],["Hide","Hide the cursor."],["Left","Move cursor left."],["Right","Move cursor right."],["Show","Show the cursor."],["Up","Move cursor up."]]});

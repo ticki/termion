@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Events","An iterator over input events."],["Keys","An iterator over input keys."],["MouseTerminal","A terminal with added mouse support."]],"trait":[["TermRead","Extension to `Read` trait."]]});

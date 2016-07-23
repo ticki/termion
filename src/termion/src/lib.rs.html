@@ -80,16 +80,6 @@
 <span id="36">36</span>
 <span id="37">37</span>
 <span id="38">38</span>
-<span id="39">39</span>
-<span id="40">40</span>
-<span id="41">41</span>
-<span id="42">42</span>
-<span id="43">43</span>
-<span id="44">44</span>
-<span id="45">45</span>
-<span id="46">46</span>
-<span id="47">47</span>
-<span id="48">48</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Termion is a pure Rust, bindless library for low-level handling, manipulating</span>
 <span class='doccomment'>//! and reading information about terminals. This provides a full-featured</span>
@@ -104,41 +94,31 @@
 <span class='doccomment'>//! For more information refer to the [README](https://github.com/ticki/termion).</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>warn</span>(<span class='ident'>missing_docs</span>)]</span>
 
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nightly&quot;</span>, <span class='ident'>feature</span>(<span class='ident'>io</span>))]</span>
-
-
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;redox&quot;</span>))]</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>libc</span>;
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;redox&quot;</span>))]</span>
 <span class='kw'>mod</span> <span class='ident'>termios</span>;
 
-<span class='kw'>mod</span> <span class='ident'>control</span>;
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>control</span>::<span class='ident'>TermWrite</span>;
-
 <span class='kw'>mod</span> <span class='ident'>async</span>;
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>async</span>::{<span class='ident'>AsyncReader</span>, <span class='ident'>async_stdin</span>};
-
-<span class='kw'>mod</span> <span class='ident'>input</span>;
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>input</span>::{<span class='ident'>TermRead</span>, <span class='ident'>Key</span>};
-<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nightly&quot;</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>input</span>::<span class='ident'>Keys</span>;
-
-<span class='kw'>mod</span> <span class='ident'>raw</span>;
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>raw</span>::{<span class='ident'>IntoRawMode</span>, <span class='ident'>RawTerminal</span>};
 
 <span class='kw'>mod</span> <span class='ident'>size</span>;
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>size</span>::<span class='ident'>terminal_size</span>;
 
-<span class='doccomment'>/// ANSI colors.</span>
+<span class='kw'>mod</span> <span class='ident'>tty</span>;
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>tty</span>::<span class='ident'>is_tty</span>;
+
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span>
+<span class='kw'>mod</span> <span class='ident'>macros</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>clear</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>color</span>;
-
-<span class='doccomment'>/// Deprecated reexport.</span>
-<span class='attribute'>#[<span class='ident'>deprecated</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>color</span>::<span class='ident'>Palette</span> <span class='kw'>as</span> <span class='ident'>Color</span>;
-
-<span class='kw'>mod</span> <span class='ident'>style</span>;
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>style</span>::<span class='ident'>Style</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>cursor</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>event</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>input</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>raw</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>scroll</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>style</span>;
 </pre>
 </section>
     <section id='search' class="content hidden"></section>
