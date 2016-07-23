@@ -1,10 +1,10 @@
 //! Input.
 
 use std::io::{self, Read, Write};
+use std::ops;
+
 use event::{parse_event, Event, Key};
-
 use raw::IntoRawMode;
-
 
 /// An iterator over input keys.
 pub struct Keys<I> {
@@ -67,7 +67,6 @@ pub trait TermRead {
     }
 }
 
-
 impl<R: Read> TermRead for R {
     fn events(self) -> Events<io::Bytes<R>> {
         Events {
@@ -95,6 +94,57 @@ impl<R: Read> TermRead for R {
 
         let string = try!(String::from_utf8(buf).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e)));
         Ok(Some(string))
+    }
+}
+
+/// A sequence of escape codes to enable terminal mouse support.
+const ENTER_MOUSE_SEQUENCE: &'static str = csi!("?1000h\x1b[?1002h\x1b[?1015h\x1b[?1006h");
+
+/// A sequence of escape codes to disable terminal mouse support.
+const EXIT_MOUSE_SEQUENCE: &'static str = csi!("?1006l\x1b[?1015l\x1b[?1002l\x1b[?1000l");
+
+/// A terminal with added mouse support.
+///
+/// This can be obtained through the `From` implementations.
+pub struct MouseTerminal<W: Write> {
+    term: W,
+}
+
+impl<W: Write> From<W> for MouseTerminal<W> {
+    fn from(mut from: W) -> MouseTerminal<W> {
+        from.write(ENTER_MOUSE_SEQUENCE.as_bytes()).unwrap();
+
+        MouseTerminal { term: from }
+    }
+}
+
+impl<W: Write> Drop for MouseTerminal<W> {
+    fn drop(&mut self) {
+        self.term.write(EXIT_MOUSE_SEQUENCE.as_bytes()).unwrap();
+    }
+}
+
+impl<W: Write> ops::Deref for MouseTerminal<W> {
+    type Target = W;
+
+    fn deref(&self) -> &W {
+        &self.term
+    }
+}
+
+impl<W: Write> ops::DerefMut for MouseTerminal<W> {
+    fn deref_mut(&mut self) -> &mut W {
+        &mut self.term
+    }
+}
+
+impl<W: Write> Write for MouseTerminal<W> {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        self.term.write(buf)
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        self.term.flush()
     }
 }
 
@@ -126,11 +176,11 @@ mod test {
         assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Char('c')));
         assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Backspace));
         assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Left));
-        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::WheelUp, 1, 3)));
-        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::Left, 1, 3)));
-        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::Left, 1, 3)));
-        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Release(1, 3)));
-        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Release(1, 3)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::WheelUp, 4, 2)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::Left, 4, 2)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::Left, 3, 1)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Release(4, 2)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Release(3, 1)));
         assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Char('b')));
         assert!(i.next().is_none());
     }

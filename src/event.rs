@@ -195,8 +195,8 @@ where I: Iterator<Item = Result<u8, Error>>
                                     let ref mut nums = str_buf.split(';');
 
                                     let cb = nums.next().unwrap().parse::<u16>().unwrap();
-                                    let cx = nums.next().unwrap().parse::<u16>().unwrap() - 1;
                                     let cy = nums.next().unwrap().parse::<u16>().unwrap() - 1;
+                                    let cx = nums.next().unwrap().parse::<u16>().unwrap() - 1;
 
                                     let event = match cb {
                                         32 => MouseEvent::Press(MouseButton::Left, cx, cy),

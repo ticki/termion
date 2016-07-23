@@ -1,13 +1,13 @@
 extern crate termion;
 
 use termion::event::{Key, Event, MouseEvent};
-use termion::input::TermRead;
+use termion::input::{TermRead, MouseTerminal};
 use termion::raw::IntoRawMode;
 use std::io::{Write, stdout, stdin};
 
 fn main() {
     let stdin = stdin();
-    let mut stdout = stdout().into_raw_mode().unwrap().with_mouse().unwrap();
+    let mut stdout = MouseTerminal::from(stdout().into_raw_mode().unwrap());
 
     write!(stdout, "{}{}q to exit. Click, click, click!", termion::clear::All, termion::cursor::Goto(1, 1)).unwrap();
     stdout.flush().unwrap();
