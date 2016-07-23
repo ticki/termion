@@ -37,7 +37,7 @@ default-features = false
 ## Features
 
 - Raw mode.
-- Truecolor.
+- TrueColor.
 - 256-color mode.
 - Cursor movement.
 - Color output.
@@ -48,6 +48,7 @@ default-features = false
 - Termios control.
 - Password input.
 - Redox support.
+- Safe `isatty` wrapper.
 - Panic-free error handling.
 - Special keys events (modifiers, special keys, etc.).
 - Allocation-free.

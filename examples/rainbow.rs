@@ -7,7 +7,7 @@ use termion::input::{TermRead, Key};
 use std::io::{Write, stdout, stdin};
 
 fn rainbow<W: Write>(stdout: &mut W, blue: u8) {
-    write!(stdout, "{}", termion::cursor::Goto(1, 1)).unwrap();
+    write!(stdout, "{}{}", termion::cursor::Goto(1, 1), termion::clear::All).unwrap();
 
     for red in (0..255).step_by(8 as u8) {
         for green in (0..255).step_by(4) {
@@ -28,7 +28,7 @@ fn main() {
            termion::cursor::Goto(1, 1),
            termion::cursor::Hide).unwrap();
 
-    let mut blue = 0u8;
+    let mut blue = 172u8;
 
     for c in stdin.keys() {
         match c.unwrap() {
