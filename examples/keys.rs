@@ -18,15 +18,14 @@ fn main() {
 
         match c.unwrap() {
             Key::Char('q') => break,
-            Key::Char(c) => writeln!(stdout, "{}", c).unwrap(),
-            Key::Alt(c) => writeln!(stdout, "^{}", c).unwrap(),
-            Key::Ctrl(c) => writeln!(stdout, "*{}", c).unwrap(),
-            Key::Left => writeln!(stdout, "←").unwrap(),
-            Key::Right => writeln!(stdout, "→").unwrap(),
-            Key::Up => writeln!(stdout, "↑").unwrap(),
-            Key::Down => writeln!(stdout, "↓").unwrap(),
-            Key::Backspace => writeln!(stdout, "×").unwrap(),
-            Key::Invalid => writeln!(stdout, "???").unwrap(),
+            Key::Char(c) => println!("{}", c),
+            Key::Alt(c) => println!("^{}", c),
+            Key::Ctrl(c) => println!("*{}", c),
+            Key::Left => println!("←"),
+            Key::Right => println!("→"),
+            Key::Up => println!("↑"),
+            Key::Down => println!("↓"),
+            Key::Backspace => println!("×"),
             _ => {},
         }
         stdout.flush().unwrap();

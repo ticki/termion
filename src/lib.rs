@@ -11,9 +11,6 @@
 //! For more information refer to the [README](https://github.com/ticki/termion).
 #![warn(missing_docs)]
 
-#![cfg_attr(feature = "nightly", feature(io))]
-
-
 #[cfg(not(target_os = "redox"))]
 extern crate libc;
 
@@ -34,6 +31,8 @@ mod macros;
 pub mod clear;
 pub mod color;
 pub mod cursor;
+pub mod event;
 pub mod input;
 pub mod raw;
+pub mod scroll;
 pub mod style;
