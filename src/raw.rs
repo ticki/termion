@@ -1,3 +1,5 @@
+//! Raw mode.
+
 use std::io::{self, Write};
 use std::ops::{Deref, DerefMut};
 

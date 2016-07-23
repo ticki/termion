@@ -1,6 +1,8 @@
+//! Input.
+
 use std::io::{self, Read, Write};
 
-use IntoRawMode;
+use raw::IntoRawMode;
 
 /// A key.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]

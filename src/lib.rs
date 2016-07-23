@@ -20,29 +20,20 @@ extern crate libc;
 #[cfg(not(target_os = "redox"))]
 mod termios;
 
-mod control;
-pub use control::TermWrite;
-
 mod async;
 pub use async::{AsyncReader, async_stdin};
-
-mod input;
-pub use input::{TermRead, Key};
-#[cfg(feature = "nightly")]
-pub use input::Keys;
-
-mod raw;
-pub use raw::{IntoRawMode, RawTerminal};
 
 mod size;
 pub use size::terminal_size;
 
-/// ANSI colors.
+mod tty;
+pub use tty::is_tty;
+
+#[macro_use]
+mod macros;
+pub mod clear;
 pub mod color;
-
-/// Deprecated reexport.
-#[deprecated]
-pub use color::Palette as Color;
-
-mod style;
-pub use style::Style;
+pub mod cursor;
+pub mod input;
+pub mod raw;
+pub mod style;

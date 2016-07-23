@@ -37,6 +37,7 @@ default-features = false
 ## Features
 
 - Raw mode.
+- Truecolor.
 - 256-color mode.
 - Cursor movement.
 - Color output.
@@ -60,26 +61,18 @@ and much more.
 ```rust
 extern crate termion;
 
-use termion::{TermWrite, color, Style};
+use termion::{color, style};
 
 use std::io;
 
 fn main() {
-    let stdout = io::stdout();
-    let mut stdout = stdout.lock();
+    println!("{}Red", color::Fg(color::Red));
 
-    stdout.color(color::Red).unwrap();
-    println!("Red");
+    println!("{}Blue", color::Fg(color::Blue));
 
-    stdout.color(color::Blue).unwrap();
-    println!("Blue");
+    println!("{}Blue'n'Bold{}", style::Bold, style::Reset);
 
-    stdout.style(Style::Bold).unwrap();
-    println!("Blue'n'Bold");
-
-    stdout.reset().unwrap();
-    stdout.style(Style::Italic).unwrap();
-    println!("Just plain italic")
+    println!("{}Just plain italic", style::Italic);
 }
 ```
 
