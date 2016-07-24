@@ -29,7 +29,7 @@ and this crate can generally be considered stable.
 
 ```toml
 [dependencies]
-termion = "1.0.0"
+termion = "1.0.3"
 ```
 
 ## 0.1.0 to 1.0.0 guide
