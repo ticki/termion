@@ -100,6 +100,20 @@ impl Color for Rgb {
     }
 }
 
+/// Reset colors to defaults.
+pub struct Reset;
+
+impl Color for Reset {#[inline]
+    fn write_fg(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, csi!("39m"))
+    }
+
+    #[inline]
+    fn write_bg(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, csi!("49m"))
+    }
+}
+
 /// A foreground color.
 pub struct Fg<C: Color>(pub C);
 
