@@ -13,7 +13,7 @@ pub struct RawTerminal<W: Write> {
 #[cfg(target_os = "redox")]
 impl<W: Write> Drop for RawTerminal<W> {
     fn drop(&mut self) {
-        write!(self, csi!("?82h")).unwrap();
+        write!(self, csi!("?82l")).unwrap();
     }
 }
 
