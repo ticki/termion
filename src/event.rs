@@ -118,8 +118,8 @@ where I: Iterator<Item = Result<u8, Error>>
                             // X10 emulation mouse encoding: ESC [ CB Cx Cy (6 characters only).
                             let cb = iter.next().unwrap().unwrap() as i8 - 32;
                             // (1, 1) are the coords for upper left.
-                            let cy = (iter.next().unwrap().unwrap() as u8).saturating_sub(32) as u16;
                             let cx = (iter.next().unwrap().unwrap() as u8).saturating_sub(32) as u16;
+                            let cy = (iter.next().unwrap().unwrap() as u8).saturating_sub(32) as u16;
                             Event::Mouse(match cb & 0b11 {
                                 0 => {
                                     if cb & 0x40 != 0 {
@@ -156,8 +156,8 @@ where I: Iterator<Item = Result<u8, Error>>
                             let ref mut nums = str_buf.split(';');
 
                             let cb = nums.next().unwrap().parse::<u16>().unwrap();
-                            let cy = nums.next().unwrap().parse::<u16>().unwrap();
                             let cx = nums.next().unwrap().parse::<u16>().unwrap();
+                            let cy = nums.next().unwrap().parse::<u16>().unwrap();
 
                             let button = match cb {
                                 0 => MouseButton::Left,
@@ -195,8 +195,8 @@ where I: Iterator<Item = Result<u8, Error>>
                                     let ref mut nums = str_buf.split(';');
 
                                     let cb = nums.next().unwrap().parse::<u16>().unwrap();
-                                    let cy = nums.next().unwrap().parse::<u16>().unwrap() - 1;
-                                    let cx = nums.next().unwrap().parse::<u16>().unwrap() - 1;
+                                    let cx = nums.next().unwrap().parse::<u16>().unwrap();
+                                    let cy = nums.next().unwrap().parse::<u16>().unwrap();
 
                                     let event = match cb {
                                         32 => MouseEvent::Press(MouseButton::Left, cx, cy),
@@ -259,8 +259,7 @@ where I: Iterator<Item = Result<u8, Error>>
 
 /// Parse `c` as either a single byte ASCII char or a variable size UTF-8 char.
 fn parse_utf8_char<I>(c: u8, iter: &mut I) -> Result<char, Error>
-where I: Iterator<Item = Result<u8, Error>>
-{
+    where I: Iterator<Item = Result<u8, Error>> {
     let error = Err(Error::new(ErrorKind::Other, "Input character is not valid UTF-8"));
     if c.is_ascii() {
         Ok(c as char)

@@ -23,7 +23,7 @@ impl fmt::Display for Goto {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         debug_assert!(self != &Goto(0, 0), "Goto is one-based.");
 
-        write!(f, csi!("{};{}H"), self.0, self.1)
+        write!(f, csi!("{};{}H"), self.1, self.0)
     }
 }
 

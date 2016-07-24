@@ -176,11 +176,11 @@ mod test {
         assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Char('c')));
         assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Backspace));
         assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Left));
-        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::WheelUp, 4, 2)));
-        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::Left, 4, 2)));
-        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::Left, 3, 1)));
-        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Release(4, 2)));
-        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Release(3, 1)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::WheelUp, 2, 4)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::Left, 2, 4)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Press(MouseButton::Left, 2, 4)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Release(2, 4)));
+        assert_eq!(i.next().unwrap().unwrap(), Event::Mouse(MouseEvent::Release(2, 4)));
         assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Char('b')));
         assert!(i.next().is_none());
     }
