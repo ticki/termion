@@ -103,7 +103,8 @@ impl Color for Rgb {
 /// Reset colors to defaults.
 pub struct Reset;
 
-impl Color for Reset {#[inline]
+impl Color for Reset {
+    #[inline]
     fn write_fg(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, csi!("39m"))
     }
