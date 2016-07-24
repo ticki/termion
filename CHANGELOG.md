@@ -17,7 +17,6 @@ Lot'ta goodies.
 This sample table gives an idea of how to go bu converting to the new major
 version of Termion.
 
-+------------------------------------------------------------
 | 0.1.0                          | 1.0.0
 |--------------------------------|---------------------------
 | `use termion::IntoRawMode`     | `use termion::raw::IntoRawMode`
