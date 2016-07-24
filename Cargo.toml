@@ -1,11 +1,12 @@
 [package]
 name = "termion"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Ticki <Ticki@users.noreply.github.com>"]
 description = "A bindless library for manipulating terminals."
-repository = "ticki/termion"
+repository = "https://github.com/ticki/termion"
+documentation = "http://ticki.github.io/termion/"
 license = "MIT"
-keywords = ["tty", "color", "terminal", "console", "tui", "size", "cursor", "clear", "ansi", "escape", "codes", "termios", "truecolor", "mouse", "isatty", "raw", "text", "password", "redox", "async"]
+keywords = ["tty", "color", "terminal", "password", "tui"]
 exclude = ["target", "CHANGELOG.md", "image.png", "Cargo.lock"]
 
 [target.'cfg(not(target_os = "redox"))'.dependencies]
