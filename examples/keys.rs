@@ -13,6 +13,7 @@ fn main() {
            termion::clear::All,
            termion::cursor::Goto(1, 1),
            termion::cursor::Hide).unwrap();
+    stdout.flush().unwrap();
 
     for c in stdin.keys() {
         write!(stdout, "{}{}", termion::cursor::Goto(1, 1), termion::clear::CurrentLine).unwrap();
