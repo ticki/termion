@@ -20,7 +20,7 @@ pub fn is_tty<T: AsRawFd>(_stream: T) -> bool {
 /// This allows for getting stdio representing _only_ the TTY, and not other streams.
 #[cfg(target_os = "redox")]
 pub fn get_tty() -> io::Result<fs::File> {
-    fs::OpenOptions::new().read(true).write(true).open(env::var("TTY")?)
+    fs::OpenOptions::new().read(true).write(true).open(try!(env::var("TTY")))
 }
 
 /// Get the TTY device.
