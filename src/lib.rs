@@ -24,7 +24,7 @@ mod size;
 pub use size::terminal_size;
 
 mod tty;
-pub use tty::is_tty;
+pub use tty::{is_tty, get_tty};
 
 #[macro_use]
 mod macros;

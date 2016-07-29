@@ -54,6 +54,7 @@ version of Termion.
 - Cursor movement.
 - Text formatting.
 - Console size.
+- TTY-only stream.
 - Control sequences.
 - Termios control.
 - Password input.
