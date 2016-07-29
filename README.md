@@ -40,6 +40,7 @@ version of Termion.
 | 0.1.0                          | 1.0.0
 |--------------------------------|---------------------------
 | `use termion::IntoRawMode`     | `use termion::raw::IntoRawMode`
+| `use termion::TermRead`        | `use termion::input::TermRead`
 | `stdout.color(color::Red);`    | `write!(stdout, "{}", color::Fg(color::Red));`
 | `stdout.color_bg(color::Red);` | `write!(stdout, "{}", color::Bg(color::Red));`
 | `stdout.goto(x, y);`           | `write!(stdout, "{}", cursor::Goto(x, y));`
