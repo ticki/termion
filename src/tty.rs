@@ -21,7 +21,8 @@ pub fn is_tty<T: AsRawFd>(_stream: T) -> bool {
 #[cfg(target_os = "redox")]
 pub fn get_tty() -> io::Result<fs::File> {
     use std::env;
-    fs::OpenOptions::new().read(true).write(true).open(try!(env::var("TTY")))
+    let tty = try!(env::var("TTY").map_err(|x| io::Error::new(io::ErrorKind::NotFound, x)));
+    fs::OpenOptions::new().read(true).write(true).open(tty)
 }
 
 /// Get the TTY device.
