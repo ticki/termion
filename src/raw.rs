@@ -75,7 +75,7 @@ impl<W: Write> IntoRawMode for W {
         use termios::{cfmakeraw, get_terminal_attr, set_terminal_attr};
 
         let (mut ios, exit) = get_terminal_attr();
-        let prev_ios = ios.clone();
+        let prev_ios = ios;
         if exit != 0 {
             return Err(io::Error::new(io::ErrorKind::Other, "Unable to get Termios attribute."));
         }

@@ -35,7 +35,7 @@ impl<I: Iterator<Item = Result<u8, io::Error>>> Iterator for Events<I> {
     type Item = Result<Event, io::Error>;
 
     fn next(&mut self) -> Option<Result<Event, io::Error>> {
-        let ref mut iter = self.bytes;
+        let iter = &mut self.bytes;
         match iter.next() {
             Some(item) => Some(parse_event(item, iter).or(Ok(Event::Unsupported))),
             None => None,
