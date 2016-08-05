@@ -244,6 +244,13 @@ mod test {
         assert!(st.next().is_none());
     }
 
+    #[test]
+    fn test_esc_key() {
+        let mut st = b"\x1B".keys();
+        assert_eq!(st.next().unwrap().unwrap(), Key::Esc);
+        assert!(st.next().is_none());
+    }
+
     fn line_match(a: &str, b: Option<&str>) {
         let mut sink = io::sink();
 
