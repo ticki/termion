@@ -7,11 +7,11 @@ use event::{parse_event, Event, Key};
 use raw::IntoRawMode;
 
 /// An iterator over input keys.
-pub struct Keys<I> {
-    iter: Events<I>,
+pub struct Keys<R> {
+    iter: Events<R>,
 }
 
-impl<I: Iterator<Item = Result<u8, io::Error>>> Iterator for Keys<I> {
+impl<R: Read> Iterator for Keys<R> {
     type Item = Result<Key, io::Error>;
 
     fn next(&mut self) -> Option<Result<Key, io::Error>> {
@@ -27,29 +27,59 @@ impl<I: Iterator<Item = Result<u8, io::Error>>> Iterator for Keys<I> {
 }
 
 /// An iterator over input events.
-pub struct Events<I> {
-    bytes: I,
+pub struct Events<R> {
+    source: R,
+    leftover: Option<u8>,
 }
 
-impl<I: Iterator<Item = Result<u8, io::Error>>> Iterator for Events<I> {
+impl<R: Read> Iterator for Events<R> {
     type Item = Result<Event, io::Error>;
 
     fn next(&mut self) -> Option<Result<Event, io::Error>> {
-        let iter = &mut self.bytes;
-        match iter.next() {
-            Some(item) => Some(parse_event(item, iter).or(Ok(Event::Unsupported))),
-            None => None,
+        let mut source = &mut self.source;
+
+        if let Some(c) = self.leftover {
+            // we have a leftover byte, use it
+            self.leftover = None;
+            return Some(parse_event(Ok(c), &mut source.bytes()).or(Ok(Event::Unsupported)));
         }
+
+        // Here we read two bytes at a time. We need to distinguish between single ESC key presses,
+        // and escape sequences (which start with ESC or a x1B byte). The idea is that if this is
+        // an escape sequence, we will read multiple bytes (the first byte being ESC) but if this
+        // is a single ESC keypress, we will only read a single byte.
+        let mut buf = [0u8; 2];
+        let res = match source.read(&mut buf) {
+            Ok(0) => return None,
+            Ok(1) => match buf[0] {
+                b'\x1B' => Ok(Event::Key(Key::Esc)),
+                c => parse_event(Ok(c), &mut source.bytes()),
+            },
+            Ok(2) => {
+                if buf[0] != b'\x1B' {
+                    // this is not an escape sequence, but we read two bytes, save the second byte
+                    // for later
+                    self.leftover = Some(buf[1]);
+                }
+
+                let mut iter = buf[1..2].iter().map(|c| Ok(*c)).chain(source.bytes());
+                parse_event(Ok(buf[0]), &mut iter)
+            }
+            Ok(_) => unreachable!(),
+            Err(e) => Err(e),
+        };
+
+        Some(res.or(Ok(Event::Unsupported)))
     }
 }
 
 /// Extension to `Read` trait.
 pub trait TermRead {
     /// An iterator over input events.
-    fn events(self) -> Events<io::Bytes<Self>> where Self: Sized;
+    fn events(self) -> Events<Self> where Self: Sized;
 
     /// An iterator over key inputs.
-    fn keys(self) -> Keys<io::Bytes<Self>> where Self: Sized;
+    fn keys(self) -> Keys<Self> where Self: Sized;
 
     /// Read a line.
     ///
@@ -68,12 +98,13 @@ pub trait TermRead {
 }
 
 impl<R: Read> TermRead for R {
-    fn events(self) -> Events<io::Bytes<R>> {
+    fn events(self) -> Events<Self> {
         Events {
-            bytes: self.bytes(),
+            source: self,
+            leftover: None,
         }
     }
-    fn keys(self) -> Keys<io::Bytes<R>> {
+    fn keys(self) -> Keys<Self> {
         Keys {
             iter: self.events(),
         }

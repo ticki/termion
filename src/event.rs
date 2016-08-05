@@ -86,6 +86,8 @@ pub enum Key {
     Ctrl(char),
     /// Null byte.
     Null,
+    /// Esc key.
+    Esc,
 
     #[allow(missing_docs)]
     #[doc(hidden)]
