@@ -153,7 +153,7 @@ where I: Iterator<Item = Result<u8, Error>>
                                     c = iter.next().unwrap().unwrap();
                                 }
                             let str_buf = String::from_utf8(buf).unwrap();
-                            let ref mut nums = str_buf.split(';');
+                            let nums = &mut str_buf.split(';');
 
                             let cb = nums.next().unwrap().parse::<u16>().unwrap();
                             let cx = nums.next().unwrap().parse::<u16>().unwrap();
@@ -192,7 +192,7 @@ where I: Iterator<Item = Result<u8, Error>>
                                 // ESC [ Cb ; Cx ; Cy ; M
                                 b'M' => {
                                     let str_buf = String::from_utf8(buf).unwrap();
-                                    let ref mut nums = str_buf.split(';');
+                                    let nums = &mut str_buf.split(';');
 
                                     let cb = nums.next().unwrap().parse::<u16>().unwrap();
                                     let cx = nums.next().unwrap().parse::<u16>().unwrap();
@@ -203,7 +203,7 @@ where I: Iterator<Item = Result<u8, Error>>
                                         33 => MouseEvent::Press(MouseButton::Middle, cx, cy),
                                         34 => MouseEvent::Press(MouseButton::Right, cx, cy),
                                         35 => MouseEvent::Release(cx, cy),
-                                        96 => MouseEvent::Press(MouseButton::WheelUp, cx, cy),
+                                        96 |
                                         97 => MouseEvent::Press(MouseButton::WheelUp, cx, cy),
                                         _ => return error,
                                     };
@@ -264,14 +264,13 @@ fn parse_utf8_char<I>(c: u8, iter: &mut I) -> Result<char, Error>
     if c.is_ascii() {
         Ok(c as char)
     } else {
-        let ref mut bytes = Vec::new();
+        let bytes = &mut Vec::new();
         bytes.push(c);
 
         loop {
             bytes.push(iter.next().unwrap().unwrap());
-            match str::from_utf8(bytes) {
-                Ok(st) => return Ok(st.chars().next().unwrap()),
-                Err(_) => {},
+            if let Ok(st) = str::from_utf8(bytes) {
+                return Ok(st.chars().next().unwrap())
             }
             if bytes.len() >= 4 { return error; }
         }
