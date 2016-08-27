@@ -1,10 +1,10 @@
 [package]
 name = "termion"
-version = "1.0.5"
+version = "1.0.6"
 authors = ["Ticki <Ticki@users.noreply.github.com>"]
 description = "A bindless library for manipulating terminals."
 repository = "https://github.com/ticki/termion"
-documentation = "http://ticki.github.io/termion/"
+documentation = "https://docs.rs/crate/eudex"
 license = "MIT"
 keywords = ["tty", "color", "terminal", "password", "tui"]
 exclude = ["target", "CHANGELOG.md", "image.png", "Cargo.lock"]
