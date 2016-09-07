@@ -18,7 +18,8 @@ cleaner to use escapes.
 
 Supports Redox, Mac OS X, BSD, and Linux (or, in general, ANSI terminals).
 
-[Documentation.](https://docs.rs/crate/termion/) | [Examples.](https://github.com/Ticki/termion/tree/master/examples) | [Changelog.](https://github.com/Ticki/termion/tree/master/CHANGELOG.md)
+[Documentation](https://docs.rs/termion) | [Examples](https://github.com/Ticki/termion/tree/master/examples) | [Changelog](https://github.com/Ticki/termion/tree/master/CHANGELOG.md)
+|----|----|----
 
 ## A note on stability
 
