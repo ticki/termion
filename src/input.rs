@@ -1,4 +1,4 @@
-//! Input.
+//! User input.
 
 use std::io::{self, Read, Write};
 use std::ops;

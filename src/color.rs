@@ -1,4 +1,18 @@
-//! Colors.
+//! Color managemement.
+//!
+//! # Example
+//!
+//! ```rust
+//! use termion::{color, style};
+//!
+//! use std::io;
+//!
+//! fn main() {
+//!     println!("{}Red", color::Fg(color::Red));
+//!     println!("{}Blue", color::Fg(color::Blue));
+//!     println!("{}Back again", color::Fg(color::Reset));
+//! }
+//! ```
 
 use std::fmt;
 

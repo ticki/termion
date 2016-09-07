@@ -2,7 +2,7 @@ extern crate termion;
 
 use termion::raw::IntoRawMode;
 use termion::async_stdin;
-use std::io::{Read, Write, stdout, stdin};
+use std::io::{Read, Write, stdout};
 use std::thread;
 use std::time::Duration;
 

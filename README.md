@@ -1,6 +1,9 @@
 # Termion
 
-Termion is a pure Rust, bindless library for low-level handling, manipulating
+[Documentation](https://docs.rs/termion) | [Examples](https://github.com/Ticki/termion/tree/master/examples) | [Changelog](https://github.com/Ticki/termion/tree/master/CHANGELOG.md)
+|----|----|----
+
+**Termion** is a pure Rust, bindless library for low-level handling, manipulating
 and reading information about terminals. This provides a full-featured
 alternative to Termbox.
 
@@ -17,9 +20,6 @@ Termion generates escapes and API calls for the user. This makes it a whole lot
 cleaner to use escapes.
 
 Supports Redox, Mac OS X, BSD, and Linux (or, in general, ANSI terminals).
-
-[Documentation](https://docs.rs/termion) | [Examples](https://github.com/Ticki/termion/tree/master/examples) | [Changelog](https://github.com/Ticki/termion/tree/master/CHANGELOG.md)
-|----|----|----
 
 ## A note on stability
 

@@ -1,4 +1,4 @@
-//! Cursor.
+//! Cursor movement.
 
 use std::fmt;
 
@@ -12,6 +12,16 @@ derive_csi_sequence!("Show the cursor.", Show, "?25h");
 /// ANSI escapes are very poorly designed, and one of the many odd aspects is being one-based. This
 /// can be quite strange at first, but it is not that big of an obstruction once you get used to
 /// it.
+///
+/// # Example
+///
+/// ```rust
+/// extern crate termion;
+///
+/// fn main() {
+///     print!("{}{}Stuff", termion::clear::All, termion::cursor::Goto(5, 3));
+/// }
+/// ```
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Goto(pub u16, pub u16);
 

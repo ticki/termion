@@ -1,4 +1,4 @@
-//! Style.
+//! Text styling management.
 
 use std::fmt;
 

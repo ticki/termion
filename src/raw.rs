@@ -1,10 +1,34 @@
-//! Raw mode.
+//! Managing raw mode.
+//!
+//! Raw mode is a particular state a TTY can have. It signifies that:
+//!
+//! 1. No line buffering (the input is given byte-by-byte).
+//! 2. The input is not written out, instead it has to be done manually by the programmer.
+//! 3. The output is not canonicalized (for example, `\n` means "go one line down", not "line
+//!    break").
+//!
+//! It is essential to design terminal programs.
+//!
+//! # Example
+//!
+//! ```rust,ignore
+//! use termion::raw::IntoRawMode;
+//! use std::io::{Write, stdout};
+//!
+//! fn main() {
+//!     let mut stdout = stdout().into_raw_mode().unwrap();
+//!
+//!     write!(stdout, "Hey there.").unwrap();
+//! }
+//! ```
 
 use std::io::{self, Write};
 use std::ops;
 
 /// A terminal restorer, which keeps the previous state of the terminal, and restores it, when
 /// dropped.
+///
+/// Restoring will entirely bring back the old TTY state.
 #[cfg(target_os = "redox")]
 pub struct RawTerminal<W: Write> {
     output: W,
@@ -60,6 +84,11 @@ impl<W: Write> Write for RawTerminal<W> {
 }
 
 /// Types which can be converted into "raw mode".
+///
+/// # Why is this type defined on writers and not readers?
+///
+/// TTYs has their state controlled by the writer, not the reader. You use the writer to clear the
+/// screen, move the cursor and so on, so naturally you use the writer to change the mode as well.
 pub trait IntoRawMode: Write + Sized {
     /// Switch to raw mode.
     ///

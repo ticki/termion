@@ -28,10 +28,12 @@ pub fn async_stdin() -> AsyncReader {
 }
 
 /// An asynchronous reader.
+///
+/// This acts as any other stream, with the exception that reading from it won't block. Instead,
+/// the buffer will only be partially updated based on how much the internal buffer holds.
 pub struct AsyncReader {
     /// The underlying mpsc receiver.
-    #[doc(hidden)]
-    pub recv: mpsc::Receiver<io::Result<u8>>,
+    recv: mpsc::Receiver<io::Result<u8>>,
 }
 
 impl Read for AsyncReader {
