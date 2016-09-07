@@ -143,7 +143,7 @@ where I: Iterator<Item = Result<u8, Error>>
                                 3 => MouseEvent::Release(cx, cy),
                                 _ => return error,
                             })
-                        }
+                        },
                         Some(Ok(b'<')) => {
                             // xterm mouse encoding:
                             // ESC [ < Cb ; Cx ; Cy ; (M or m)
@@ -177,7 +177,6 @@ where I: Iterator<Item = Result<u8, Error>>
                                         b'M' => MouseEvent::Press(button, cx, cy),
                                         b'm' => MouseEvent::Release(cx, cy),
                                         _ => return error,
-
                                     }
                                 }
                                 32 => MouseEvent::Hold(cx, cy),
@@ -185,7 +184,7 @@ where I: Iterator<Item = Result<u8, Error>>
                             };
 
                             Event::Mouse(event)
-                        }
+                        },
                         Some(Ok(c @ b'0'...b'9')) => {
                             // Numbered escape code.
                             let mut buf = Vec::new();
@@ -238,10 +237,10 @@ where I: Iterator<Item = Result<u8, Error>>
                                         v @ 23...24 => Event::Key(Key::F(v - 12)),
                                         _ => return error,
                                     }
-                                }
+                                },
                                 _ => return error,
                             }
-                        }
+                        },
                         _ => return error,
                     }
                 }
