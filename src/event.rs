@@ -26,6 +26,10 @@ pub enum MouseEvent {
     ///
     /// The coordinates are one-based.
     Release(u16, u16),
+    /// A mouse button is held over the given coordinates.
+    ///
+    /// The coordinates are one-based.
+    Hold(u16, u16),
 }
 
 /// A mouse button.
@@ -159,20 +163,28 @@ where I: Iterator<Item = Result<u8, Error>>
                             let cx = nums.next().unwrap().parse::<u16>().unwrap();
                             let cy = nums.next().unwrap().parse::<u16>().unwrap();
 
-                            let button = match cb {
-                                0 => MouseButton::Left,
-                                1 => MouseButton::Middle,
-                                2 => MouseButton::Right,
-                                64 => MouseButton::WheelUp,
-                                65 => MouseButton::WheelDown,
+                            let event = match cb {
+                                0...2 | 64...65 => {
+                                    let button = match cb {
+                                        0 => MouseButton::Left,
+                                        1 => MouseButton::Middle,
+                                        2 => MouseButton::Right,
+                                        64 => MouseButton::WheelUp,
+                                        65 => MouseButton::WheelDown,
+                                        _ => return error,
+                                    };
+                                    match c {
+                                        b'M' => MouseEvent::Press(button, cx, cy),
+                                        b'm' => MouseEvent::Release(cx, cy),
+                                        _ => return error,
+
+                                    }
+                                }
+                                32 => MouseEvent::Hold(cx, cy),
                                 _ => return error,
                             };
-                            Event::Mouse(match c {
-                                b'M' => MouseEvent::Press(button, cx, cy),
-                                b'm' => MouseEvent::Release(cx, cy),
-                                _ => return error,
 
-                            })
+                            Event::Mouse(event)
                         }
                         Some(Ok(c @ b'0'...b'9')) => {
                             // Numbered escape code.
@@ -203,6 +215,7 @@ where I: Iterator<Item = Result<u8, Error>>
                                         33 => MouseEvent::Press(MouseButton::Middle, cx, cy),
                                         34 => MouseEvent::Press(MouseButton::Right, cx, cy),
                                         35 => MouseEvent::Release(cx, cy),
+                                        64 => MouseEvent::Hold(cx, cy),
                                         96 |
                                         97 => MouseEvent::Press(MouseButton::WheelUp, cx, cy),
                                         _ => return error,
