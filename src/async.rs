@@ -2,20 +2,23 @@ use std::io::{self, Read};
 use std::sync::mpsc;
 use std::thread;
 
-/// Construct an asynchronous handle to the standard input.
+use tty;
+
+/// Construct an asynchronous handle to the TTY standard input.
 ///
 /// This allows you to read from standard input _without blocking_ the current thread.
 /// Specifically, it works by firing up another thread to handle the event stream, which will then
 /// be buffered in a mpsc queue, which will eventually be read by the current thread.
 ///
-/// Note that this will acquire the Mutex lock on the standard input, making all future stdin
-/// construction hang the program until the reader is dropped.
+/// This will not read the piped standard input, but rather read from the TTY device, since reading
+/// asyncronized from piped input would rarely make sense. In other words, if you pipe standard
+/// output from another process, it won't be reflected in the stream returned by this function, as
+/// this represents the TTY device, and not the piped standard input.
 pub fn async_stdin() -> AsyncReader {
     let (send, recv) = mpsc::channel();
 
     thread::spawn(move || {
-        let stdin = io::stdin();
-        for i in stdin.lock().bytes() {
+        for i in tty::get_tty().unwrap().bytes() {
             if send.send(i).is_err() {
                 return;
             }
@@ -35,6 +38,8 @@ pub struct AsyncReader {
     /// The underlying mpsc receiver.
     recv: mpsc::Receiver<io::Result<u8>>,
 }
+
+// FIXME: Allow constructing an async reader from an arbitrary stream.
 
 impl Read for AsyncReader {
     /// Read from the byte stream.
