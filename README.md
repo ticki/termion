@@ -65,8 +65,9 @@ version of Termion.
 - Special keys events (modifiers, special keys, etc.).
 - Allocation-free.
 - Asynchronous key events.
-- Mouse input
+- Mouse input.
 - Carefully tested.
+- Detailed documentation on every item.
 
 and much more.
 
