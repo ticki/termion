@@ -23,8 +23,7 @@ Supports Redox, Mac OS X, BSD, and Linux (or, in general, ANSI terminals).
 
 ## A note on stability
 
-Although small breaking changes might happen, I will try my best to avoid them,
-and this crate can generally be considered stable.
+This crate is stable.
 
 ## Cargo.toml
 
@@ -35,7 +34,7 @@ termion = "1.0"
 
 ## 0.1.0 to 1.0.0 guide
 
-This sample table gives an idea of how to go bu converting to the new major
+This sample table gives an idea of how to go about converting to the new major
 version of Termion.
 
 | 0.1.0                          | 1.0.0
