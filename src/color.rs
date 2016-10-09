@@ -100,7 +100,7 @@ impl Color for AnsiValue {
 }
 
 /// A truecolor RGB.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Rgb(pub u8, pub u8, pub u8);
 
 impl Color for Rgb {
@@ -116,7 +116,7 @@ impl Color for Rgb {
 }
 
 /// Reset colors to defaults.
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Reset;
 
 impl Color for Reset {
@@ -132,7 +132,7 @@ impl Color for Reset {
 }
 
 /// A foreground color.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Fg<C: Color>(pub C);
 
 impl<C: Color> fmt::Display for Fg<C> {
@@ -142,7 +142,7 @@ impl<C: Color> fmt::Display for Fg<C> {
 }
 
 /// A background color.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Bg<C: Color>(pub C);
 
 impl<C: Color> fmt::Display for Bg<C> {
