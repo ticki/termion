@@ -100,7 +100,7 @@ impl Color for AnsiValue {
 }
 
 /// A truecolor RGB.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Rgb(pub u8, pub u8, pub u8);
 
 impl Color for Rgb {
