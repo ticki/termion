@@ -54,8 +54,6 @@ pub struct RawTerminal<W: Write> {
 #[cfg(not(target_os = "redox"))]
 impl<W: Write> Drop for RawTerminal<W> {
     fn drop(&mut self) {
-        write!(self, csi!("r")).unwrap();
-        write!(self, csi!("?1049l")).unwrap();
         use termios::set_terminal_attr;
         set_terminal_attr(&mut self.prev_ios as *mut _);
     }
@@ -102,7 +100,7 @@ pub trait IntoRawMode: Write + Sized {
 
 impl<W: Write> IntoRawMode for W {
     #[cfg(not(target_os = "redox"))]
-    fn into_raw_mode(mut self) -> io::Result<RawTerminal<W>> {
+    fn into_raw_mode(self) -> io::Result<RawTerminal<W>> {
         use termios::{cfmakeraw, get_terminal_attr, set_terminal_attr};
 
         let (mut ios, exit) = get_terminal_attr();
@@ -118,7 +116,6 @@ impl<W: Write> IntoRawMode for W {
         if set_terminal_attr(&mut ios as *mut _) != 0 {
             Err(io::Error::new(io::ErrorKind::Other, "Unable to set Termios attribute."))
         } else {
-            write!(self, csi!("?1049h")).unwrap();
             let res = RawTerminal {
                 prev_ios: prev_ios,
                 output: self,
