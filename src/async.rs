@@ -51,14 +51,14 @@ impl Read for AsyncReader {
         let mut total = 0;
 
         loop {
+            if total >= buf.len() {
+                break;
+            }
+
             match self.recv.try_recv() {
                 Ok(Ok(b)) => {
                     buf[total] = b;
                     total += 1;
-
-                    if total == buf.len() {
-                        break;
-                    }
                 },
                 Ok(Err(e)) => return Err(e),
                 Err(_) => break,
