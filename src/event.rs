@@ -228,7 +228,7 @@ where I: Iterator<Item = Result<u8, Error>>
                                 b'~' => {
                                     let str_buf = String::from_utf8(buf).unwrap();
                                     
-                                    // This can of code can be a list of
+                                    // This CSI sequence can be a list of
                                     // semicolon-separated numbers.
                                     let nums: Vec<u8> = str_buf.split(';')
                                         .map(|n| n.parse().unwrap())
