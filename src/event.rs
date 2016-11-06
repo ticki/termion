@@ -226,8 +226,21 @@ where I: Iterator<Item = Result<u8, Error>>
                                 },
                                 // Special key code.
                                 b'~' => {
-                                    let num: u8 = String::from_utf8(buf).unwrap().parse().unwrap();
-                                    match num {
+                                    let str_buf = String::from_utf8(buf).unwrap();
+                                    
+                                    // This can of code can be a list of
+                                    // semicolon-separated numbers.
+                                    let nums: Vec<u8> = str_buf.split(';')
+                                        .map(|n| n.parse().unwrap())
+                                        .collect();
+                                    
+                                    if nums.is_empty() {
+                                        return error;
+                                    }
+                                    
+                                    // TODO: handle multiple values for key modififiers
+                                    // (ex: values [3, 2] means Shift+Delete)
+                                    match nums[0] {
                                         1 | 7 => Event::Key(Key::Home),
                                         2 => Event::Key(Key::Insert),
                                         3 => Event::Key(Key::Delete),
