@@ -13,6 +13,7 @@ struct TermSize {
 }
 
 // Since attributes on non-item statements is not stable yet, we use a function.
+#[cfg(not(target_os = "android"))]
 #[cfg(not(target_os = "redox"))]
 #[cfg(target_pointer_width = "64")]
 #[cfg(not(target_env = "musl"))]
@@ -20,6 +21,7 @@ fn tiocgwinsz() -> u64 {
     use termios::TIOCGWINSZ;
     TIOCGWINSZ as u64
 }
+#[cfg(not(target_os = "android"))]
 #[cfg(not(target_os = "redox"))]
 #[cfg(target_pointer_width = "32")]
 #[cfg(not(target_env = "musl"))]
@@ -28,12 +30,19 @@ fn tiocgwinsz() -> u32 {
     TIOCGWINSZ as u32
 }
 
-#[cfg(target_env = "musl")]
+#[cfg(any(target_env = "musl", target_os = "android"))]
+#[cfg(target_pointer_width = "32")]
 fn tiocgwinsz() -> i32 {
     use termios::TIOCGWINSZ;
     TIOCGWINSZ as i32
 }
 
+#[cfg(target_os = "android")]
+#[cfg(target_pointer_width = "64")]
+fn tiocgwinsz() -> i64 {
+    use termios::TIOCGWINSZ;
+    TIOCGWINSZ as i64
+}
 
 /// Get the size of the terminal.
 #[cfg(not(target_os = "redox"))]
