@@ -96,7 +96,6 @@ pub enum Key {
     /// Esc key.
     Esc,
 
-    #[allow(missing_docs)]
     #[doc(hidden)]
     __IsNotComplete
 }
