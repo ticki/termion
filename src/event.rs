@@ -5,7 +5,7 @@ use std::ascii::AsciiExt;
 use std::str;
 
 /// An event reported by the terminal.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Event {
     /// A key press.
     Key(Key),
@@ -13,6 +13,9 @@ pub enum Event {
     Mouse(MouseEvent),
     /// An event that cannot currently be evaluated.
     Unsupported,
+    /// A CSI sequence unrecognized by termion. Does not inlude the leading `^[`.
+    UnknownCSI(Vec<u8>),
+
 }
 
 /// A mouse related event.
@@ -108,11 +111,13 @@ where I: Iterator<Item = Result<u8, Error>>
             Ok(match iter.next() {
                 Some(Ok(b'O')) => {
                     match iter.next() {
+                        // F1-F4
                         Some(Ok(val @ b'P' ... b'S')) => Event::Key(Key::F(1 + val - b'P')),
                         _ => return error,
                     }
                 }
                 Some(Ok(b'[')) => {
+                    // This is a CSI sequence.
                     match iter.next() {
                         Some(Ok(b'D')) => Event::Key(Key::Left),
                         Some(Ok(b'C')) => Event::Key(Key::Right),
@@ -198,17 +203,24 @@ where I: Iterator<Item = Result<u8, Error>>
                                 buf.push(c);
                                 c = iter.next().unwrap().unwrap();
                             }
+                            // Include the terminal char in the buffer.
+                            // We'll want it if we return an unknown sequence.
+                            buf.push(c);
 
                             match c {
                                 // rxvt mouse encoding:
                                 // ESC [ Cb ; Cx ; Cy ; M
                                 b'M' => {
                                     let str_buf = String::from_utf8(buf).unwrap();
-                                    let nums = &mut str_buf.split(';');
 
-                                    let cb = nums.next().unwrap().parse::<u16>().unwrap();
-                                    let cx = nums.next().unwrap().parse::<u16>().unwrap();
-                                    let cy = nums.next().unwrap().parse::<u16>().unwrap();
+                                    // 
+                                    let nums: Vec<u16> = str_buf[..str_buf.len()-1].split(';')
+                                        .map(|n| n.parse().unwrap())
+                                        .collect();
+
+                                    let cb = nums[0];
+                                    let cx = nums[1];
+                                    let cy = nums[2];
 
                                     let event = match cb {
                                         32 => MouseEvent::Press(MouseButton::Left, cx, cy),
@@ -218,7 +230,7 @@ where I: Iterator<Item = Result<u8, Error>>
                                         64 => MouseEvent::Hold(cx, cy),
                                         96 |
                                         97 => MouseEvent::Press(MouseButton::WheelUp, cx, cy),
-                                        _ => return error,
+                                        _ => return Ok(Event::UnknownCSI(str_buf.into_bytes())),
                                     };
 
                                     Event::Mouse(event)
@@ -229,16 +241,20 @@ where I: Iterator<Item = Result<u8, Error>>
 
                                     // This CSI sequence can be a list of semicolon-separated
                                     // numbers.
-                                    let nums: Vec<u8> = str_buf.split(';')
+                                    let nums: Vec<u8> = str_buf[..str_buf.len()-1].split(';')
                                         .map(|n| n.parse().unwrap())
                                         .collect();
 
                                     if nums.is_empty() {
-                                        return error;
+                                        return Ok(Event::UnknownCSI(str_buf.into_bytes()));
                                     }
 
                                     // TODO: handle multiple values for key modififiers (ex: values
                                     // [3, 2] means Shift+Delete)
+                                    if nums.len() > 1 {
+                                        return Ok(Event::UnknownCSI(str_buf.into_bytes()));
+                                    }
+
                                     match nums[0] {
                                         1 | 7 => Event::Key(Key::Home),
                                         2 => Event::Key(Key::Insert),
@@ -249,10 +265,10 @@ where I: Iterator<Item = Result<u8, Error>>
                                         v @ 11...15 => Event::Key(Key::F(v - 10)),
                                         v @ 17...21 => Event::Key(Key::F(v - 11)),
                                         v @ 23...24 => Event::Key(Key::F(v - 12)),
-                                        _ => return error,
+                                        _ => return Ok(Event::UnknownCSI(str_buf.into_bytes())),
                                     }
                                 },
-                                _ => return error,
+                                _ => return Ok(Event::UnknownCSI(buf)),
                             }
                         },
                         _ => return error,
