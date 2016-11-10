@@ -192,8 +192,8 @@ where I: Iterator<Item = Result<u8, Error>>
                             let mut buf = Vec::new();
                             buf.push(c);
                             let mut c = iter.next().unwrap().unwrap();
-                            // The final byte of a CSI sequence can be in the range 64-126
-                            // So let's keep reading anything else.
+                            // The final byte of a CSI sequence can be in the range 64-126, so
+                            // let's keep reading anything else.
                             while c < 64 || c > 126 {
                                 buf.push(c);
                                 c = iter.next().unwrap().unwrap();
