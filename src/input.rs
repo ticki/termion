@@ -77,12 +77,10 @@ impl<R: Read> Iterator for Events<R> {
                 c => parse_event(Ok(c), &mut source.bytes()),
             },
             Ok(2) => {
-                if buf[0] != b'\x1B' {
-                    // this is not an escape sequence, but we read two bytes, save the second byte
-                    // for later
-                    self.leftover = Some(buf[1]);
-                }
+                // Save the next byte for later.
+                self.leftover = Some(buf[1]);
 
+                // The OptionIterator will consume the leftover if requested.
                 let mut iter = OptionIterator::new(&mut self.leftover).map(|c| Ok(c)).chain(source.bytes());
                 parse_event(Ok(buf[0]), &mut iter)
             }
