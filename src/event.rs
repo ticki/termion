@@ -14,7 +14,7 @@ pub enum Event {
     /// An event that cannot currently be evaluated.
     Unsupported,
     /// A CSI sequence unrecognized by termion. Does not inlude the leading `^[`.
-    UnknownCSI(Vec<u8>),
+    UnknownCsi(Vec<u8>),
 
 }
 
@@ -229,7 +229,7 @@ where I: Iterator<Item = Result<u8, Error>>
                                         64 => MouseEvent::Hold(cx, cy),
                                         96 |
                                         97 => MouseEvent::Press(MouseButton::WheelUp, cx, cy),
-                                        _ => return Ok(Event::UnknownCSI(str_buf.into_bytes())),
+                                        _ => return Ok(Event::UnknownCsi(str_buf.into_bytes())),
                                     };
 
                                     Event::Mouse(event)
@@ -245,13 +245,13 @@ where I: Iterator<Item = Result<u8, Error>>
                                         .collect();
 
                                     if nums.is_empty() {
-                                        return Ok(Event::UnknownCSI(str_buf.into_bytes()));
+                                        return Ok(Event::UnknownCsi(str_buf.into_bytes()));
                                     }
 
                                     // TODO: handle multiple values for key modififiers (ex: values
                                     // [3, 2] means Shift+Delete)
                                     if nums.len() > 1 {
-                                        return Ok(Event::UnknownCSI(str_buf.into_bytes()));
+                                        return Ok(Event::UnknownCsi(str_buf.into_bytes()));
                                     }
 
                                     match nums[0] {
@@ -264,10 +264,10 @@ where I: Iterator<Item = Result<u8, Error>>
                                         v @ 11...15 => Event::Key(Key::F(v - 10)),
                                         v @ 17...21 => Event::Key(Key::F(v - 11)),
                                         v @ 23...24 => Event::Key(Key::F(v - 12)),
-                                        _ => return Ok(Event::UnknownCSI(str_buf.into_bytes())),
+                                        _ => return Ok(Event::UnknownCsi(str_buf.into_bytes())),
                                     }
                                 },
-                                _ => return Ok(Event::UnknownCSI(buf)),
+                                _ => return Ok(Event::UnknownCsi(buf)),
                             }
                         },
                         _ => return error,
