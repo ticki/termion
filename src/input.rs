@@ -32,27 +32,6 @@ pub struct Events<R> {
     leftover: Option<u8>,
 }
 
-/// An iterator that takes a single value from an option.
-struct OptionIterator<'a, T: 'a> {
-    option: &'a mut Option<T>,
-}
-
-impl <'a, T> OptionIterator<'a, T> {
-    fn new(option: &'a mut Option<T>) -> Self {
-        OptionIterator {
-            option: option,
-        }
-    }
-}
-
-impl <'a, T> Iterator for OptionIterator<'a, T> {
-    type Item = T;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.option.take()
-    }
-}
-
 impl<R: Read> Iterator for Events<R> {
     type Item = Result<Event, io::Error>;
 
@@ -77,12 +56,14 @@ impl<R: Read> Iterator for Events<R> {
                 c => parse_event(Ok(c), &mut source.bytes()),
             },
             Ok(2) => {
-                // Save the next byte for later.
-                self.leftover = Some(buf[1]);
-
-                // The OptionIterator will consume the leftover if requested.
-                let mut iter = OptionIterator::new(&mut self.leftover).map(|c| Ok(c)).chain(source.bytes());
-                parse_event(Ok(buf[0]), &mut iter)
+                let mut option_iter = &mut Some(buf[1]).into_iter();
+                let result = {
+                    let mut iter = option_iter.map(|c| Ok(c)).chain(source.bytes());
+                    parse_event(Ok(buf[0]), &mut iter)
+                };
+                // If the option_iter wasn't consumed, keep the byte for later.
+                self.leftover = option_iter.next();
+                result
             }
             Ok(_) => unreachable!(),
             Err(e) => Err(e),
