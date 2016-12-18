@@ -61,6 +61,18 @@ derive_color!("High-intensity light magenta.", LightMagenta, "13");
 derive_color!("High-intensity light cyan.", LightCyan, "14");
 derive_color!("High-intensity light white.", LightWhite, "15");
 
+impl<'a> Color for &'a Color {
+    #[inline]
+    fn write_fg(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        (*self).write_fg(f)
+    }
+
+    #[inline]
+    fn write_bg(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        (*self).write_bg(f)
+    }
+}
+
 /// An arbitrary ANSI color value.
 #[derive(Clone, Copy, Debug)]
 pub struct AnsiValue(pub u8);

@@ -1,6 +1,6 @@
 [package]
 name = "termion"
-version = "1.1.3"
+version = "1.1.4"
 authors = ["ticki <Ticki@users.noreply.github.com>", "gycos <alexandre.bury@gmail.com>"]
 description = "A bindless library for manipulating terminals."
 repository = "https://github.com/ticki/termion"
