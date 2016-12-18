@@ -3,9 +3,7 @@
 //! # Example
 //!
 //! ```rust
-//! use termion::{color, style};
-//!
-//! use std::io;
+//! use termion::color;
 //!
 //! fn main() {
 //!     println!("{}Red", color::Fg(color::Red));

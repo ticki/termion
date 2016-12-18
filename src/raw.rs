@@ -11,7 +11,7 @@
 //!
 //! # Example
 //!
-//! ```rust,ignore
+//! ```rust,no_run
 //! use termion::raw::IntoRawMode;
 //! use std::io::{Write, stdout};
 //!
