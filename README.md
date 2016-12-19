@@ -1,7 +1,8 @@
-# Termion
+# Termion [![Build Status](https://travis-ci.org/ticki/termion.svg?branch=master)](https://travis-ci.org/ticki/termion) [![Latest Version](https://img.shields.io/crates/v/termion.svg)](https://crates.io/crates/termion)
 
 [Documentation](https://docs.rs/termion) | [Examples](https://github.com/Ticki/termion/tree/master/examples) | [Changelog](https://github.com/Ticki/termion/tree/master/CHANGELOG.md) | [Tutorial](http://ticki.github.io/blog/making-terminal-applications-in-rust-with-termion/)
 |----|----|----|----
+
 
 **Termion** is a pure Rust, bindless library for low-level handling, manipulating
 and reading information about terminals. This provides a full-featured
