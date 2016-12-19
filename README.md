@@ -1,8 +1,8 @@
 <p align="center">
-![Termion logo](https://rawgit.com/ticki/tfs/master/icon.svg)
+<img alt="Termion logo" src="https://rawgit.com/ticki/tfs/master/icon.svg" />
+</p>
 
 [![Build Status](https://travis-ci.org/ticki/termion.svg?branch=master)](https://travis-ci.org/ticki/termion) [![Latest Version](https://img.shields.io/crates/v/termion.svg)](https://crates.io/crates/termion)
-</p>
 
 [Documentation](https://docs.rs/termion) | [Examples](https://github.com/Ticki/termion/tree/master/examples) | [Changelog](https://github.com/Ticki/termion/tree/master/CHANGELOG.md) | [Tutorial](http://ticki.github.io/blog/making-terminal-applications-in-rust-with-termion/)
 |----|----|----|----
