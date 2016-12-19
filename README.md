@@ -1,4 +1,4 @@
-# Termion [![Build Status](https://travis-ci.org/ticki/termion.svg?branch=master)](https://travis-ci.org/ticki/termion) [![Latest Version](https://img.shields.io/crates/v/termion.svg)](https://crates.io/crates/termion)
+# Termion &emsp; [![Build Status](https://travis-ci.org/ticki/termion.svg?branch=master)](https://travis-ci.org/ticki/termion) [![Latest Version](https://img.shields.io/crates/v/termion.svg)](https://crates.io/crates/termion)
 
 [Documentation](https://docs.rs/termion) | [Examples](https://github.com/Ticki/termion/tree/master/examples) | [Changelog](https://github.com/Ticki/termion/tree/master/CHANGELOG.md) | [Tutorial](http://ticki.github.io/blog/making-terminal-applications-in-rust-with-termion/)
 |----|----|----|----
@@ -12,9 +12,9 @@ Termion aims to be simple and yet expressive. It is bindless, meaning that it
 is not a front-end to some other library (e.g., ncurses or termbox), but a
 standalone library directly talking to the TTY.
 
-Termion is quite convinient, due to its complete coverage of essential TTY
+Termion is quite convenient, due to its complete coverage of essential TTY
 features, providing one consistent API. Termion is rather low-level containing
-only abstraction aligned with what actually happens behind the scenes, for
+only abstraction aligned with what actually happens behind the scenes. For
 something more high-level, refer to inquirer-rs, which uses Termion as backend.
 
 Termion generates escapes and API calls for the user. This makes it a whole lot
