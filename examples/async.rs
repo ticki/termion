@@ -25,10 +25,10 @@ fn main() {
         stdout.flush().unwrap();
 
         thread::sleep(Duration::from_millis(50));
-        stdout.write(b"# ").unwrap();
+        stdout.write_all(b"# ").unwrap();
         stdout.flush().unwrap();
         thread::sleep(Duration::from_millis(50));
-        stdout.write(b"\r #").unwrap();
+        stdout.write_all(b"\r #").unwrap();
         write!(stdout, "{}", termion::cursor::Goto(1, 1)).unwrap();
         stdout.flush().unwrap();
     }
