@@ -160,7 +160,7 @@ pub struct MouseTerminal<W: Write> {
 
 impl<W: Write> From<W> for MouseTerminal<W> {
     fn from(mut from: W) -> MouseTerminal<W> {
-        from.write(ENTER_MOUSE_SEQUENCE.as_bytes()).unwrap();
+        from.write_all(ENTER_MOUSE_SEQUENCE.as_bytes()).unwrap();
 
         MouseTerminal { term: from }
     }
@@ -168,7 +168,7 @@ impl<W: Write> From<W> for MouseTerminal<W> {
 
 impl<W: Write> Drop for MouseTerminal<W> {
     fn drop(&mut self) {
-        self.term.write(EXIT_MOUSE_SEQUENCE.as_bytes()).unwrap();
+        self.term.write_all(EXIT_MOUSE_SEQUENCE.as_bytes()).unwrap();
     }
 }
 
