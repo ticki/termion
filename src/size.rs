@@ -31,17 +31,9 @@ fn tiocgwinsz() -> u32 {
 }
 
 #[cfg(any(target_env = "musl", target_os = "android"))]
-#[cfg(target_pointer_width = "32")]
 fn tiocgwinsz() -> i32 {
     use termios::TIOCGWINSZ;
     TIOCGWINSZ as i32
-}
-
-#[cfg(target_os = "android")]
-#[cfg(target_pointer_width = "64")]
-fn tiocgwinsz() -> i64 {
-    use termios::TIOCGWINSZ;
-    TIOCGWINSZ as i64
 }
 
 /// Get the size of the terminal.
