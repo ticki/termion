@@ -13,6 +13,11 @@
 //! ```
 
 use std::fmt;
+use raw::RawTerminal;
+use std::io::{self, Write, Read};
+use std::time::{SystemTime, Duration};
+use async::async_stdin;
+use std::env;
 
 /// A terminal color.
 pub trait Color {
@@ -159,4 +164,68 @@ impl<C: Color> fmt::Display for Bg<C> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.0.write_bg(f)
     }
+}
+
+/// Types that allow detection of the colors they support
+pub trait DetectColors {
+    /// How many ANSI colors are supported (from 8 to 256)?
+    ///
+    /// Beware: the information given isn't authoritative, it's infered through escape codes or the
+    /// value of `TERM`, more colors may be available.
+    fn available_colors(&mut self) -> io::Result<u16>;
+}
+
+impl<W: Write> DetectColors for RawTerminal<W> {
+    fn available_colors(&mut self) -> io::Result<u16> {
+        let mut stdin = async_stdin();
+
+        if detect_color(self, &mut stdin, 0)? {
+            // OSC 4 is supported, detect how many colors there are
+            let mut min = 8;
+            let mut max = 256;
+            let mut i;
+            while min + 1 < max {
+                i = (min + max) / 2;
+                if detect_color(self, &mut stdin, i)? {
+                    min = i
+                } else {
+                    max = i
+                }
+            }
+            Ok(max)
+        } else {
+            // OSC 4 is not supported, trust TERM contents
+            Ok(match env::var_os("TERM") {
+                Some(val) => {
+                    if val.to_str().unwrap_or("").contains("256color") {
+                        256
+                    } else {
+                        8
+                    }
+                }
+                None => 8,
+            })
+        }
+    }
+}
+
+/// Detect a color using OSC 4
+fn detect_color<W: Write>(stdout: &mut RawTerminal<W>,
+                          stdin: &mut Read,
+                          color: u16)
+                          -> io::Result<bool> {
+    write!(stdout, "\x1B]4;{};?\x07", color)?;
+    stdout.flush()?;
+
+    let mut buf: [u8; 1] = [0];
+    let mut total_read = 0;
+
+    let timeout = Duration::from_millis(100);
+    let now = SystemTime::now();
+
+    while buf[0] != 7u8 && now.elapsed().unwrap() < timeout {
+        total_read += stdin.read(&mut buf)?;
+    }
+
+    Ok(total_read > 0)
 }
