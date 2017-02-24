@@ -112,6 +112,7 @@ pub trait TermRead {
         self.read_line()
     }
 
+    /// Like read_line, but allows you to highlight certain parts or otherwise change the appearance of the text.
     fn highlighted_read_line<W: Write, F: Fn(&str) -> String>(&mut self, writer: &mut W, prompt: &str, highlighter: F) -> std::io::Result<Option<String>>;    
 }
 
