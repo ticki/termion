@@ -5,6 +5,7 @@ use std::ops;
 
 use event::{self, Event, Key};
 use raw::IntoRawMode;
+use clear;
 
 /// An iterator over input keys.
 pub struct Keys<R> {
