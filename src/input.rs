@@ -111,7 +111,7 @@ pub trait TermRead {
     fn read_passwd<W: Write>(&mut self, writer: &mut W) -> io::Result<Option<String>> {
         let _raw = try!(writer.into_raw_mode());
         self.read_line()
-    }    
+    }
 }
 
 impl<R: Read> TermRead for R {
