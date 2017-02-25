@@ -4,7 +4,7 @@ use std::io::{self, Read, Write};
 use std::ops;
 
 use event::{self, Event, Key};
-use raw::IntoRawMode;
+use raw::{IntoRawMode, RawTerminal};
 use clear;
 
 /// An iterator over input keys.
@@ -111,10 +111,7 @@ pub trait TermRead {
     fn read_passwd<W: Write>(&mut self, writer: &mut W) -> io::Result<Option<String>> {
         let _raw = try!(writer.into_raw_mode());
         self.read_line()
-    }
-
-    /// Like read_line, but allows you to highlight certain parts or otherwise change the appearance of the text.
-    fn highlighted_read_line<W: Write, F: Fn(&str) -> String>(&mut self, writer: &mut W, prompt: &str, highlighter: F) -> io::Result<Option<String>>;    
+    }    
 }
 
 impl<R: Read> TermRead for R {
@@ -146,30 +143,6 @@ impl<R: Read> TermRead for R {
         let string = try!(String::from_utf8(buf)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e)));
         Ok(Some(string))
-    }
-
-   fn highlighted_read_line<W: Write, F: Fn(&str) -> String>(&mut self, writer: &mut W, prompt: &str, highlighter: F) -> io::Result<Option<String>> {
-        let mut raw = try!(writer.into_raw_mode());
-        
-        let mut buf = String::with_capacity(30);
-        
-        write!(raw, "\r{}{}", prompt, highlighter(&buf))?;
-        raw.flush()?;
-        
-        for c in self.bytes() {
-            match c {
-                Err(e) => return Err(e),
-                Ok(0) | Ok(3) | Ok(4) => return Ok(None),
-                Ok(0x7f) => { buf.pop(); },
-                Ok(b'\n') | Ok(b'\r') => break,
-                Ok(c) => buf.push(c as char),
-            }
-            write!(raw, "{}", clear::CurrentLine)?;
-            write!(raw, "\r{}{}", prompt, highlighter(&buf))?;
-            raw.flush()?;
-        }
-        
-        Ok(Some(buf))
     }
 }
 
@@ -222,6 +195,31 @@ impl<W: Write> Write for MouseTerminal<W> {
     fn flush(&mut self) -> io::Result<()> {
         self.term.flush()
     }
+}
+
+/// Like read_line, but allows you to highlight certain parts or otherwise change the appearance of the text.
+pub fn highlighted_read_line<W, R, F>(reader: R, writer: &mut RawTerminal<W>, prompt: &str, highlighter: F) -> io::Result<Option<String>>
+    where W: Write, R: Read, F: Fn(&str) -> String
+{
+    let mut buf = String::with_capacity(30);
+    
+    write!(writer, "{}\r{}{}", clear::CurrentLine, prompt, highlighter(&buf))?;
+    writer.flush()?;
+    
+    for c in reader.bytes() {
+        match c {
+            Err(e) => return Err(e),
+            Ok(0) | Ok(3) | Ok(4) => return Ok(None),
+            Ok(0x7f) => { buf.pop(); },
+            Ok(b'\n') | Ok(b'\r') => break,
+            Ok(c) => buf.push(c as char),
+        }
+        
+        write!(writer, "{}\r{}{}", clear::CurrentLine, prompt, highlighter(&buf))?;
+        writer.flush()?;
+    }
+    
+    Ok(Some(buf))
 }
 
 #[cfg(test)]
