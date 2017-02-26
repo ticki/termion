@@ -166,7 +166,7 @@ impl<C: Color> fmt::Display for Bg<C> {
     }
 }
 
-/// Types that allow detection of the colors they support
+/// Types that allow detection of the colors they support.
 pub trait DetectColors {
     /// How many ANSI colors are supported (from 8 to 256)?
     ///
@@ -180,7 +180,8 @@ impl<W: Write> DetectColors for RawTerminal<W> {
         let mut stdin = async_stdin();
 
         if detect_color(self, &mut stdin, 0)? {
-            // OSC 4 is supported, detect how many colors there are
+            // OSC 4 is supported, detect how many colors there are.
+            // Do a binary search of the last supported color.
             let mut min = 8;
             let mut max = 256;
             let mut i;
@@ -194,7 +195,7 @@ impl<W: Write> DetectColors for RawTerminal<W> {
             }
             Ok(max)
         } else {
-            // OSC 4 is not supported, trust TERM contents
+            // OSC 4 is not supported, trust TERM contents.
             Ok(match env::var_os("TERM") {
                 Some(val) => {
                     if val.to_str().unwrap_or("").contains("256color") {
@@ -209,23 +210,31 @@ impl<W: Write> DetectColors for RawTerminal<W> {
     }
 }
 
-/// Detect a color using OSC 4
+/// The timeout of an escape code control sequence, in milliseconds.
+const CONTROL_SEQUENCE_TIMEOUT: u64 = 100;
+
+/// Detect a color using OSC 4.
 fn detect_color<W: Write>(stdout: &mut RawTerminal<W>,
                           stdin: &mut Read,
                           color: u16)
                           -> io::Result<bool> {
+    // Is the color available?
+    // Use `ESC ] 4 ; color ; ? BEL`.
     write!(stdout, "\x1B]4;{};?\x07", color)?;
     stdout.flush()?;
 
     let mut buf: [u8; 1] = [0];
     let mut total_read = 0;
 
-    let timeout = Duration::from_millis(100);
+    let timeout = Duration::from_millis(CONTROL_SEQUENCE_TIMEOUT);
     let now = SystemTime::now();
+    let bell = 7u8;
 
-    while buf[0] != 7u8 && now.elapsed().unwrap() < timeout {
+    // Either consume all data up to bell or wait for a timeout.
+    while buf[0] != bell && now.elapsed().unwrap() < timeout {
         total_read += stdin.read(&mut buf)?;
     }
 
+    // If there was a response, the color is supported.
     Ok(total_read > 0)
 }
