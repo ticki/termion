@@ -1,4 +1,4 @@
-//! Managing switching between main and alternate screen buffers
+//! Managing switching between main and alternate screen buffers.
 //!
 //! Note that this implementation uses xterm's new escape sequences for screen switching and thus
 //! only works for xterm compatible terminals (which should be most terminals nowadays).
@@ -23,7 +23,7 @@ use std::io::{self, Write};
 use std::ops;
 use std::fmt;
 
-/// Switch to the main screen buffer of the terminal
+/// Switch to the main screen buffer of the terminal.
 pub struct ToMainScreen;
 
 impl fmt::Display for ToMainScreen {
@@ -32,7 +32,7 @@ impl fmt::Display for ToMainScreen {
     }
 }
 
-/// Switch to the alternate screen buffer of the terminal
+/// Switch to the alternate screen buffer of the terminal.
 pub struct ToAlternateScreen;
 
 impl fmt::Display for ToAlternateScreen {
@@ -47,6 +47,7 @@ impl fmt::Display for ToAlternateScreen {
 /// This is achieved by switching the terminal to the alternate screen on creation and
 /// automatically switching it back to the original screen on drop.
 pub struct AlternateScreen<W: Write> {
+    /// The output target.
     output: W,
 }
 
