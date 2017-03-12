@@ -13,7 +13,7 @@
 //! ```
 
 use std::fmt;
-use raw::RawTerminal;
+use raw::CONTROL_SEQUENCE_TIMEOUT;
 use std::io::{self, Write, Read};
 use std::time::{SystemTime, Duration};
 use async::async_stdin;
@@ -175,7 +175,7 @@ pub trait DetectColors {
     fn available_colors(&mut self) -> io::Result<u16>;
 }
 
-impl<W: Write> DetectColors for RawTerminal<W> {
+impl<W: Write> DetectColors for W {
     fn available_colors(&mut self) -> io::Result<u16> {
         let mut stdin = async_stdin();
 
@@ -210,11 +210,8 @@ impl<W: Write> DetectColors for RawTerminal<W> {
     }
 }
 
-/// The timeout of an escape code control sequence, in milliseconds.
-const CONTROL_SEQUENCE_TIMEOUT: u64 = 100;
-
 /// Detect a color using OSC 4.
-fn detect_color<W: Write>(stdout: &mut RawTerminal<W>,
+fn detect_color<W: Write>(stdout: &mut W,
                           stdin: &mut Read,
                           color: u16)
                           -> io::Result<bool> {
