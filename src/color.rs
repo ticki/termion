@@ -211,10 +211,10 @@ impl<W: Write> DetectColors for W {
 }
 
 /// Detect a color using OSC 4.
-fn detect_color<W: Write>(stdout: &mut W,
-                          stdin: &mut Read,
-                          color: u16)
-                          -> io::Result<bool> {
+fn detect_color(stdout: &mut Write,
+                stdin: &mut Read,
+                color: u16)
+                -> io::Result<bool> {
     // Is the color available?
     // Use `ESC ] 4 ; color ; ? BEL`.
     write!(stdout, "\x1B]4;{};?\x07", color)?;
