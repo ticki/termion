@@ -314,12 +314,17 @@ fn parse_utf8_char<I>(c: u8, iter: &mut I) -> Result<char, Error>
         bytes.push(c);
 
         loop {
-            bytes.push(iter.next().unwrap().unwrap());
-            if let Ok(st) = str::from_utf8(bytes) {
-                return Ok(st.chars().next().unwrap());
-            }
-            if bytes.len() >= 4 {
-                return error;
+            match iter.next() {
+                Some(Ok(next)) => {
+                    bytes.push(next);
+                    if let Ok(st) = str::from_utf8(bytes) {
+                        return Ok(st.chars().next().unwrap());
+                    }
+                    if bytes.len() >= 4 {
+                        return error;
+                    }
+                }
+                _ => return error,
             }
         }
     }
