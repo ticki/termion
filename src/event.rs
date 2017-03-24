@@ -182,7 +182,7 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
         }
         Some(Ok(b'<')) => {
             // xterm mouse encoding:
-            // ESC [ < Cb ; Cx ; Cy ; (M or m)
+            // ESC [ < Cb ; Cx ; Cy (;) (M or m)
             let mut buf = Vec::new();
             let mut c = iter.next().unwrap().unwrap();
             while match c {
@@ -216,6 +216,7 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
                     }
                 }
                 32 => MouseEvent::Hold(cx, cy),
+                3 => MouseEvent::Release(cx, cy),
                 _ => return None,
             };
 
