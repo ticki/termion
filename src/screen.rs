@@ -56,9 +56,7 @@ impl<W: Write> AlternateScreen<W> {
     /// to the alternate screen.
     pub fn from(mut output: W) -> Self {
         write!(output, "{}", ToAlternateScreen).expect("switch to alternate screen");
-        AlternateScreen {
-            output: output,
-        }
+        AlternateScreen { output: output }
     }
 }
 

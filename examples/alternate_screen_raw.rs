@@ -27,12 +27,12 @@ fn main() {
             Key::Char('q') => break,
             Key::Char('1') => {
                 write!(screen, "{}", ToMainScreen).unwrap();
-            },
+            }
             Key::Char('2') => {
                 write!(screen, "{}", ToAlternateScreen).unwrap();
                 write_alt_screen_msg(&mut screen);
-            },
-            _ => {},
+            }
+            _ => {}
         }
         screen.flush().unwrap();
     }

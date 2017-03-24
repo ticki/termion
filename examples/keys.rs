@@ -9,14 +9,20 @@ fn main() {
     let stdin = stdin();
     let mut stdout = stdout().into_raw_mode().unwrap();
 
-    write!(stdout, "{}{}q to exit. Type stuff, use alt, and so on.{}",
+    write!(stdout,
+           "{}{}q to exit. Type stuff, use alt, and so on.{}",
            termion::clear::All,
            termion::cursor::Goto(1, 1),
-           termion::cursor::Hide).unwrap();
+           termion::cursor::Hide)
+            .unwrap();
     stdout.flush().unwrap();
 
     for c in stdin.keys() {
-        write!(stdout, "{}{}", termion::cursor::Goto(1, 1), termion::clear::CurrentLine).unwrap();
+        write!(stdout,
+               "{}{}",
+               termion::cursor::Goto(1, 1),
+               termion::clear::CurrentLine)
+                .unwrap();
 
         match c.unwrap() {
             Key::Char('q') => break,
@@ -29,7 +35,7 @@ fn main() {
             Key::Up => println!("↑"),
             Key::Down => println!("↓"),
             Key::Backspace => println!("×"),
-            _ => {},
+            _ => {}
         }
         stdout.flush().unwrap();
     }

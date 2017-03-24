@@ -129,9 +129,7 @@ impl<W: Write> IntoRawMode for W {
 
     #[cfg(target_os = "redox")]
     fn into_raw_mode(mut self) -> io::Result<RawTerminal<W>> {
-        write!(self, csi!("?82h")).map(|_| {
-            RawTerminal { output: self }
-        })
+        write!(self, csi!("?82h")).map(|_| RawTerminal { output: self })
     }
 }
 

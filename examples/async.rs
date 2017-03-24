@@ -11,7 +11,11 @@ fn main() {
     let mut stdout = stdout.lock().into_raw_mode().unwrap();
     let mut stdin = async_stdin().bytes();
 
-    write!(stdout, "{}{}", termion::clear::All, termion::cursor::Goto(1, 1)).unwrap();
+    write!(stdout,
+           "{}{}",
+           termion::clear::All,
+           termion::cursor::Goto(1, 1))
+            .unwrap();
 
     loop {
         write!(stdout, "{}", termion::clear::CurrentLine).unwrap();

@@ -30,7 +30,9 @@ derive_csi_sequence!("Show the cursor.", Show, "?25h");
 pub struct Goto(pub u16, pub u16);
 
 impl Default for Goto {
-    fn default() -> Goto { Goto(1, 1) }
+    fn default() -> Goto {
+        Goto(1, 1)
+    }
 }
 
 impl fmt::Display for Goto {
@@ -118,11 +120,17 @@ impl<W: Write> DetectCursorPos for W {
         read_chars.pop(); // remove trailing R.
         let read_str = String::from_utf8(read_chars).unwrap();
         let beg = read_str.rfind('[').unwrap();
-        let coords: String = read_str.chars().skip(beg+1).collect();
+        let coords: String = read_str.chars().skip(beg + 1).collect();
         let mut nums = coords.split(';');
 
-        let cy = nums.next().unwrap().parse::<u16>().unwrap();
-        let cx = nums.next().unwrap().parse::<u16>().unwrap();
+        let cy = nums.next()
+            .unwrap()
+            .parse::<u16>()
+            .unwrap();
+        let cx = nums.next()
+            .unwrap()
+            .parse::<u16>()
+            .unwrap();
 
         Ok((cx, cy))
     }

@@ -81,8 +81,8 @@ fn parse_event<I>(item: u8, iter: &mut I) -> Result<Event, io::Error>
     let mut buf = vec![item];
     let result = {
         let mut iter = iter.inspect(|byte| if let &Ok(byte) = byte {
-            buf.push(byte);
-        });
+                                        buf.push(byte);
+                                    });
         event::parse_event(item, &mut iter)
     };
     result.or(Ok(Event::Unsupported(buf)))
@@ -216,9 +216,10 @@ mod test {
 
     #[test]
     fn test_events() {
-        let mut i = b"\x1B[\x00bc\x7F\x1B[D\
+        let mut i =
+            b"\x1B[\x00bc\x7F\x1B[D\
                     \x1B[M\x00\x22\x24\x1B[<0;2;4;M\x1B[32;2;4M\x1B[<0;2;4;m\x1B[35;2;4Mb"
-            .events();
+                    .events();
 
         assert_eq!(i.next().unwrap().unwrap(),
                    Event::Unsupported(vec![0x1B, b'[', 0x00]));
@@ -249,7 +250,7 @@ mod test {
 
         let mut st = b"\x1B[11~\x1B[12~\x1B[13~\x1B[14~\x1B[15~\
         \x1B[17~\x1B[18~\x1B[19~\x1B[20~\x1B[21~\x1B[23~\x1B[24~"
-            .keys();
+                .keys();
         for i in 1..13 {
             assert_eq!(st.next().unwrap().unwrap(), Key::F(i));
         }

@@ -12,13 +12,13 @@ fn main() {
               {line_num_fg}{line_num_bg}84 {reset}     }};\n\
               {line_num_fg}{line_num_bg}85 {reset} }}\n\
               {line_num_fg}{line_num_bg}{info_line}{reset} {red}^{reset} {error_fg}borrow from first closure ends here",
-                  lighgreen=color::Fg(color::LightGreen),
-                  red=color::Fg(color::Red),
-                  bold=style::Bold,
-                  reset=style::Reset,
-                  magenta=color::Fg(color::Magenta),
-                  line_num_bg=color::Bg(color::AnsiValue::grayscale(3)),
-                  line_num_fg=color::Fg(color::AnsiValue::grayscale(18)),
-                  info_line="|  ",
-                  error_fg=color::Fg(color::AnsiValue::grayscale(17)))
+             lighgreen = color::Fg(color::LightGreen),
+             red = color::Fg(color::Red),
+             bold = style::Bold,
+             reset = style::Reset,
+             magenta = color::Fg(color::Magenta),
+             line_num_bg = color::Bg(color::AnsiValue::grayscale(3)),
+             line_num_fg = color::Fg(color::AnsiValue::grayscale(18)),
+             info_line = "|  ",
+             error_fg = color::Fg(color::AnsiValue::grayscale(17)))
 }

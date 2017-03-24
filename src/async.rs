@@ -17,17 +17,13 @@ use tty;
 pub fn async_stdin() -> AsyncReader {
     let (send, recv) = mpsc::channel();
 
-    thread::spawn(move || {
-        for i in tty::get_tty().unwrap().bytes() {
-            if send.send(i).is_err() {
-                return;
-            }
-        }
-    });
+    thread::spawn(move || for i in tty::get_tty().unwrap().bytes() {
+                      if send.send(i).is_err() {
+                          return;
+                      }
+                  });
 
-    AsyncReader {
-        recv: recv,
-    }
+    AsyncReader { recv: recv }
 }
 
 /// An asynchronous reader.
@@ -59,7 +55,7 @@ impl Read for AsyncReader {
                 Ok(Ok(b)) => {
                     buf[total] = b;
                     total += 1;
-                },
+                }
                 Ok(Err(e)) => return Err(e),
                 Err(_) => break,
             }

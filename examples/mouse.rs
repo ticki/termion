@@ -14,7 +14,7 @@ fn main() {
              "{}{}q to exit. Type stuff, use alt, click around...",
              termion::clear::All,
              termion::cursor::Goto(1, 1))
-        .unwrap();
+            .unwrap();
 
     for c in stdin.events() {
         let evt = c.unwrap();
@@ -33,7 +33,8 @@ fn main() {
                                termion::clear::UntilNewline,
                                x,
                                y,
-                               cursor::Goto(a, b)).unwrap();
+                               cursor::Goto(a, b))
+                                .unwrap();
                     }
                 }
             }
