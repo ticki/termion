@@ -3,10 +3,10 @@ use std::mem;
 
 pub use libc::termios as Termios;
 
-#[cfg(not(target_os = "macos"))]
+#[cfg(target_os = "linux")]
 pub const TIOCGWINSZ: usize = 0x00005413;
 
-#[cfg(target_os = "macos")]
+#[cfg(not(target_os = "linux"))]
 pub const TIOCGWINSZ: usize = 0x40087468;
 
 extern {
