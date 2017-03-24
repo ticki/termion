@@ -25,6 +25,9 @@
 use std::io::{self, Write};
 use std::ops;
 
+/// The timeout of an escape code control sequence, in milliseconds.
+pub const CONTROL_SEQUENCE_TIMEOUT: u64 = 100;
+
 /// A terminal restorer, which keeps the previous state of the terminal, and restores it, when
 /// dropped.
 ///

@@ -1,6 +1,10 @@
 //! Cursor movement.
 
 use std::fmt;
+use std::io::{self, Write, Error, ErrorKind, Read};
+use async::async_stdin;
+use std::time::{SystemTime, Duration};
+use raw::CONTROL_SEQUENCE_TIMEOUT;
 
 derive_csi_sequence!("Hide the cursor.", Hide, "?25l");
 derive_csi_sequence!("Show the cursor.", Show, "?25h");
@@ -74,5 +78,52 @@ pub struct Down(pub u16);
 impl fmt::Display for Down {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, csi!("{}B"), self.0)
+    }
+}
+
+/// Types that allow detection of the cursor position.
+pub trait DetectCursorPos {
+    /// Get the (1,1)-based cursor position from the terminal.
+    fn cursor_pos(&mut self) -> io::Result<(u16, u16)>;
+}
+
+impl<W: Write> DetectCursorPos for W {
+    fn cursor_pos(&mut self) -> io::Result<(u16, u16)> {
+        let mut stdin = async_stdin();
+
+        // Where is the cursor?
+        // Use `ESC [ 6 n`.
+        write!(self, "\x1B[6n")?;
+        self.flush()?;
+
+        let mut buf: [u8; 1] = [0];
+        let mut read_chars = Vec::new();
+
+        let timeout = Duration::from_millis(CONTROL_SEQUENCE_TIMEOUT);
+        let now = SystemTime::now();
+
+        // Either consume all data up to R or wait for a timeout.
+        while buf[0] != b'R' && now.elapsed().unwrap() < timeout {
+            if stdin.read(&mut buf)? > 0 {
+                read_chars.push(buf[0]);
+            }
+        }
+
+        if read_chars.len() == 0 {
+            return Err(Error::new(ErrorKind::Other, "Cursor position detection timed out."));
+        }
+
+        // The answer will look like `ESC [ Cy ; Cx R`.
+
+        read_chars.pop(); // remove trailing R.
+        let read_str = String::from_utf8(read_chars).unwrap();
+        let beg = read_str.rfind('[').unwrap();
+        let coords: String = read_str.chars().skip(beg+1).collect();
+        let mut nums = coords.split(';');
+
+        let cy = nums.next().unwrap().parse::<u16>().unwrap();
+        let cx = nums.next().unwrap().parse::<u16>().unwrap();
+
+        Ok((cx, cy))
     }
 }
