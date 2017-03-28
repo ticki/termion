@@ -146,6 +146,10 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
     where I: Iterator<Item = Result<u8, Error>>
 {
     Some(match iter.next() {
+             Some(Ok(b'[')) => match iter.next() {
+                 Some(Ok(val @ b'A'...b'E')) => Event::Key(Key::F(1 + val - b'A')),
+                 _ => return None,
+             },
              Some(Ok(b'D')) => Event::Key(Key::Left),
              Some(Ok(b'C')) => Event::Key(Key::Right),
              Some(Ok(b'A')) => Event::Key(Key::Up),
