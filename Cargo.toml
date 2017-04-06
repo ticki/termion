@@ -11,3 +11,18 @@ exclude = ["target", "CHANGELOG.md", "image.png", "Cargo.lock"]
 
 [target.'cfg(not(target_os = "redox"))'.dependencies]
 libc = "0.2.8"
+
+[library]
+name = "libterm"
+
+[[bin]]
+name = "simple"
+path = "examples/simple.rs"
+
+[[bin]]
+name = "read"
+path = "examples/read.rs"
+
+[[bin]]
+name = "size"
+path = "examples/size.rs"
