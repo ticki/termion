@@ -24,6 +24,7 @@
 
 use std::io::{self, Write};
 use std::ops;
+use cursor;
 
 /// The timeout of an escape code control sequence, in milliseconds.
 pub const CONTROL_SEQUENCE_TIMEOUT: u64 = 100;
@@ -57,6 +58,11 @@ pub struct RawTerminal<W: Write> {
 #[cfg(not(target_os = "redox"))]
 impl<W: Write> Drop for RawTerminal<W> {
     fn drop(&mut self) {
+        // In the event that the cursor is hidden, this will show it before
+        // exiting, preventing the parent process (most likely a shell) from
+        // suppressing the cursor.
+        write!(self, "{}", cursor::Show);
+
         use termios::set_terminal_attr;
         set_terminal_attr(&mut self.prev_ios as *mut _);
     }
