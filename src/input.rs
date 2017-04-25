@@ -4,7 +4,8 @@ use std::io::{self, Read, Write};
 use std::ops;
 
 use event::{self, Event, Key};
-use raw::IntoRawMode;
+use raw::{IntoRawMode, RawTerminal};
+use clear;
 
 /// An iterator over input keys.
 pub struct Keys<R> {
@@ -194,6 +195,31 @@ impl<W: Write> Write for MouseTerminal<W> {
     fn flush(&mut self) -> io::Result<()> {
         self.term.flush()
     }
+}
+
+/// Like read_line, but allows you to highlight certain parts or otherwise change the appearance of the text.
+pub fn highlighted_read_line<W, R, F>(reader: R, writer: &mut RawTerminal<W>, prompt: &str, highlighter: F) -> io::Result<Option<String>>
+    where W: Write, R: Read, F: Fn(&str) -> String
+{
+    let mut buf = String::with_capacity(30);
+    
+    write!(writer, "{}\r{}{}", clear::CurrentLine, prompt, highlighter(&buf))?;
+    writer.flush()?;
+    
+    for c in reader.bytes() {
+        match c {
+            Err(e) => return Err(e),
+            Ok(0) | Ok(3) | Ok(4) => return Ok(None),
+            Ok(0x7f) => { buf.pop(); },
+            Ok(b'\n') | Ok(b'\r') => break,
+            Ok(c) => buf.push(c as char),
+        }
+        
+        write!(writer, "{}\r{}{}", clear::CurrentLine, prompt, highlighter(&buf))?;
+        writer.flush()?;
+    }
+    
+    Ok(Some(buf))
 }
 
 #[cfg(test)]
