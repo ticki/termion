@@ -27,6 +27,19 @@ pub trait Color {
     fn write_bg(&self, f: &mut fmt::Formatter) -> fmt::Result;
 }
 
+impl Color for Box<Color> {
+    #[inline]
+    fn write_fg(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.as_ref().write_fg(f)
+    }
+
+    #[inline]
+    fn write_bg(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.as_ref().write_bg(f)
+    }
+}
+
+
 macro_rules! derive_color {
     ($doc:expr, $name:ident, $value:expr) => {
         #[doc = $doc]
