@@ -32,7 +32,7 @@ This crate is stable.
 
 ```toml
 [dependencies]
-termion = "1.0"
+termion = "*"
 ```
 
 ## 0.1.0 to 1.0.0 guide
