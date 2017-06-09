@@ -40,7 +40,8 @@ pub struct RawTerminal<W: Write> {
 #[cfg(target_os = "redox")]
 impl<W: Write> Drop for RawTerminal<W> {
     fn drop(&mut self) {
-        write!(self, csi!("?82l")).unwrap();
+        let _ = write!(self, csi!("?82l"));
+        let _ = self.flush();
     }
 }
 
@@ -129,7 +130,9 @@ impl<W: Write> IntoRawMode for W {
 
     #[cfg(target_os = "redox")]
     fn into_raw_mode(mut self) -> io::Result<RawTerminal<W>> {
-        write!(self, csi!("?82h")).map(|_| RawTerminal { output: self })
+        write!(self, csi!("?82h"))?;
+        self.flush()?;
+        Ok(RawTerminal { output: self })
     }
 }
 
