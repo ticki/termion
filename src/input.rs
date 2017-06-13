@@ -7,11 +7,11 @@ use event::{self, Event, Key};
 use raw::IntoRawMode;
 
 /// An iterator over input keys.
-pub struct Keys<R> {
-    iter: Events<R>,
+pub struct Keys<'a, R: 'a> {
+    iter: Events<'a, R>,
 }
 
-impl<R: Read> Iterator for Keys<R> {
+impl<'a, R: Read> Iterator for Keys<'a, R> {
     type Item = Result<Key, io::Error>;
 
     fn next(&mut self) -> Option<Result<Key, io::Error>> {
@@ -27,12 +27,12 @@ impl<R: Read> Iterator for Keys<R> {
 }
 
 /// An iterator over input events.
-pub struct Events<R> {
-    source: R,
+pub struct Events<'a, R: 'a> {
+    source: &'a mut R,
     leftover: Option<u8>,
 }
 
-impl<R: Read> Iterator for Events<R> {
+impl<'a, R: Read> Iterator for Events<'a, R> {
     type Item = Result<Event, io::Error>;
 
     fn next(&mut self) -> Option<Result<Event, io::Error>> {
@@ -92,10 +92,10 @@ fn parse_event<I>(item: u8, iter: &mut I) -> Result<Event, io::Error>
 /// Extension to `Read` trait.
 pub trait TermRead {
     /// An iterator over input events.
-    fn events(self) -> Events<Self> where Self: Sized;
+    fn events(&mut self) -> Events<Self> where Self: Sized;
 
     /// An iterator over key inputs.
-    fn keys(self) -> Keys<Self> where Self: Sized;
+    fn keys(&mut self) -> Keys<Self> where Self: Sized;
 
     /// Read a line.
     ///
@@ -114,13 +114,13 @@ pub trait TermRead {
 }
 
 impl<R: Read> TermRead for R {
-    fn events(self) -> Events<Self> {
+    fn events(&mut self) -> Events<Self> {
         Events {
             source: self,
             leftover: None,
         }
     }
-    fn keys(self) -> Keys<Self> {
+    fn keys(&mut self) -> Keys<Self> {
         Keys { iter: self.events() }
     }
 
