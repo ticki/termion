@@ -1,6 +1,7 @@
 //! Cursor movement.
 
 use std::fmt;
+use std::ops;
 use std::io::{self, Write, Error, ErrorKind, Read};
 use async::async_stdin;
 use std::time::{SystemTime, Duration};
@@ -133,5 +134,50 @@ impl<W: Write> DetectCursorPos for W {
             .unwrap();
 
         Ok((cx, cy))
+    }
+}
+
+/// Hide the cursor for the lifetime of this struct.
+/// It will hide the cursor on creation with from() and show it back on drop().
+pub struct HideCursor<W: Write> {
+    /// The output target.
+    output: W,
+}
+
+impl<W: Write> HideCursor<W> {
+    /// Create a hide cursor wrapper struct for the provided output and hides the cursor.
+    pub fn from(mut output: W) -> Self {
+        write!(output, "{}", Hide).expect("hide the cursor");
+        HideCursor { output: output }
+    }
+}
+
+impl<W: Write> Drop for HideCursor<W> {
+    fn drop(&mut self) {
+        write!(self, "{}", Show).expect("show the cursor");
+    }
+}
+
+impl<W: Write> ops::Deref for HideCursor<W> {
+    type Target = W;
+
+    fn deref(&self) -> &W {
+        &self.output
+    }
+}
+
+impl<W: Write> ops::DerefMut for HideCursor<W> {
+    fn deref_mut(&mut self) -> &mut W {
+        &mut self.output
+    }
+}
+
+impl<W: Write> Write for HideCursor<W> {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        self.output.write(buf)
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        self.output.flush()
     }
 }
