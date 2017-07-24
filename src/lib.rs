@@ -17,6 +17,12 @@ extern crate libc;
 #[cfg(not(target_os = "redox"))]
 mod termios;
 
+#[cfg(target_os = "redox")]
+extern crate redox_termios;
+
+#[cfg(target_os = "redox")]
+extern crate syscall;
+
 mod async;
 pub use async::{AsyncReader, async_stdin};
 

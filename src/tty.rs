@@ -11,8 +11,15 @@ pub fn is_tty<T: AsRawFd>(stream: &T) -> bool {
 
 /// This will panic.
 #[cfg(target_os = "redox")]
-pub fn is_tty<T: AsRawFd>(_stream: &T) -> bool {
-    unimplemented!();
+pub fn is_tty<T: AsRawFd>(stream: &T) -> bool {
+    use syscall;
+
+    if let Ok(fd) = syscall::dup(stream.as_raw_fd(), b"termios") {
+        let _ = syscall::close(fd);
+        true
+    } else {
+        false
+    }
 }
 
 /// Get the TTY device.
