@@ -57,16 +57,21 @@ pub fn terminal_size() -> io::Result<(u16, u16)> {
 /// Get the size of the terminal.
 #[cfg(target_os = "redox")]
 pub fn terminal_size() -> io::Result<(u16, u16)> {
-    use std::env;
+    use redox_termios;
+    use syscall;
 
-    let width = try!(env::var("COLUMNS").map_err(|x| io::Error::new(io::ErrorKind::NotFound, x)))
-        .parse()
-        .unwrap_or(0);
-    let height = try!(env::var("LINES").map_err(|x| io::Error::new(io::ErrorKind::NotFound, x)))
-        .parse()
-        .unwrap_or(0);
+    if let Ok(fd) = syscall::dup(1, b"winsize") {
+        let mut winsize = redox_termios::Winsize::default();
+        let res = syscall::read(fd, &mut winsize);
+        let _ = syscall::close(fd);
+        if let Ok(count) = res {
+            if count == winsize.len() {
+                return Ok((winsize.ws_col, winsize.ws_row));
+            }
+        }
+    }
 
-    Ok((width, height))
+    Err(io::Error::new(io::ErrorKind::Other, "Unable to get the terminal size."))
 }
 
 #[cfg(test)]
