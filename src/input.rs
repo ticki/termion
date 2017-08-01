@@ -3,6 +3,7 @@
 use std::io::{self, Read, Write};
 use std::ops;
 
+use error;
 use event::{self, Event, Key};
 use raw::IntoRawMode;
 
@@ -12,9 +13,9 @@ pub struct Keys<R> {
 }
 
 impl<R: Read> Iterator for Keys<R> {
-    type Item = Result<Key, io::Error>;
+    type Item = error::Result<Key>;
 
-    fn next(&mut self) -> Option<Result<Key, io::Error>> {
+    fn next(&mut self) -> Option<error::Result<Key>> {
         loop {
             match self.iter.next() {
                 Some(Ok(Event::Key(k))) => return Some(Ok(k)),
@@ -32,9 +33,9 @@ pub struct Events<R>  {
 }
 
 impl<R: Read> Iterator for Events<R> {
-    type Item = Result<Event, io::Error>;
+    type Item = Result<Event, error::Error>;
 
-    fn next(&mut self) -> Option<Result<Event, io::Error>> {
+    fn next(&mut self) -> Option<error::Result<Event>> {
         self.inner.next().map(|tuple| tuple.map(|(event, _raw)| event))
     }
 }
@@ -46,15 +47,15 @@ pub struct EventsAndRaw<R> {
 }
 
 impl<R: Read> Iterator for EventsAndRaw<R> {
-    type Item = Result<(Event, Vec<u8>), io::Error>;
+    type Item = error::Result<(Event, Vec<u8>)>;
 
-    fn next(&mut self) -> Option<Result<(Event, Vec<u8>), io::Error>> {
+    fn next(&mut self) -> Option<error::Result<(Event, Vec<u8>)>> {
         let mut source = &mut self.source;
 
         if let Some(c) = self.leftover {
             // we have a leftover byte, use it
             self.leftover = None;
-            return Some(parse_event(c, &mut source.bytes()));
+            return Some(parse_event(c, &mut source.bytes().map(|r| r.map_err(Into::into))));
         }
 
         // Here we read two bytes at a time. We need to distinguish between single ESC key presses,
@@ -67,13 +68,13 @@ impl<R: Read> Iterator for EventsAndRaw<R> {
             Ok(1) => {
                 match buf[0] {
                     b'\x1B' => Ok((Event::Key(Key::Esc), vec![b'\x1B'])),
-                    c => parse_event(c, &mut source.bytes()),
+                    c => parse_event(c, &mut source.bytes().map(|r| r.map_err(Into::into))),
                 }
             }
             Ok(2) => {
                 let mut option_iter = &mut Some(buf[1]).into_iter();
                 let result = {
-                    let mut iter = option_iter.map(|c| Ok(c)).chain(source.bytes());
+                    let mut iter = option_iter.map(|c| Ok(c)).chain(source.bytes().map(|r| r.map_err(Into::into)));
                     parse_event(buf[0], &mut iter)
                 };
                 // If the option_iter wasn't consumed, keep the byte for later.
@@ -81,15 +82,15 @@ impl<R: Read> Iterator for EventsAndRaw<R> {
                 result
             }
             Ok(_) => unreachable!(),
-            Err(e) => Err(e),
+            Err(e) => Err(e.into()),
         };
 
         Some(res)
     }
 }
 
-fn parse_event<I>(item: u8, iter: &mut I) -> Result<(Event, Vec<u8>), io::Error>
-    where I: Iterator<Item = Result<u8, io::Error>>
+fn parse_event<I>(item: u8, iter: &mut I) -> error::Result<(Event, Vec<u8>)>
+    where I: Iterator<Item = error::Result<u8>>
 {
     let mut buf = vec![item];
     let result = {
@@ -114,13 +115,13 @@ pub trait TermRead {
     ///
     /// EOT and ETX will abort the prompt, returning `None`. Newline or carriage return will
     /// complete the input.
-    fn read_line(&mut self) -> io::Result<Option<String>>;
+    fn read_line(&mut self) -> error::Result<Option<String>>;
 
     /// Read a password.
     ///
     /// EOT and ETX will abort the prompt, returning `None`. Newline or carriage return will
     /// complete the input.
-    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> io::Result<Option<String>> {
+    fn read_passwd<W: Write>(&mut self, writer: &mut W) -> error::Result<Option<String>> {
         let _raw = try!(writer.into_raw_mode());
         self.read_line()
     }
@@ -137,12 +138,12 @@ impl<R: Read + TermReadEventsAndRaw> TermRead for R {
         Keys { iter: self.events() }
     }
 
-    fn read_line(&mut self) -> io::Result<Option<String>> {
+    fn read_line(&mut self) -> error::Result<Option<String>> {
         let mut buf = Vec::with_capacity(30);
 
         for c in self.bytes() {
             match c {
-                Err(e) => return Err(e),
+                Err(e) => return Err(e.into()),
                 Ok(0) | Ok(3) | Ok(4) => return Ok(None),
                 Ok(0x7f) => {
                     buf.pop();
@@ -152,8 +153,10 @@ impl<R: Read + TermReadEventsAndRaw> TermRead for R {
             }
         }
 
-        let string = try!(String::from_utf8(buf)
-            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e)));
+        //let string = try!(String::from_utf8(buf)
+        //    .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e)));
+        // TODO: return an invalid data error, not from utf8 conversion one
+        let string = String::from_utf8(buf)?;
         Ok(Some(string))
     }
 }

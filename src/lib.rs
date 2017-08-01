@@ -26,6 +26,8 @@ extern crate syscall;
 mod async;
 pub use async::{AsyncReader, async_stdin};
 
+mod error;
+
 mod size;
 pub use size::terminal_size;
 
