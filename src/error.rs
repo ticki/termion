@@ -18,7 +18,9 @@ impl error::Error for Error {
             ErrorKind::ParseInt(ref e) => e.description(),
             ErrorKind::FromUtf8(ref e) => e.description(),
 
+            ErrorKind::CursorPosDetectionTimeout => "Cursor position detection timed out",
             ErrorKind::InvalidUtf8InputChar => "Input character is not valid UTF-8",
+            ErrorKind::NoCursorBracket => "No cursor bracket found",
             ErrorKind::UnableToParseEvent => "Could not parse an event",
             ErrorKind::UnexpectedIterEnd => "Unexpected end of an iterator",
         }
@@ -30,7 +32,9 @@ impl error::Error for Error {
             ErrorKind::ParseInt(ref e) => e.cause(),
             ErrorKind::FromUtf8(ref e) => e.cause(),
 
+            ErrorKind::CursorPosDetectionTimeout => None,
             ErrorKind::InvalidUtf8InputChar => None,
+            ErrorKind::NoCursorBracket => None,
             ErrorKind::UnableToParseEvent => None,
             ErrorKind::UnexpectedIterEnd => None,
         }
@@ -82,7 +86,9 @@ pub enum ErrorKind {
     ParseInt(::std::num::ParseIntError),
     FromUtf8(::std::string::FromUtf8Error),
 
+    CursorPosDetectionTimeout,
     InvalidUtf8InputChar,
+    NoCursorBracket,
     UnableToParseEvent,
     UnexpectedIterEnd,
 }

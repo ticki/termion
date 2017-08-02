@@ -4,6 +4,7 @@ use std::ascii::AsciiExt;
 use std::str;
 
 use error::{self, ErrorKind};
+use utils::checked_next;
 
 /// An event reported by the terminal.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -322,7 +323,7 @@ fn parse_utf8_char<I>(c: u8, iter: &mut I) -> error::Result<char>
                 Some(Ok(next)) => {
                     bytes.push(next);
                     if let Ok(st) = str::from_utf8(bytes) {
-                        return st.chars().next().ok_or(ErrorKind::UnexpectedIterEnd.into());
+                        return checked_next(&mut st.chars());
                     }
                     if bytes.len() >= 4 {
                         return Err(error);
@@ -334,11 +335,6 @@ fn parse_utf8_char<I>(c: u8, iter: &mut I) -> error::Result<char>
     }
 }
 
-fn checked_next<T, I>(iterator: &mut I) -> error::Result<T>
-    where I: Iterator<Item = T>
-{
-    iterator.next().ok_or(ErrorKind::UnexpectedIterEnd.into())
-}
 
 
 #[cfg(test)]

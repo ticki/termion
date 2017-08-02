@@ -1,10 +1,13 @@
 //! Cursor movement.
 
 use std::fmt;
-use std::io::{self, Write, Error, ErrorKind, Read};
-use async::async_stdin;
+use std::io::{self, Write, Read};
 use std::time::{SystemTime, Duration};
+
+use async::async_stdin;
+use error::{self, ErrorKind};
 use raw::CONTROL_SEQUENCE_TIMEOUT;
+use utils::{checked_next, checked_rfind_bracket};
 
 derive_csi_sequence!("Hide the cursor.", Hide, "?25l");
 derive_csi_sequence!("Show the cursor.", Show, "?25h");
@@ -86,11 +89,11 @@ impl fmt::Display for Down {
 /// Types that allow detection of the cursor position.
 pub trait DetectCursorPos {
     /// Get the (1,1)-based cursor position from the terminal.
-    fn cursor_pos(&mut self) -> io::Result<(u16, u16)>;
+    fn cursor_pos(&mut self) -> error::Result<(u16, u16)>;
 }
 
 impl<W: Write> DetectCursorPos for W {
-    fn cursor_pos(&mut self) -> io::Result<(u16, u16)> {
+    fn cursor_pos(&mut self) -> error::Result<(u16, u16)> {
         let mut stdin = async_stdin();
 
         // Where is the cursor?
@@ -112,25 +115,19 @@ impl<W: Write> DetectCursorPos for W {
         }
 
         if read_chars.len() == 0 {
-            return Err(Error::new(ErrorKind::Other, "Cursor position detection timed out."));
+            return Err(ErrorKind::CursorPosDetectionTimeout.into())
         }
 
         // The answer will look like `ESC [ Cy ; Cx R`.
 
         read_chars.pop(); // remove trailing R.
-        let read_str = String::from_utf8(read_chars).unwrap();
-        let beg = read_str.rfind('[').unwrap();
+        let read_str = String::from_utf8(read_chars)?;
+        let beg = checked_rfind_bracket(&read_str)?;
         let coords: String = read_str.chars().skip(beg + 1).collect();
-        let mut nums = coords.split(';');
+        let nums = &mut coords.split(';');
 
-        let cy = nums.next()
-            .unwrap()
-            .parse::<u16>()
-            .unwrap();
-        let cx = nums.next()
-            .unwrap()
-            .parse::<u16>()
-            .unwrap();
+        let cy = checked_next(nums)?.parse::<u16>()?;
+        let cx = checked_next(nums)?.parse::<u16>()?;
 
         Ok((cx, cy))
     }
