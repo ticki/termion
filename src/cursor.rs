@@ -9,6 +9,9 @@ use raw::CONTROL_SEQUENCE_TIMEOUT;
 derive_csi_sequence!("Hide the cursor.", Hide, "?25l");
 derive_csi_sequence!("Show the cursor.", Show, "?25h");
 
+derive_csi_sequence!("Restore the cursor.", Restore, "u");
+derive_csi_sequence!("Save the cursor.", Save, "s");
+
 /// Goto some position ((1,1)-based).
 ///
 /// # Why one-based?

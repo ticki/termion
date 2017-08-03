@@ -2,7 +2,7 @@ use std::io::{self, Read};
 use std::sync::mpsc;
 use std::thread;
 
-use tty;
+use sys::tty::get_tty;
 
 /// Construct an asynchronous handle to the TTY standard input.
 ///
@@ -17,7 +17,7 @@ use tty;
 pub fn async_stdin() -> AsyncReader {
     let (send, recv) = mpsc::channel();
 
-    thread::spawn(move || for i in tty::get_tty().unwrap().bytes() {
+    thread::spawn(move || for i in get_tty().unwrap().bytes() {
                       if send.send(i).is_err() {
                           return;
                       }
