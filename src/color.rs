@@ -174,6 +174,16 @@ impl<C: Color> fmt::Display for Bg<C> {
     }
 }
 
+/// A fore-/background color.
+#[derive(Debug, Clone, Copy)]
+pub struct FBg<Cf: Color, Cb: Color>(pub Cf, pub Cb);
+
+impl<Cf: Color, Cb: Color> fmt::Display for FBg<Cf, Cb> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.0.write_fg(f).and(self.1.write_bg(f))
+    }
+}
+
 /// Types that allow detection of the colors they support.
 pub trait DetectColors {
     /// How many ANSI colors are supported (from 8 to 256)?
