@@ -1,13 +1,14 @@
 use std::io;
+use std::os::unix::io::RawFd;
 
 use super::{cvt, syscall, Termios};
 
-pub fn get_terminal_attr() -> io::Result<Termios> {
+pub fn get_terminal_attr(fd: RawFd) -> io::Result<Termios> {
     let mut termios = Termios::default();
 
-    let fd = cvt(syscall::dup(0, b"termios"))?;
-    let res = cvt(syscall::read(fd, &mut termios));
-    let _ = syscall::close(fd);
+    let tfd = cvt(syscall::dup(fd, b"termios"))?;
+    let res = cvt(syscall::read(tfd, &mut termios));
+    let _ = syscall::close(tfd);
 
     if res? == termios.len() {
         Ok(termios)
@@ -16,10 +17,10 @@ pub fn get_terminal_attr() -> io::Result<Termios> {
     }
 }
 
-pub fn set_terminal_attr(termios: &Termios) -> io::Result<()> {
-    let fd = cvt(syscall::dup(0, b"termios"))?;
-    let res = cvt(syscall::write(fd, termios));
-    let _ = syscall::close(fd);
+pub fn set_terminal_attr(fd: RawFd, termios: &Termios) -> io::Result<()> {
+    let tfd = cvt(syscall::dup(fd, b"termios"))?;
+    let res = cvt(syscall::write(tfd, termios));
+    let _ = syscall::close(tfd);
 
     if res? == termios.len() {
         Ok(())

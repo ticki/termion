@@ -24,6 +24,7 @@
 
 use std::io::{self, Write};
 use std::ops;
+use std::os::unix::io::AsRawFd;
 
 use sys::Termios;
 use sys::attr::{get_terminal_attr, raw_terminal_attr, set_terminal_attr};
@@ -35,32 +36,26 @@ pub const CONTROL_SEQUENCE_TIMEOUT: u64 = 100;
 /// dropped.
 ///
 /// Restoring will entirely bring back the old TTY state.
-pub struct RawTerminal<W: Write> {
+pub struct RawTerminal<'a, W: IntoRawMode + 'a> {
     prev_ios: Termios,
-    output: W,
+    output: &'a mut W,
 }
 
-impl<W: Write> Drop for RawTerminal<W> {
-    fn drop(&mut self) {
-        set_terminal_attr(&self.prev_ios).unwrap();
-    }
-}
-
-impl<W: Write> ops::Deref for RawTerminal<W> {
+impl<'a, W: IntoRawMode> ops::Deref for RawTerminal<'a, W> {
     type Target = W;
 
     fn deref(&self) -> &W {
-        &self.output
+        self.output
     }
 }
 
-impl<W: Write> ops::DerefMut for RawTerminal<W> {
+impl<'a, W: IntoRawMode> ops::DerefMut for RawTerminal<'a, W> {
     fn deref_mut(&mut self) -> &mut W {
-        &mut self.output
+        self.output
     }
 }
 
-impl<W: Write> Write for RawTerminal<W> {
+impl<'a, W: IntoRawMode> Write for RawTerminal<'a, W> {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         self.output.write(buf)
     }
@@ -70,29 +65,35 @@ impl<W: Write> Write for RawTerminal<W> {
     }
 }
 
+impl<'a, W: IntoRawMode> Drop for RawTerminal<'a, W> {
+    fn drop(&mut self) {
+        set_terminal_attr(self.output.as_raw_fd(), &self.prev_ios).unwrap();
+    }
+}
+
 /// Types which can be converted into "raw mode".
 ///
 /// # Why is this type defined on writers and not readers?
 ///
 /// TTYs has their state controlled by the writer, not the reader. You use the writer to clear the
 /// screen, move the cursor and so on, so naturally you use the writer to change the mode as well.
-pub trait IntoRawMode: Write + Sized {
+pub trait IntoRawMode: AsRawFd + Write + Sized {
     /// Switch to raw mode.
     ///
     /// Raw mode means that stdin won't be printed (it will instead have to be written manually by
     /// the program). Furthermore, the input isn't canonicalised or buffered (that is, you can
     /// read from stdin one byte of a time). The output is neither modified in any way.
-    fn into_raw_mode(self) -> io::Result<RawTerminal<Self>>;
+    fn into_raw_mode<'a>(&'a mut self) -> io::Result<RawTerminal<Self>>;
 }
 
-impl<W: Write> IntoRawMode for W {
-    fn into_raw_mode(self) -> io::Result<RawTerminal<W>> {
-        let mut ios = get_terminal_attr()?;
+impl<W: AsRawFd + Write> IntoRawMode for W {
+    fn into_raw_mode<'a>(&'a mut self) -> io::Result<RawTerminal<W>> {
+        let mut ios = get_terminal_attr(self.as_raw_fd())?;
         let prev_ios = ios;
 
         raw_terminal_attr(&mut ios);
 
-        set_terminal_attr(&ios)?;
+        set_terminal_attr(self.as_raw_fd(), &ios)?;
 
         Ok(RawTerminal {
             prev_ios: prev_ios,
