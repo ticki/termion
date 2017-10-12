@@ -3,6 +3,7 @@
 use std::io::{Error, ErrorKind};
 use std::ascii::AsciiExt;
 use std::str;
+use std::cmp::Ordering;
 
 /// An event reported by the terminal.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -95,6 +96,48 @@ pub enum Key {
 
     #[doc(hidden)]
     __IsNotComplete,
+}
+
+fn quantify_key(key: &Key) -> u32 {
+    // TODO: Derive the proper formula for Ctrl and Alt.
+    const CTRL_PREFIX: u32 = 0x10000000u32;
+    const ALT_PREFIX:  u32 = 0x20000000u32;
+    match key {
+        &Key::Null      => 0x00000000u32,
+        &Key::Backspace => 0x00000008u32,
+        &Key::Esc       => 0x0000001Bu32,
+        &Key::Delete    => 0x0000007Fu32,
+        &Key::Insert    => 0x40000049u32,
+        &Key::Home      => 0x4000004Au32,
+        &Key::PageUp    => 0x4000004Bu32,
+        &Key::End       => 0x4000004Du32,
+        &Key::PageDown  => 0x4000004Eu32,
+        &Key::Right     => 0x4000004Fu32,
+        &Key::Left      => 0x40000050u32,
+        &Key::Down      => 0x40000051u32,
+        &Key::Up        => 0x40000052u32,
+        &Key::F(b) => match b {
+                    1 ... 12 => (b as u32) + 0x40000039u32,
+                    13 ... 24 => (b as u32) + 0x4000005au32,
+                    _ => panic!()
+                },
+        &Key::Char(c) => c as u32,
+        &Key::Alt(c) => c as u32 + ALT_PREFIX,
+        &Key::Ctrl(c) => c as u32 + CTRL_PREFIX,
+        &Key::__IsNotComplete => panic!(),
+    }
+}
+
+impl PartialOrd for Key {
+    fn partial_cmp(&self, other: &Key) -> Option<Ordering> {
+        Some(quantify_key(self).cmp(&quantify_key(other)))
+    }
+}
+
+impl Ord for Key {
+    fn cmp(&self, other: &Key) -> Ordering {
+        quantify_key(self).cmp(&quantify_key(other))
+    }
 }
 
 /// Parse an Event from `item` and possibly subsequent bytes through `iter`.
