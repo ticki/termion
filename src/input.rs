@@ -49,7 +49,7 @@ impl<R: Read> Iterator for EventsAndRaw<R> {
     type Item = Result<(Event, Vec<u8>), io::Error>;
 
     fn next(&mut self) -> Option<Result<(Event, Vec<u8>), io::Error>> {
-        let mut source = &mut self.source;
+        let source = &mut self.source;
 
         if let Some(c) = self.leftover {
             // we have a leftover byte, use it
@@ -71,7 +71,7 @@ impl<R: Read> Iterator for EventsAndRaw<R> {
                 }
             }
             Ok(2) => {
-                let mut option_iter = &mut Some(buf[1]).into_iter();
+                let option_iter = &mut Some(buf[1]).into_iter();
                 let result = {
                     let mut iter = option_iter.map(|c| Ok(c)).chain(source.bytes());
                     parse_event(buf[0], &mut iter)
