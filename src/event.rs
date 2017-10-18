@@ -3,10 +3,9 @@
 use std::io::{Error, ErrorKind};
 use std::ascii::AsciiExt;
 use std::str;
-use std::cmp::Ordering;
 
 /// An event reported by the terminal.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(PartialOrd, Ord, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Event {
     /// A key press.
     Key(Key),
@@ -17,7 +16,7 @@ pub enum Event {
 }
 
 /// A mouse related event.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(PartialOrd, Ord, Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum MouseEvent {
     /// A mouse button was pressed.
     ///
@@ -34,7 +33,7 @@ pub enum MouseEvent {
 }
 
 /// A mouse button.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(PartialOrd, Ord, Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum MouseButton {
     /// The left mouse button.
     Left,
@@ -53,7 +52,7 @@ pub enum MouseButton {
 }
 
 /// A key.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(PartialOrd, Ord, Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Key {
     /// Backspace.
     Backspace,
@@ -96,64 +95,6 @@ pub enum Key {
 
     #[doc(hidden)]
     __IsNotComplete,
-}
-
-// For reference:
-// http://vimhelp.appspot.com/vim_faq.txt.html#faq-20.5
-// \x00 = ^@
-// \x01 = ^A = <C-A>
-// ...
-// \x09 = ^I = <C-I> = <Tab>
-// ...
-// \x0D = ^M = <C-M> = <C-Enter>
-// ...
-// \x1A = ^Z = <C-Z>
-// \x1B = ^[ = <C-[> = <C-3> = Esc
-// \x1C = ^\ = <C-\> = <C-4>
-// \x1D = ^] = <C-]> = <C-5>
-// \x1E = ^^ = <C-^> = <C-6>
-// \x1F = ^_ = <C-/> = <C-7> = <C-_>
-// \x7F = ^? = <C-?> = <C-8> = <C-Delete> = <C-Bksp>
-fn quantify_key(key: &Key) -> u32 {
-    // http://vimhelp.appspot.com/intro.txt.html#key-codes
-    match *key {
-        Key::Null => 0x00000000u32,
-        Key::Backspace => 0x00000008u32,
-        Key::Esc => 0x0000001Bu32,
-        Key::Delete => 0x0000007Fu32,
-        Key::Insert => 0x40000049u32,
-        Key::Home => 0x4000004Au32,
-        Key::PageUp => 0x4000004Bu32,
-        Key::End => 0x4000004Du32,
-        Key::PageDown => 0x4000004Eu32,
-        Key::Right => 0x4000004Fu32,
-        Key::Left => 0x40000050u32,
-        Key::Down => 0x40000051u32,
-        Key::Up => 0x40000052u32,
-        Key::F(b) => {
-            match b {
-                1...12 => (b as u32) + 0x40000039u32,
-                13...24 => (b as u32) + 0x4000005Au32,
-                _ => 0x00,
-            }
-        }
-        Key::Char(c) => c as u32,
-        Key::Alt(c) => (c as u32) | 0x10,
-        Key::Ctrl(c) => ((c as u32) - ('A' as u32) + 1),
-        Key::__IsNotComplete => 0x00,
-    }
-}
-
-impl PartialOrd for Key {
-    fn partial_cmp(&self, other: &Key) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for Key {
-    fn cmp(&self, other: &Key) -> Ordering {
-        quantify_key(self).cmp(&quantify_key(other))
-    }
 }
 
 /// Parse an Event from `item` and possibly subsequent bytes through `iter`.
