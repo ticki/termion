@@ -98,7 +98,6 @@ pub enum Key {
 }
 
 /// Parse an Event from `item` and possibly subsequent bytes through `iter`.
-/// TODO It isn't clear if a single Esc keystroke will be properly captured.
 pub fn parse_event<I>(item: u8, iter: &mut I) -> Result<Event, Error>
 where
     I: Iterator<Item = Result<u8, Error>>,
@@ -384,13 +383,24 @@ where
 }
 
 #[cfg(test)]
-#[test]
-fn test_parse_utf8() {
-    let st = "abcéŷ¤£€ù%323";
-    let ref mut bytes = st.bytes().map(|x| Ok(x));
-    let chars = st.chars();
-    for c in chars {
+mod test {
+    use super::*;
+
+    #[test]
+    fn parse_utf8() {
+        let st = "abcéŷ¤£€ù%323";
+        let ref mut bytes = st.bytes().map(|x| Ok(x));
+        let chars = st.chars();
+        for c in chars {
+            let b = bytes.next().unwrap().unwrap();
+            assert_eq!(c, parse_utf8_char(b, bytes).unwrap());
+        }
+    }
+    #[test]
+    fn parse_esc() {
+        let st = "";
+        let ref mut bytes = st.bytes().map(|x| Ok(x));
         let b = bytes.next().unwrap().unwrap();
-        assert!(c == parse_utf8_char(b, bytes).unwrap());
+        assert_eq!(Event::Key(Key::Esc), parse_event(b, bytes).unwrap());
     }
 }
