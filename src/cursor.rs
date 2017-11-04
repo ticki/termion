@@ -115,7 +115,10 @@ impl<W: Write> DetectCursorPos for W {
         }
 
         if read_chars.len() == 0 {
-            return Err(Error::new(ErrorKind::Other, "Cursor position detection timed out."));
+            return Err(Error::new(
+                ErrorKind::Other,
+                "Cursor position detection timed out.",
+            ));
         }
 
         // The answer will look like `ESC [ Cy ; Cx R`.
@@ -126,14 +129,8 @@ impl<W: Write> DetectCursorPos for W {
         let coords: String = read_str.chars().skip(beg + 1).collect();
         let mut nums = coords.split(';');
 
-        let cy = nums.next()
-            .unwrap()
-            .parse::<u16>()
-            .unwrap();
-        let cx = nums.next()
-            .unwrap()
-            .parse::<u16>()
-            .unwrap();
+        let cy = nums.next().unwrap().parse::<u16>().unwrap();
+        let cx = nums.next().unwrap().parse::<u16>().unwrap();
 
         Ok((cx, cy))
     }

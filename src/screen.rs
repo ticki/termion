@@ -55,7 +55,9 @@ impl<W: Write> AlternateScreen<W> {
     /// Create an alternate screen wrapper struct for the provided output and switch the terminal
     /// to the alternate screen.
     pub fn from(mut output: W) -> Self {
-        write!(output, "{}", ToAlternateScreen).expect("switch to alternate screen");
+        write!(output, "{}", ToAlternateScreen).expect(
+            "switch to alternate screen",
+        );
         AlternateScreen { output: output }
     }
 }

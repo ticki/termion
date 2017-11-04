@@ -11,12 +11,18 @@
 //! For more information refer to the [README](https://github.com/ticki/termion).
 #![warn(missing_docs)]
 
+extern crate serde;
+extern crate serde_json;
+
+#[macro_use]
+extern crate serde_derive;
+
 #[cfg(target_os = "redox")]
-#[path="sys/redox/mod.rs"]
+#[path = "sys/redox/mod.rs"]
 mod sys;
 
 #[cfg(unix)]
-#[path="sys/unix/mod.rs"]
+#[path = "sys/unix/mod.rs"]
 mod sys;
 
 pub use sys::size::terminal_size;

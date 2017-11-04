@@ -5,7 +5,8 @@ use std::ascii::AsciiExt;
 use std::str;
 
 /// An event reported by the terminal.
-#[derive(PartialOrd, Ord, Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Serialize, Deserialize, PartialOrd, Ord, Debug, Clone, PartialEq, Eq,
+         Hash)]
 pub enum Event {
     /// A key press.
     Key(Key),
@@ -16,7 +17,8 @@ pub enum Event {
 }
 
 /// A mouse related event.
-#[derive(PartialOrd, Ord, Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Serialize, Deserialize, PartialOrd, Ord, Debug, Copy, Clone,
+         PartialEq, Eq, Hash)]
 pub enum MouseEvent {
     /// A mouse button was pressed.
     ///
@@ -33,7 +35,8 @@ pub enum MouseEvent {
 }
 
 /// A mouse button.
-#[derive(PartialOrd, Ord, Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Serialize, Deserialize, PartialOrd, Ord, Debug, Copy, Clone,
+         PartialEq, Eq, Hash)]
 pub enum MouseButton {
     /// The left mouse button.
     Left,
@@ -52,7 +55,8 @@ pub enum MouseButton {
 }
 
 /// A key.
-#[derive(PartialOrd, Ord, Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Serialize, Deserialize, PartialOrd, Ord, Debug, Copy, Clone,
+         PartialEq, Eq, Hash)]
 pub enum Key {
     /// Backspace.
     Backspace,
@@ -86,7 +90,8 @@ pub enum Key {
     Alt(char),
     /// Ctrl modified character.
     ///
-    /// Note that certain keys may not be modifiable with `ctrl`, due to limitations of terminals.
+    /// Note that certain keys may not be modifiable with `ctrl`, due to
+    /// limitations of terminals.
     Ctrl(char),
     /// Null byte.
     Null,
@@ -108,7 +113,9 @@ where
         b'\n' | b'\r' => Ok(Event::Key(Key::Char('\n'))),
         b'\t' => Ok(Event::Key(Key::Char('\t'))),
         b'\x7F' => Ok(Event::Key(Key::Backspace)),
-        c @ b'\x01'...b'\x1F' => Ok(Event::Key(Key::Ctrl((c as u8 - 0x1 + b'a') as char))),
+        c @ b'\x01'...b'\x1F' => Ok(Event::Key(
+            Key::Ctrl((c as u8 - 0x1 + b'a') as char),
+        )),
         b'\0' => Ok(Event::Key(Key::Null)),
         c => {
             Ok({
@@ -127,7 +134,9 @@ where
         Some(Ok(b'O')) => {
             match iter.next() {
                 // F1-F4
-                Some(Ok(val @ b'P'...b'S')) => Ok(Event::Key(Key::F(1 + val - b'P'))),
+                Some(Ok(val @ b'P'...b'S')) => Ok(Event::Key(
+                    Key::F(1 + val - b'P'),
+                )),
                 Some(Err(e)) => Err(e),
                 Some(Ok(_)) | None => Err(Error::new(
                     ErrorKind::Other,
@@ -160,7 +169,9 @@ where
     Ok(match iter.next() {
         Some(Ok(b'[')) => {
             return match iter.next() {
-                Some(Ok(val @ b'A'...b'E')) => Ok(Event::Key(Key::F(1 + val - b'A'))),
+                Some(Ok(val @ b'A'...b'E')) => Ok(Event::Key(
+                    Key::F(1 + val - b'A'),
+                )),
                 _ => Err(Error::new(
                     ErrorKind::Other,
                     "Input character is not valid UTF-8",
@@ -192,7 +203,9 @@ where
             ))
         }
         _ => {
-            return Err(Error::new(ErrorKind::Other, "Input is not a valid CSI"));
+            return Err(
+                Error::new(ErrorKind::Other, "Input is not a valid CSI"),
+            );
         }
     })
 }
@@ -218,7 +231,8 @@ where
         b'M' => {
             let str_buf = String::from_utf8(buf).unwrap();
 
-            let nums: Vec<u16> = str_buf.split(';').map(|n| n.parse().unwrap()).collect();
+            let nums: Vec<u16> =
+                str_buf.split(';').map(|n| n.parse().unwrap()).collect();
 
             let cb = nums[0];
             let cx = nums[1];
@@ -242,7 +256,8 @@ where
 
             // This CSI sequence can be a list of semicolon-separated
             // numbers.
-            let nums: Vec<u8> = str_buf.split(';').map(|n| n.parse().unwrap()).collect();
+            let nums: Vec<u8> =
+                str_buf.split(';').map(|n| n.parse().unwrap()).collect();
 
             if nums.is_empty() {
                 return None;

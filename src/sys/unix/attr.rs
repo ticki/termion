@@ -16,7 +16,11 @@ pub fn get_terminal_attr() -> io::Result<Termios> {
 
 pub fn set_terminal_attr(termios: &Termios) -> io::Result<()> {
     extern "C" {
-        pub fn tcsetattr(fd: c_int, opt: c_int, termptr: *const Termios) -> c_int;
+        pub fn tcsetattr(
+            fd: c_int,
+            opt: c_int,
+            termptr: *const Termios,
+        ) -> c_int;
     }
     cvt(unsafe { tcsetattr(0, 0, termios) }).and(Ok(()))
 }
