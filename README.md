@@ -17,7 +17,7 @@ standalone library directly talking to the TTY.
 Termion is quite convenient, due to its complete coverage of essential TTY
 features, providing one consistent API. Termion is rather low-level containing
 only abstraction aligned with what actually happens behind the scenes. For
-something more high-level, refer to inquirer-rs, which uses Termion as backend.
+something more high-level, refer to [inquirer-rs](https://github.com/Munksgaard/inquirer-rs), which uses Termion as backend, and [Cursive](https://github.com/gyscos/Cursive), which provides an option for a termion backend.
 
 Termion generates escapes and API calls for the user. This makes it a whole lot
 cleaner to use escapes.
