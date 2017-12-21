@@ -18,6 +18,7 @@ use std::io::{self, Write, Read};
 use std::time::{SystemTime, Duration};
 use async::async_stdin;
 use std::env;
+use std::ops::Deref;
 
 /// A terminal color.
 pub trait Color {
