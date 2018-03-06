@@ -1,6 +1,7 @@
 //! Mouse and key events.
 
 use std::io::{Error, ErrorKind};
+#[allow(unused_imports)]
 use std::ascii::AsciiExt;
 use std::str;
 
