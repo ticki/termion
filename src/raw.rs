@@ -22,19 +22,41 @@
 //! }
 //! ```
 
+use std::fmt;
 use std::io::{self, Write};
 use std::ops;
 
-use sys::Termios;
+use sys::Termios as SysTermios;
 use sys::attr::{get_terminal_attr, raw_terminal_attr, set_terminal_attr};
 
 /// The timeout of an escape code control sequence, in milliseconds.
 pub const CONTROL_SEQUENCE_TIMEOUT: u64 = 100;
 
+/// A wrapper around sys::Termios that implements std::fmt::Debug.
+// This workaround can go once libc gets adjusted so that all public
+// types implement Debug https://github.com/rust-lang/rfcs/pull/2235.
+struct Termios(SysTermios);
+
+impl fmt::Debug for Termios {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "termion::sys::Termios")
+    }
+}
+
+impl ops::Deref for Termios {
+    type Target = SysTermios;
+
+    fn deref(&self) -> &SysTermios {
+        &self.0
+    }
+
+}
+
 /// A terminal restorer, which keeps the previous state of the terminal, and restores it, when
 /// dropped.
 ///
 /// Restoring will entirely bring back the old TTY state.
+#[derive(Debug)]
 pub struct RawTerminal<W: Write> {
     prev_ios: Termios,
     output: W,
@@ -42,7 +64,7 @@ pub struct RawTerminal<W: Write> {
 
 impl<W: Write> Drop for RawTerminal<W> {
     fn drop(&mut self) {
-        set_terminal_attr(&self.prev_ios).unwrap();
+        set_terminal_attr(&*self.prev_ios).unwrap();
     }
 }
 
@@ -95,7 +117,7 @@ impl<W: Write> IntoRawMode for W {
         set_terminal_attr(&ios)?;
 
         Ok(RawTerminal {
-            prev_ios: prev_ios,
+            prev_ios: Termios(prev_ios),
             output: self,
         })
     }

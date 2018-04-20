@@ -29,7 +29,7 @@ derive_csi_sequence!("Save the cursor.", Save, "s");
 ///     print!("{}{}Stuff", termion::clear::All, termion::cursor::Goto(5, 3));
 /// }
 /// ```
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Goto(pub u16, pub u16);
 
 impl Default for Goto {
@@ -47,7 +47,7 @@ impl fmt::Display for Goto {
 }
 
 /// Move cursor left.
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Left(pub u16);
 
 impl fmt::Display for Left {
@@ -57,7 +57,7 @@ impl fmt::Display for Left {
 }
 
 /// Move cursor right.
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Right(pub u16);
 
 impl fmt::Display for Right {
@@ -67,7 +67,7 @@ impl fmt::Display for Right {
 }
 
 /// Move cursor up.
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Up(pub u16);
 
 impl fmt::Display for Up {
@@ -77,7 +77,7 @@ impl fmt::Display for Up {
 }
 
 /// Move cursor down.
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Down(pub u16);
 
 impl fmt::Display for Down {

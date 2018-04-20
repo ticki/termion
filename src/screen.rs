@@ -24,6 +24,7 @@ use std::ops;
 use std::fmt;
 
 /// Switch to the main screen buffer of the terminal.
+#[derive(Debug)]
 pub struct ToMainScreen;
 
 impl fmt::Display for ToMainScreen {
@@ -33,6 +34,7 @@ impl fmt::Display for ToMainScreen {
 }
 
 /// Switch to the alternate screen buffer of the terminal.
+#[derive(Debug)]
 pub struct ToAlternateScreen;
 
 impl fmt::Display for ToAlternateScreen {
@@ -46,6 +48,7 @@ impl fmt::Display for ToAlternateScreen {
 ///
 /// This is achieved by switching the terminal to the alternate screen on creation and
 /// automatically switching it back to the original screen on drop.
+#[derive(Debug)]
 pub struct AlternateScreen<W: Write> {
     /// The output target.
     output: W,

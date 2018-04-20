@@ -3,7 +3,7 @@
 use std::fmt;
 
 /// Scroll up.
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Up(pub u16);
 
 impl fmt::Display for Up {
@@ -13,7 +13,7 @@ impl fmt::Display for Up {
 }
 
 /// Scroll down.
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Down(pub u16);
 
 impl fmt::Display for Down {
