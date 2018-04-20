@@ -31,7 +31,7 @@ derive_csi_sequence!("Save the cursor.", Save, "s");
 ///     print!("{}{}Stuff", termion::clear::All, termion::cursor::Goto(5, 3));
 /// }
 /// ```
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Goto(pub u16, pub u16);
 
 impl From<Goto> for String {
@@ -55,7 +55,7 @@ impl fmt::Display for Goto {
 }
 
 /// Move cursor left.
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Left(pub u16);
 
 impl From<Left> for String {
@@ -72,7 +72,7 @@ impl fmt::Display for Left {
 }
 
 /// Move cursor right.
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Right(pub u16);
 
 impl From<Right> for String {
@@ -89,7 +89,7 @@ impl fmt::Display for Right {
 }
 
 /// Move cursor up.
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Up(pub u16);
 
 impl From<Up> for String {
@@ -106,7 +106,7 @@ impl fmt::Display for Up {
 }
 
 /// Move cursor down.
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Down(pub u16);
 
 impl From<Down> for String {
@@ -178,6 +178,7 @@ impl<W: Write> DetectCursorPos for W {
 
 /// Hide the cursor for the lifetime of this struct.
 /// It will hide the cursor on creation with from() and show it back on drop().
+#[derive(Debug)]
 pub struct HideCursor<W: Write> {
     /// The output target.
     output: W,

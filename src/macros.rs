@@ -7,7 +7,7 @@ macro_rules! csi {
 macro_rules! derive_csi_sequence {
     ($doc:expr, $name:ident, $value:expr) => {
         #[doc = $doc]
-        #[derive(Copy, Clone)]
+        #[derive(Copy, Clone, Debug)]
         pub struct $name;
 
         impl fmt::Display for $name {

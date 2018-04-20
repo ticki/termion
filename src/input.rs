@@ -7,6 +7,7 @@ use event::{self, Event, Key};
 use raw::IntoRawMode;
 
 /// An iterator over input keys.
+#[derive(Debug)]
 pub struct Keys<R> {
     iter: Events<R>,
 }
@@ -27,6 +28,7 @@ impl<R: Read> Iterator for Keys<R> {
 }
 
 /// An iterator over input events.
+#[derive(Debug)]
 pub struct Events<R>  {
     inner: EventsAndRaw<R>
 }
@@ -40,6 +42,7 @@ impl<R: Read> Iterator for Events<R> {
 }
 
 /// An iterator over input events and the bytes that define them.
+#[derive(Debug)]
 pub struct EventsAndRaw<R> {
     source: R,
     leftover: Option<u8>,
@@ -182,6 +185,7 @@ const EXIT_MOUSE_SEQUENCE: &'static str = csi!("?1006l\x1b[?1015l\x1b[?1002l\x1b
 /// A terminal with added mouse support.
 ///
 /// This can be obtained through the `From` implementations.
+#[derive(Debug)]
 pub struct MouseTerminal<W: Write> {
     term: W,
 }
