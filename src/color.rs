@@ -30,7 +30,7 @@ pub trait Color {
 macro_rules! derive_color {
     ($doc:expr, $name:ident, $value:expr) => {
         #[doc = $doc]
-        #[derive(Copy, Clone, Debug)]
+        #[derive(Copy, Clone, Debug, PartialEq)]
         pub struct $name;
 
         impl Color for $name {
@@ -77,7 +77,7 @@ impl<'a> Color for &'a Color {
 }
 
 /// An arbitrary ANSI color value.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct AnsiValue(pub u8);
 
 impl AnsiValue {
@@ -139,7 +139,7 @@ impl Color for Rgb {
 }
 
 /// Reset colors to defaults.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Reset;
 
 impl Color for Reset {
@@ -155,7 +155,7 @@ impl Color for Reset {
 }
 
 /// A foreground color.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Fg<C: Color>(pub C);
 
 impl<C: Color> fmt::Display for Fg<C> {
@@ -165,7 +165,7 @@ impl<C: Color> fmt::Display for Fg<C> {
 }
 
 /// A background color.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Bg<C: Color>(pub C);
 
 impl<C: Color> fmt::Display for Bg<C> {
