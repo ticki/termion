@@ -1,8 +1,33 @@
 use std::io::{self, Read};
 use std::sync::mpsc;
 use std::thread;
+use std::io::BufReader;
+use std::io::BufRead;
 
 use sys::tty::get_tty;
+
+/// Construct an asynchronous handle to the TTY standard input, with a delimiter byte.
+///
+/// This has the same advantages as async_stdin(), but also allows specifying a delimiter byte. The
+/// reader will stop reading after consuming the delimiter byte.
+pub fn async_stdin_until(delimiter: u8) -> AsyncReader {
+    let (send, recv) = mpsc::channel();
+
+    thread::spawn(move || for i in get_tty().unwrap().bytes() {
+
+        match i {
+            Ok(byte) => {
+                let end_of_stream = &byte == &delimiter;
+                let send_error = send.send(Ok(byte)).is_err();
+
+                if end_of_stream || send_error { return; }
+            },
+            Err(e) => { return; }
+        }
+    });
+
+    AsyncReader { recv: recv }
+}
 
 /// Construct an asynchronous handle to the TTY standard input.
 ///
