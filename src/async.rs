@@ -1,8 +1,6 @@
 use std::io::{self, Read};
 use std::sync::mpsc;
 use std::thread;
-use std::io::BufReader;
-use std::io::BufRead;
 
 use sys::tty::get_tty;
 
@@ -22,7 +20,7 @@ pub fn async_stdin_until(delimiter: u8) -> AsyncReader {
 
                 if end_of_stream || send_error { return; }
             },
-            Err(e) => { return; }
+            Err(_) => { return; }
         }
     });
 
