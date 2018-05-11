@@ -8,7 +8,7 @@
 //!
 //! Supports Redox, Mac OS X, and Linux (or, in general, ANSI terminals).
 //!
-//! For more information refer to the [README](https://github.com/ticki/termion).
+//! For more information refer to the [README](https://github.com/redox-os/termion).
 #![deny(missing_debug_implementations)]
 #![warn(missing_docs)]
 
