@@ -1,6 +1,7 @@
 use std::io::{self, Read};
 use std::sync::mpsc;
 use std::thread;
+use std::time::Duration;
 
 use sys::tty::get_tty;
 
@@ -74,7 +75,7 @@ impl Read for AsyncReader {
                 break;
             }
 
-            match self.recv.try_recv() {
+            match self.recv.recv_timeout(Duration::from_millis(1)) {
                 Ok(Ok(b)) => {
                     buf[total] = b;
                     total += 1;
