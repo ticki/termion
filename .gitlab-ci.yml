@@ -4,31 +4,22 @@ before_script:
   - curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
   - source "$HOME/.cargo/env"
 
-build_stable:
+stable:
   script:
     - cargo +stable build --verbose
+    - cargo +stable test --verbose
+    - cargo +stable test --release --verbose
 
-test_stable:
-  script:
-    - bash -c "cargo test --verbose"
-    - bash -c "cargo test --release --verbose"
-    
-build_beta:
+beta:
   script:
     - rustup toolchain add beta
     - cargo +beta build --verbose
+    - cargo +beta test --verbose
+    - cargo +beta test --release --verbose
 
-test_beta:
+nightly:
   script:
-    - bash -c "cargo +beta test --verbose"
-    - bash -c "cargo +beta test --release --verbose"
-
-build_nightly:
-  script:
-    - rustup toolchain add nightly
+  - rustup toolchain add nightly
     - cargo +nightly build --verbose
-
-test_nightly:
-  script:
-    - bash -c "cargo +nightly test --verbose"
-    - bash -c "cargo +nightly test --release --verbose"
+    - cargo +nightly test --verbose
+    - cargo +nightly test --release --verbose
