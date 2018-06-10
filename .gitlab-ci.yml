@@ -1,16 +1,34 @@
 before_script:
   - apt-get update -qq
   - apt-get install -qq build-essential curl git
-  - curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly
+  - curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
   - source "$HOME/.cargo/env"
-  - rustup toolchain add stable
-  - rustup toolchain add beta
 
-build:
+build_stable:
   script:
-    - cargo build --verbose
+    - cargo +stable build --verbose
 
-test:
+test_stable:
   script:
-    - cargo test --verbose
-    - cargo test --release --verbose
+    - bash -c "cargo test --verbose"
+    - bash -c "cargo test --release --verbose"
+    
+build_beta:
+  script:
+    - rustup toolchain add beta
+    - cargo +beta build --verbose
+
+test_beta:
+  script:
+    - bash -c "cargo +beta test --verbose"
+    - bash -c "cargo +beta test --release --verbose"
+
+build_nightly:
+  script:
+    - rustup toolchain add nightly
+    - cargo +nightly build --verbose
+
+test_nightly:
+  script:
+    - bash -c "cargo +nightly test --verbose"
+    - bash -c "cargo +nightly test --release --verbose"
