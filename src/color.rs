@@ -18,6 +18,7 @@ use std::io::{self, Write, Read};
 use std::time::{SystemTime, Duration};
 use async::async_stdin;
 use std::env;
+use std::ops::Deref;
 
 /// A terminal color.
 pub trait Color {
@@ -25,6 +26,17 @@ pub trait Color {
     fn write_fg(&self, f: &mut fmt::Formatter) -> fmt::Result;
     /// Write the background version of this color.
     fn write_bg(&self, f: &mut fmt::Formatter) -> fmt::Result;
+}
+
+/// Color implementation for boxed version of color
+impl<'a> Color for Box<Color + 'a> {
+    fn write_fg(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.deref().write_fg(f)
+    }
+
+    fn write_bg(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.deref().write_bg(f)
+    }
 }
 
 macro_rules! derive_color {
