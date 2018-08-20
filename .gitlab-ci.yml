@@ -7,19 +7,19 @@ before_script:
 stable:
   script:
     - cargo +stable build --verbose
-    - cargo +stable test --verbose
-    - cargo +stable test --release --verbose
+    - script -q -c "cargo +stable test --verbose"
+    - script -q -c "cargo +stable test --release --verbose"
 
 beta:
   script:
     - rustup toolchain add beta
     - cargo +beta build --verbose
-    - cargo +beta test --verbose
-    - cargo +beta test --release --verbose
+    - script -q -c "cargo +beta test --verbose"
+    - script -q -c "cargo +beta test --release --verbose"
 
 nightly:
   script:
   - rustup toolchain add nightly
-    - cargo +nightly build --verbose
-    - cargo +nightly test --verbose
-    - cargo +nightly test --release --verbose
+  - cargo +nightly build --verbose
+  - script -q -c "cargo +nightly test --verbose"
+  - script -q -c "cargo +nightly test --release --verbose"
