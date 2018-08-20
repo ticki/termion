@@ -9,6 +9,9 @@ license = "MIT"
 keywords = ["tty", "color", "terminal", "password", "tui"]
 exclude = ["target", "CHANGELOG.md", "image.png", "Cargo.lock"]
 
+[dependencies]
+numtoa = { version = "0.1.0", features = ["std"]}
+
 [target.'cfg(not(target_os = "redox"))'.dependencies]
 libc = "0.2.8"
 
