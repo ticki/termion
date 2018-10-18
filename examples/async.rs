@@ -17,22 +17,28 @@ fn main() {
            termion::cursor::Goto(1, 1))
             .unwrap();
 
-    loop {
+    let mut buf = String::new();
+    'a: loop {
         write!(stdout, "{}", termion::clear::CurrentLine).unwrap();
 
-        let b = stdin.next();
-        write!(stdout, "\r{:?}    <- This demonstrates the async read input char. Between each update a 100 ms. is waited, simply to demonstrate the async fashion. \n\r", b).unwrap();
-        if let Some(Ok(b'q')) = b {
-            break;
-        }
+        write!(stdout, "\r{}    <- This demonstrates the async read input char. \
+               Between each update a 100 ms. is waited, simply to demonstrate the async fashion. \n\r", buf).unwrap();
+
+        while let Some(next) = stdin.next() { match next {
+            Ok(b'q') => break 'a,
+
+            Ok(c) => buf.push(c as char),
+
+            Err(e) => panic!("error: {:?}", e),
+        }}
 
         stdout.flush().unwrap();
 
-        thread::sleep(Duration::from_millis(50));
-        stdout.write_all(b"# ").unwrap();
-        stdout.flush().unwrap();
-        thread::sleep(Duration::from_millis(50));
-        stdout.write_all(b"\r #").unwrap();
+        //thread::sleep(Duration::from_millis(200));
+        //stdout.write_all(b"# ").unwrap();
+        //stdout.flush().unwrap();
+        thread::sleep(Duration::from_millis(100));
+        //stdout.write_all(b"\r #").unwrap();
         write!(stdout, "{}", termion::cursor::Goto(1, 1)).unwrap();
         stdout.flush().unwrap();
     }
