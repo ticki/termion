@@ -1,6 +1,6 @@
 [package]
 name = "termion"
-version = "1.5.1"
+version = "1.5.2"
 authors = ["ticki <Ticki@users.noreply.github.com>", "gycos <alexandre.bury@gmail.com>", "IGI-111 <igi-111@protonmail.com>"]
 description = "A bindless library for manipulating terminals."
 repository = "https://gitlab.redox-os.org/redox-os/termion"
