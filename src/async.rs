@@ -6,7 +6,7 @@ use crossbeam_channel::{self as channel, bounded, Receiver};
 
 use sys::tty::get_tty;
 
-const QUEUE_SIZE: usize = 32;
+const QUEUE_SIZE: usize = 128;
 const TIMEOUT: Duration = Duration::from_millis(1);
 
 /// Construct an asynchronous handle to the TTY standard input, with a delimiter byte.
