@@ -11,6 +11,10 @@
 //! For more information refer to the [README](https://github.com/redox-os/termion).
 #![warn(missing_docs)]
 
+extern crate numtoa;
+#[macro_use]
+extern crate crossbeam_channel;
+
 #[cfg(target_os = "redox")]
 #[path="sys/redox/mod.rs"]
 mod sys;

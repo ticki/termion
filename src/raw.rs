@@ -101,6 +101,20 @@ impl<W: Write> IntoRawMode for W {
     }
 }
 
+impl<W: Write> RawTerminal<W> {
+    pub fn suspend_raw_mode(&self) -> io::Result<()> {
+        set_terminal_attr(&self.prev_ios)?;
+        Ok(())
+    }
+
+    pub fn activate_raw_mode(&self) -> io::Result<()> {
+        let mut ios = get_terminal_attr()?;
+        raw_terminal_attr(&mut ios);
+        set_terminal_attr(&ios)?;
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

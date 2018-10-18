@@ -1,0 +1,66 @@
+image: "rust:latest"
+
+stages:
+  - build
+  - test
+
+before_script:
+    - rustup toolchain add $toolchain
+
+cache:
+  paths:
+    - target/
+
+build:stable:
+  stage: build
+  variables:
+    toolchain: stable
+  script:
+    - cargo +stable build --verbose
+    - cargo +stable build --release --verbose
+
+test:stable:
+  stage: test
+  variables:
+    toolchain: stable
+  dependencies:
+    - build:stable
+  script:
+    - script -q -c "cargo +stable test --verbose"
+    - script -q -c "cargo +stable test --release --verbose"
+
+build:beta:
+  stage: build
+  variables:
+    toolchain: beta
+  script:
+    - cargo +beta build --verbose
+    - cargo +beta build --release --verbose
+
+test:beta:
+  stage: test
+  variables:
+    toolchain: beta
+  dependencies:
+    - build:beta
+  script:
+    - script -q -c "cargo +beta test --verbose"
+    - script -q -c "cargo +beta test --release --verbose"
+
+build:nightly:
+  stage: build
+  variables:
+    toolchain: nightly
+  script:
+    - cargo +nightly build --verbose
+    - cargo +nightly build --release --verbose
+
+test:nightly:
+  stage: test
+  variables:
+    toolchain: nightly
+  dependencies:
+    - build:nightly
+  script:
+    - script -q -c "cargo +nightly test --verbose"
+    - script -q -c "cargo +nightly test --release --verbose"
