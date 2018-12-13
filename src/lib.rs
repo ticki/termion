@@ -9,7 +9,6 @@
 //! Supports Redox, Mac OS X, and Linux (or, in general, ANSI terminals).
 //!
 //! For more information refer to the [README](https://github.com/redox-os/termion).
-#![warn(missing_docs)]
 
 extern crate numtoa;
 #[macro_use]
