@@ -107,7 +107,7 @@ impl<W: Write> IntoRawMode for W {
         set_terminal_attr(&ios)?;
 
         Ok(RawTerminal {
-            prev_ios: prev_ios,
+            prev_ios,
             output: self,
         })
     }
