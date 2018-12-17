@@ -21,6 +21,10 @@ mod sys;
 #[path="sys/unix/mod.rs"]
 mod sys;
 
+#[cfg(windows)]
+#[path="sys/windows/mod.rs"]
+mod sys;
+
 pub use sys::size::terminal_size;
 #[cfg(all(unix, not(target_os = "redox")))]
 pub use sys::size::terminal_size_pixels;
