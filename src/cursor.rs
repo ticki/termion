@@ -1,11 +1,11 @@
 //! Cursor movement.
 
-use std::fmt;
-use std::io::{self, Write, Error, ErrorKind, Read};
 use async::async_stdin_until;
-use std::time::{SystemTime, Duration};
-use raw::CONTROL_SEQUENCE_TIMEOUT;
 use numtoa::NumToA;
+use raw::CONTROL_SEQUENCE_TIMEOUT;
+use std::fmt;
+use std::io::{self, Error, ErrorKind, Read, Write};
+use std::time::{Duration, SystemTime};
 
 derive_csi_sequence!("Hide the cursor.", Hide, "?25l");
 derive_csi_sequence!("Show the cursor.", Show, "?25h");
@@ -36,7 +36,14 @@ pub struct Goto(pub u16, pub u16);
 impl From<Goto> for String {
     fn from(this: Goto) -> String {
         let (mut x, mut y) = ([0u8; 20], [0u8; 20]);
-        ["\x1B[", this.1.numtoa_str(10, &mut x), ";", this.0.numtoa_str(10, &mut y), "H"].concat()
+        [
+            "\x1B[",
+            this.1.numtoa_str(10, &mut x),
+            ";",
+            this.0.numtoa_str(10, &mut y),
+            "H",
+        ]
+        .concat()
     }
 }
 
@@ -151,7 +158,10 @@ impl<W: Write> DetectCursorPos for W {
         }
 
         if read_chars.is_empty() {
-            return Err(Error::new(ErrorKind::Other, "Cursor position detection timed out."));
+            return Err(Error::new(
+                ErrorKind::Other,
+                "Cursor position detection timed out.",
+            ));
         }
 
         // The answer will look like `ESC [ Cy ; Cx R`.
@@ -162,14 +172,8 @@ impl<W: Write> DetectCursorPos for W {
         let coords: String = read_str.chars().skip(beg + 1).collect();
         let mut nums = coords.split(';');
 
-        let cy = nums.next()
-            .unwrap()
-            .parse::<u16>()
-            .unwrap();
-        let cx = nums.next()
-            .unwrap()
-            .parse::<u16>()
-            .unwrap();
+        let cy = nums.next().unwrap().parse::<u16>().unwrap();
+        let cx = nums.next().unwrap().parse::<u16>().unwrap();
 
         Ok((cx, cy))
     }

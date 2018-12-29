@@ -1,7 +1,7 @@
 use std::{io, mem};
 
-use super::{cvt, Termios};
 use super::libc::c_int;
+use super::{cvt, Termios};
 
 pub fn get_terminal_attr() -> io::Result<Termios> {
     extern "C" {

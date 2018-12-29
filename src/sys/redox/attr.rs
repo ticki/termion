@@ -12,7 +12,10 @@ pub fn get_terminal_attr() -> io::Result<Termios> {
     if res? == termios.len() {
         Ok(termios)
     } else {
-        Err(io::Error::new(io::ErrorKind::Other, "Unable to get the terminal attributes."))
+        Err(io::Error::new(
+            io::ErrorKind::Other,
+            "Unable to get the terminal attributes.",
+        ))
     }
 }
 
@@ -24,7 +27,10 @@ pub fn set_terminal_attr(termios: &Termios) -> io::Result<()> {
     if res? == termios.len() {
         Ok(())
     } else {
-        Err(io::Error::new(io::ErrorKind::Other, "Unable to set the terminal attributes."))
+        Err(io::Error::new(
+            io::ErrorKind::Other,
+            "Unable to set the terminal attributes.",
+        ))
     }
 }
 

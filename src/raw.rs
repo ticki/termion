@@ -25,8 +25,8 @@
 use std::io::{self, Write};
 use std::ops;
 
-use sys::Termios;
 use sys::attr::{get_terminal_attr, raw_terminal_attr, set_terminal_attr};
+use sys::Termios;
 
 /// The timeout of an escape code control sequence, in milliseconds.
 pub const CONTROL_SEQUENCE_TIMEOUT: u64 = 100;
@@ -118,7 +118,7 @@ impl<W: Write> RawTerminal<W> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use std::io::{Write, stdout};
+    use std::io::{stdout, Write};
 
     #[test]
     fn test_into_raw_mode() {

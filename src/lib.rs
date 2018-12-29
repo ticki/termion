@@ -14,18 +14,18 @@
 extern crate numtoa;
 
 #[cfg(target_os = "redox")]
-#[path="sys/redox/mod.rs"]
+#[path = "sys/redox/mod.rs"]
 mod sys;
 
 #[cfg(unix)]
-#[path="sys/unix/mod.rs"]
+#[path = "sys/unix/mod.rs"]
 mod sys;
 
 pub use sys::size::terminal_size;
-pub use sys::tty::{is_tty, get_tty};
+pub use sys::tty::{get_tty, is_tty};
 
 mod async;
-pub use async::{AsyncReader, async_stdin};
+pub use async::{async_stdin, AsyncReader};
 
 #[macro_use]
 mod macros;

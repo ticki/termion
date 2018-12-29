@@ -12,13 +12,13 @@
 //! }
 //! ```
 
-use std::fmt;
-use raw::CONTROL_SEQUENCE_TIMEOUT;
-use std::io::{self, Write, Read};
-use std::time::{SystemTime, Duration};
 use async::async_stdin;
-use std::env;
 use numtoa::NumToA;
+use raw::CONTROL_SEQUENCE_TIMEOUT;
+use std::env;
+use std::fmt;
+use std::io::{self, Read, Write};
+use std::time::{Duration, SystemTime};
 
 /// A terminal color.
 pub trait Color {
@@ -49,11 +49,15 @@ macro_rules! derive_color {
         impl $name {
             #[inline]
             /// Returns the ANSI escape sequence as a string.
-            pub fn fg_str(&self) -> &'static str { csi!("38;5;", $value, "m") }
+            pub fn fg_str(&self) -> &'static str {
+                csi!("38;5;", $value, "m")
+            }
 
             #[inline]
             /// Returns the ANSI escape sequences as a string.
-            pub fn bg_str(&self) -> &'static str { csi!("48;5;", $value, "m") }
+            pub fn bg_str(&self) -> &'static str {
+                csi!("48;5;", $value, "m")
+            }
         }
     };
 }
@@ -94,15 +98,21 @@ pub struct AnsiValue(pub u8);
 impl AnsiValue {
     /// 216-color (r, g, b ≤ 5) RGB.
     pub fn rgb(r: u8, g: u8, b: u8) -> AnsiValue {
-        debug_assert!(r <= 5,
-                      "Red color fragment (r = {}) is out of bound. Make sure r ≤ 5.",
-                      r);
-        debug_assert!(g <= 5,
-                      "Green color fragment (g = {}) is out of bound. Make sure g ≤ 5.",
-                      g);
-        debug_assert!(b <= 5,
-                      "Blue color fragment (b = {}) is out of bound. Make sure b ≤ 5.",
-                      b);
+        debug_assert!(
+            r <= 5,
+            "Red color fragment (r = {}) is out of bound. Make sure r ≤ 5.",
+            r
+        );
+        debug_assert!(
+            g <= 5,
+            "Green color fragment (g = {}) is out of bound. Make sure g ≤ 5.",
+            g
+        );
+        debug_assert!(
+            b <= 5,
+            "Blue color fragment (b = {}) is out of bound. Make sure b ≤ 5.",
+            b
+        );
 
         AnsiValue(16 + 36 * r + 6 * g + b)
     }
@@ -112,10 +122,12 @@ impl AnsiValue {
     /// There are 24 shades of gray.
     pub fn grayscale(shade: u8) -> AnsiValue {
         // Unfortunately, there are a little less than fifty shades.
-        debug_assert!(shade < 24,
-                      "Grayscale out of bound (shade = {}). There are only 24 shades of \
-                      gray.",
-                      shade);
+        debug_assert!(
+            shade < 24,
+            "Grayscale out of bound (shade = {}). There are only 24 shades of \
+             gray.",
+            shade
+        );
 
         AnsiValue(0xE8 + shade)
     }
@@ -200,9 +212,13 @@ const RESET_BG: &str = csi!("49m");
 
 impl Reset {
     /// Returns the ANSI sequence as a string.
-    pub fn fg_str(self) -> &'static str { RESET_FG }
+    pub fn fg_str(self) -> &'static str {
+        RESET_FG
+    }
     /// Returns the ANSI sequence as a string.
-    pub fn bg_str(self) -> &'static str { RESET_BG }
+    pub fn bg_str(self) -> &'static str {
+        RESET_BG
+    }
 }
 
 impl Color for Reset {
@@ -268,15 +284,15 @@ impl<W: Write> DetectColors for W {
         } else {
             // OSC 4 is not supported, trust TERM contents.
             Ok(match env::var_os("TERM") {
-                   Some(val) => {
-                       if val.to_str().unwrap_or("").contains("256color") {
-                           256
-                       } else {
-                           8
-                       }
-                   }
-                   None => 8,
-               })
+                Some(val) => {
+                    if val.to_str().unwrap_or("").contains("256color") {
+                        256
+                    } else {
+                        8
+                    }
+                }
+                None => 8,
+            })
         }
     }
 }

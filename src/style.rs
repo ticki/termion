@@ -16,7 +16,9 @@ derive_csi_sequence!("Undo italic text.", NoItalic, "23m");
 derive_csi_sequence!("Undo underlined text.", NoUnderline, "24m");
 derive_csi_sequence!("Undo blinking text (not widely supported).", NoBlink, "25m");
 derive_csi_sequence!("Undo inverted colors (negative mode).", NoInvert, "27m");
-derive_csi_sequence!("Undo crossed out text (not widely supported).",
-                     NoCrossedOut,
-                     "29m");
+derive_csi_sequence!(
+    "Undo crossed out text (not widely supported).",
+    NoCrossedOut,
+    "29m"
+);
 derive_csi_sequence!("Framed text (not widely supported).", Framed, "51m");

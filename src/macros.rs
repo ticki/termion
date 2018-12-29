@@ -17,11 +17,15 @@ macro_rules! derive_csi_sequence {
         }
 
         impl AsRef<[u8]> for $name {
-            fn as_ref(&self) -> &'static [u8] { csi!($value).as_bytes() }
+            fn as_ref(&self) -> &'static [u8] {
+                csi!($value).as_bytes()
+            }
         }
 
         impl AsRef<str> for $name {
-            fn as_ref(&self) -> &'static str { csi!($value) }
+            fn as_ref(&self) -> &'static str {
+                csi!($value)
+            }
         }
     };
 }
