@@ -35,7 +35,7 @@ pub struct Goto(pub u16, pub u16);
 
 impl From<Goto> for String {
     fn from(this: Goto) -> String {
-        let (mut x, mut y) = ([0u8; 20], [0u8; 20]);
+        let (mut x, mut y) = ([0u8; 5], [0u8; 5]);
         [
             "\x1B[",
             this.1.numtoa_str(10, &mut x),
@@ -66,7 +66,7 @@ pub struct Left(pub u16);
 
 impl From<Left> for String {
     fn from(this: Left) -> String {
-        let mut buf = [0u8; 20];
+        let mut buf = [0u8; 5];
         ["\x1B[", this.0.numtoa_str(10, &mut buf), "D"].concat()
     }
 }
@@ -83,7 +83,7 @@ pub struct Right(pub u16);
 
 impl From<Right> for String {
     fn from(this: Right) -> String {
-        let mut buf = [0u8; 20];
+        let mut buf = [0u8; 5];
         ["\x1B[", this.0.numtoa_str(10, &mut buf), "C"].concat()
     }
 }
@@ -100,7 +100,7 @@ pub struct Up(pub u16);
 
 impl From<Up> for String {
     fn from(this: Up) -> String {
-        let mut buf = [0u8; 20];
+        let mut buf = [0u8; 5];
         ["\x1B[", this.0.numtoa_str(10, &mut buf), "A"].concat()
     }
 }
@@ -117,7 +117,7 @@ pub struct Down(pub u16);
 
 impl From<Down> for String {
     fn from(this: Down) -> String {
-        let mut buf = [0u8; 20];
+        let mut buf = [0u8; 5];
         ["\x1B[", this.0.numtoa_str(10, &mut buf), "B"].concat()
     }
 }

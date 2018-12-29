@@ -136,14 +136,14 @@ impl AnsiValue {
 impl AnsiValue {
     /// Returns the ANSI sequence as a string.
     pub fn fg_string(self) -> String {
-        let mut x = [0u8; 20];
+        let mut x = [0u8; 3];
         let x = self.0.numtoa_str(10, &mut x);
         [csi!("38;5;"), x, "m"].concat()
     }
 
     /// Returns the ANSI sequence as a string.
     pub fn bg_string(self) -> String {
-        let mut x = [0u8; 20];
+        let mut x = [0u8; 3];
         let x = self.0.numtoa_str(10, &mut x);
         [csi!("48;5;"), x, "m"].concat()
     }
@@ -168,7 +168,7 @@ pub struct Rgb(pub u8, pub u8, pub u8);
 impl Rgb {
     /// Returns the ANSI sequence as a string.
     pub fn fg_string(self) -> String {
-        let (mut x, mut y, mut z) = ([0u8; 20], [0u8; 20], [0u8; 20]);
+        let (mut x, mut y, mut z) = ([0u8; 3], [0u8; 3], [0u8; 3]);
         let (x, y, z) = (
             self.0.numtoa_str(10, &mut x),
             self.1.numtoa_str(10, &mut y),
@@ -180,7 +180,7 @@ impl Rgb {
 
     /// Returns the ANSI sequence as a string.
     pub fn bg_string(self) -> String {
-        let (mut x, mut y, mut z) = ([0u8; 20], [0u8; 20], [0u8; 20]);
+        let (mut x, mut y, mut z) = ([0u8; 3], [0u8; 3], [0u8; 3]);
         let (x, y, z) = (
             self.0.numtoa_str(10, &mut x),
             self.1.numtoa_str(10, &mut y),
