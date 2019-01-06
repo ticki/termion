@@ -101,28 +101,24 @@ pub fn parse_event<I>(item: u8, iter: &mut I) -> Result<Event, Error>
 where
     I: Iterator<Item = Result<u8, Error>>,
 {
-    let error = Error::new(ErrorKind::Other, "Could not parse an event");
     match item {
         b'\x1B' => {
             // This is an escape character, leading a control sequence.
-            Ok(match iter.next() {
+            match iter.next() {
                 Some(Ok(b'O')) => {
                     match iter.next() {
                         // F1-F4
-                        Some(Ok(val @ b'P'...b'S')) => Event::Key(Key::F(1 + val - b'P')),
-                        _ => return Err(error),
+                        Some(Ok(val @ b'P'...b'S')) => Ok(Event::Key(Key::F(1 + val - b'P'))),
+                        _ => Err(Error::new(ErrorKind::Other, "Could not parse an event")),
                     }
                 }
-                Some(Ok(b'[')) => {
-                    // This is a CSI sequence.
-                    parse_csi(iter).ok_or(error)?
+                // This is a CSI sequence.
+                Some(Ok(b'[')) => parse_csi(iter),
+                Some(Ok(c)) => Ok(Event::Key(Key::Alt(parse_utf8_char(c, iter)?))),
+                Some(Err(_)) | None => {
+                    Err(Error::new(ErrorKind::Other, "Could not parse an event"))
                 }
-                Some(Ok(c)) => {
-                    let ch = parse_utf8_char(c, iter);
-                    Event::Key(Key::Alt(try!(ch)))
-                }
-                Some(Err(_)) | None => return Err(error),
-            })
+            }
         }
         b'\n' | b'\r' => Ok(Event::Key(Key::Char('\n'))),
         b'\t' => Ok(Event::Key(Key::Char('\t'))),
@@ -130,24 +126,21 @@ where
         c @ b'\x01'...b'\x1A' => Ok(Event::Key(Key::Ctrl((c as u8 - 0x1 + b'a') as char))),
         c @ b'\x1C'...b'\x1F' => Ok(Event::Key(Key::Ctrl((c as u8 - 0x1C + b'4') as char))),
         b'\0' => Ok(Event::Key(Key::Null)),
-        c => Ok({
-            let ch = parse_utf8_char(c, iter);
-            Event::Key(Key::Char(try!(ch)))
-        }),
+        c => Ok(Event::Key(Key::Char(parse_utf8_char(c, iter)?))),
     }
 }
 
 /// Parses a CSI sequence, just after reading ^[
 ///
 /// Returns None if an unrecognized sequence is found.
-fn parse_csi<I>(iter: &mut I) -> Option<Event>
+fn parse_csi<I>(iter: &mut I) -> Result<Event, Error>
 where
     I: Iterator<Item = Result<u8, Error>>,
 {
-    Some(match iter.next() {
+    Ok(match iter.next() {
         Some(Ok(b'[')) => match iter.next() {
             Some(Ok(val @ b'A'...b'E')) => Event::Key(Key::F(1 + val - b'A')),
-            _ => return None,
+            _ => return Err(Error::new(ErrorKind::InvalidData, "Invalid CSI sequence")),
         },
         Some(Ok(b'D')) => Event::Key(Key::Left),
         Some(Ok(b'C')) => Event::Key(Key::Right),
@@ -155,14 +148,17 @@ where
         Some(Ok(b'B')) => Event::Key(Key::Down),
         Some(Ok(b'H')) => Event::Key(Key::Home),
         Some(Ok(b'F')) => Event::Key(Key::End),
+        // X10 emulation mouse encoding: ESC [ CB Cx Cy (6 characters only).
         Some(Ok(b'M')) => {
-            // X10 emulation mouse encoding: ESC [ CB Cx Cy (6 characters only).
-            let mut next = || iter.next().unwrap().unwrap();
+            let mut next = || {
+                iter.next()
+                    .ok_or_else(|| Error::new(ErrorKind::InvalidData, "Invalid CSI Seqeunce"))?
+            };
 
-            let cb = next() as i8 - 32;
+            let cb = next()? as i8 - 32;
             // (1, 1) are the coords for upper left.
-            let cx = next().saturating_sub(32) as u16;
-            let cy = next().saturating_sub(32) as u16;
+            let cx = next()?.saturating_sub(32) as u16;
+            let cy = next()?.saturating_sub(32) as u16;
             Event::Mouse(match cb & 0b11 {
                 0 => {
                     if cb & 0x40 != 0 {
@@ -180,28 +176,53 @@ where
                 }
                 2 => MouseEvent::Press(MouseButton::Right, cx, cy),
                 3 => MouseEvent::Release(cx, cy),
-                _ => return None,
+                _ => return Err(Error::new(ErrorKind::InvalidData, "Invalid CSI sequence")),
             })
         }
+        // xterm mouse encoding:
+        // ESC [ < Cb ; Cx ; Cy (;) (M or m)
         Some(Ok(b'<')) => {
-            // xterm mouse encoding:
-            // ESC [ < Cb ; Cx ; Cy (;) (M or m)
-            let mut buf = Vec::new();
-            let mut c = iter.next().unwrap().unwrap();
-            while match c {
-                b'm' | b'M' => false,
-                _ => true,
-            } {
-                buf.push(c);
-                c = iter.next().unwrap().unwrap();
-            }
-            let str_buf = String::from_utf8(buf).unwrap();
-            let nums = &mut str_buf.split(';');
+            // Parse coordinate bytes, each coordinate is a u16
+            let mut next = |break_early| -> Result<(u16, u8), Error> {
+                let mut len = 0;
+                let mut end = b'\0';
+                let mut bytes = [b'\0'; 5];
+                for i in 0..5 {
+                    match iter.next().ok_or_else(|| {
+                        Error::new(ErrorKind::InvalidData, "Incomplete CSI sequence")
+                    })?? {
+                        b';' => {
+                            len = i;
+                            if break_early {
+                                break;
+                            }
+                        }
+                        c @ b'm' | c @ b'M' if !break_early => {
+                            if len == 0 {
+                                len = i;
+                            }
+                            end = c;
+                            break;
+                        }
+                        c => {
+                            bytes[i] = c;
+                        }
+                    }
+                }
+                Ok((
+                    str::from_utf8(&bytes[..len])
+                        .map_err(|_| {
+                            Error::new(ErrorKind::InvalidData, "CSI sequence is not valid UTF-8")
+                        })?
+                        .parse()
+                        .map_err(|_| {
+                            Error::new(ErrorKind::InvalidData, "CSI sequence contains invalid u16")
+                        })?,
+                    end,
+                ))
+            };
 
-            let cb = nums.next().unwrap().parse::<u16>().unwrap();
-            let cx = nums.next().unwrap().parse::<u16>().unwrap();
-            let cy = nums.next().unwrap().parse::<u16>().unwrap();
-
+            let (cb, cx, (cy, end)) = (next(true)?.0, next(true)?.0, next(false)?);
             let event = match cb {
                 0...2 | 64...65 => {
                     let button = match cb {
@@ -212,42 +233,77 @@ where
                         65 => MouseButton::WheelDown,
                         _ => unreachable!(),
                     };
-                    match c {
+                    match end {
                         b'M' => MouseEvent::Press(button, cx, cy),
                         b'm' => MouseEvent::Release(cx, cy),
-                        _ => return None,
+                        _ => return Err(Error::new(ErrorKind::InvalidData, "Invalid CSI sequence")),
                     }
                 }
                 32 => MouseEvent::Hold(cx, cy),
                 3 => MouseEvent::Release(cx, cy),
-                _ => return None,
+                _ => return Err(Error::new(ErrorKind::InvalidData, "Invalid CSI sequence")),
             };
 
             Event::Mouse(event)
         }
+        // Numbered escape code.
         Some(Ok(c @ b'0'...b'9')) => {
-            // Numbered escape code.
-            let mut buf = Vec::new();
-            buf.push(c);
-            let mut c = iter.next().unwrap().unwrap();
-            // The final byte of a CSI sequence can be in the range 64-126, so
-            // let's keep reading anything else.
-            while c < 64 || c > 126 {
-                buf.push(c);
-                c = iter.next().unwrap().unwrap();
+            let mut count = 0;
+            let mut bytes = [b'\0'; 19];
+            bytes[0] = c;
+
+            for i in 1..20 {
+                match iter.next().ok_or_else(|| {
+                    Error::new(ErrorKind::InvalidData, "Incomplete CSI sequence")
+                })?? {
+                    c @ b'M' | c @ b'~' => {
+                        bytes[i] = c;
+                        count = i;
+                        break;
+                    }
+                    c @ _ => {
+                        bytes[i] = c;
+                    }
+                }
             }
 
-            match c {
+            match bytes[count] {
                 // rxvt mouse encoding:
                 // ESC [ Cb ; Cx ; Cy ; M
                 b'M' => {
-                    let str_buf = String::from_utf8(buf).unwrap();
+                    let mut next = |offset| -> Result<(u16, _), Error> {
+                        let mut len = 0;
+                        for i in 1..5 {
+                            match bytes[offset + i] {
+                                b';' | b'M' | b'\0' => {
+                                    len = i;
+                                    break;
+                                }
+                                _ => (),
+                            }
+                        }
+                        Ok((
+                            str::from_utf8(&bytes[offset..(offset + len)])
+                                .map_err(|_| {
+                                    Error::new(
+                                        ErrorKind::InvalidData,
+                                        "CSI sequence is not valid UTF-8",
+                                    )
+                                })?
+                                .parse()
+                                .map_err(|e| {
+                                    Error::new(
+                                        ErrorKind::InvalidData,
+                                        "CSI sequence contains invalid u16",
+                                    )
+                                })?,
+                            offset + len + 1,
+                        ))
+                    };
 
-                    let nums: Vec<u16> = str_buf.split(';').map(|n| n.parse().unwrap()).collect();
-
-                    let cb = nums[0];
-                    let cx = nums[1];
-                    let cy = nums[2];
+                    let (cb, off) = next(0)?;
+                    let (cx, off) = next(off)?;
+                    let (cy, _) = next(off)?;
 
                     let event = match cb {
                         32 => MouseEvent::Press(MouseButton::Left, cx, cy),
@@ -256,30 +312,53 @@ where
                         35 => MouseEvent::Release(cx, cy),
                         64 => MouseEvent::Hold(cx, cy),
                         96 | 97 => MouseEvent::Press(MouseButton::WheelUp, cx, cy),
-                        _ => return None,
+                        _ => return Err(Error::new(ErrorKind::InvalidData, "Invalid CSI sequence")),
                     };
 
                     Event::Mouse(event)
                 }
                 // Special key code.
+                // This CSI sequence can be a list of semicolon-separated numbers.
                 b'~' => {
-                    let str_buf = String::from_utf8(buf).unwrap();
+                    let mut next = |offset| -> Result<(u8, _), Error> {
+                        let mut len = 0;
+                        for i in 1..3 {
+                            match bytes[offset + i] {
+                                b';' | b'~' | b'\0' => {
+                                    len = i;
+                                    break;
+                                }
+                                _ => (),
+                            }
+                        }
+                        Ok((
+                            str::from_utf8(&bytes[offset..offset + len])
+                                .map_err(|_| {
+                                    Error::new(
+                                        ErrorKind::InvalidData,
+                                        "CSI sequence is not valid UTF-8",
+                                    )
+                                })?
+                                .parse()
+                                .map_err(|_| {
+                                    Error::new(
+                                        ErrorKind::InvalidData,
+                                        "CSI sequence contains invalid u16",
+                                    )
+                                })?,
+                            offset + len,
+                        ))
+                    };
 
-                    // This CSI sequence can be a list of semicolon-separated
-                    // numbers.
-                    let nums: Vec<u8> = str_buf.split(';').map(|n| n.parse().unwrap()).collect();
+                    let (num, off) = next(0)?;
 
-                    if nums.is_empty() {
-                        return None;
-                    }
-
-                    // TODO: handle multiple values for key modififiers (ex: values
+                    // TODO: handle multiple values for key modifiers (ex: values
                     // [3, 2] means Shift+Delete)
-                    if nums.len() > 1 {
-                        return None;
+                    if next(off).is_ok() {
+                        return Err(Error::new(ErrorKind::Other, "CSI sequences with a special key code andmultiple key modifiers not yet supported"));
                     }
 
-                    match nums[0] {
+                    match num {
                         1 | 7 => Event::Key(Key::Home),
                         2 => Event::Key(Key::Insert),
                         3 => Event::Key(Key::Delete),
@@ -289,13 +368,13 @@ where
                         v @ 11...15 => Event::Key(Key::F(v - 10)),
                         v @ 17...21 => Event::Key(Key::F(v - 11)),
                         v @ 23...24 => Event::Key(Key::F(v - 12)),
-                        _ => return None,
+                        _ => return Err(Error::new(ErrorKind::InvalidData, "Invalid CSI sequence")),
                     }
                 }
-                _ => return None,
+                _ => return Err(Error::new(ErrorKind::InvalidData, "Invalid CSI sequence")),
             }
         }
-        _ => return None,
+        _ => return Err(Error::new(ErrorKind::InvalidData, "Invalid CSI sequence")),
     })
 }
 
@@ -304,30 +383,31 @@ fn parse_utf8_char<I>(c: u8, iter: &mut I) -> Result<char, Error>
 where
     I: Iterator<Item = Result<u8, Error>>,
 {
-    let error = Err(Error::new(
-        ErrorKind::Other,
-        "Input character is not valid UTF-8",
-    ));
     if c.is_ascii() {
         Ok(c as char)
     } else {
-        let bytes = &mut Vec::new();
-        bytes.push(c);
-
-        loop {
+        let mut bytes = [c, b'\0', b'\0', b'\0'];
+        for i in 1..4 {
             match iter.next() {
                 Some(Ok(next)) => {
-                    bytes.push(next);
-                    if let Ok(st) = str::from_utf8(bytes) {
+                    bytes[i] = next;
+                    if let Ok(st) = str::from_utf8(&bytes[..i + 1]) {
                         return Ok(st.chars().next().unwrap());
                     }
-                    if bytes.len() >= 4 {
-                        return error;
-                    }
                 }
-                _ => return error,
+                _ => {
+                    return Err(Error::new(
+                        ErrorKind::InvalidData,
+                        "Input character is not valid UTF-8",
+                    ))
+                }
             }
         }
+
+        Err(Error::new(
+            ErrorKind::InvalidData,
+            "Input character is not valid UTF-8",
+        ))
     }
 }
 
