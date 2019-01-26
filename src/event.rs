@@ -233,16 +233,19 @@ where
 
             Event::Mouse(event)
         }
-        Some(Ok(c @ b'0'...b'9')) => {
+        Some(Ok(mut c @ b'0'...b'9')) => {
             // Numbered escape code.
             let mut buf = Vec::new();
             buf.push(c);
-            let mut c = iter.next().unwrap().unwrap();
             // The final byte of a CSI sequence can be in the range 64-126, so
             // let's keep reading anything else.
-            while c < 64 || c > 126 {
-                buf.push(c);
-                c = iter.next().unwrap().unwrap();
+            while let Some(n) = iter.next() {
+                c = n?;
+                if c < 64 || c > 126 {
+                    buf.push(c);
+                } else {
+                    break;
+                }
             }
 
             match c {
