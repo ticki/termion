@@ -101,7 +101,6 @@ pub fn parse_event<I>(item: u8, iter: &mut I) -> Result<Event, Error>
 where
     I: Iterator<Item = Result<u8, Error>>,
 {
-    let error = Error::new(ErrorKind::Other, "Could not parse an event");
     match item {
         b'\x1B' => {
             // This is an escape character, leading a control sequence.
@@ -110,18 +109,21 @@ where
                     match iter.next() {
                         // F1-F4
                         Some(Ok(val @ b'P'...b'S')) => Event::Key(Key::F(1 + val - b'P')),
-                        _ => return Err(error),
+                        Some(Ok(val)) => Event::Unsupported(vec![b'\x1B', b'0', val]),
+                        Some(Err(e)) => return Err(e),
+                        None => Event::Unsupported(vec![b'\x1B', b'0']),
                     }
                 }
                 Some(Ok(b'[')) => {
                     // This is a CSI sequence.
-                    parse_csi(iter).ok_or(error)?
+                    parse_csi(iter)?
                 }
                 Some(Ok(c)) => {
                     let ch = parse_utf8_char(c, iter);
                     Event::Key(Key::Alt(try!(ch)))
                 }
-                Some(Err(_)) | None => return Err(error),
+                Some(Err(e)) => return Err(e),
+                None => Event::Unsupported(vec![b'\x1B']),
             })
         }
         b'\n' | b'\r' => Ok(Event::Key(Key::Char('\n'))),
@@ -139,15 +141,17 @@ where
 
 /// Parses a CSI sequence, just after reading ^[
 ///
-/// Returns None if an unrecognized sequence is found.
-fn parse_csi<I>(iter: &mut I) -> Option<Event>
+/// Returns Ok(Event::Unsupported) if an unrecognized sequence is found.
+fn parse_csi<I>(iter: &mut I) -> Result<Event, Error>
 where
     I: Iterator<Item = Result<u8, Error>>,
 {
-    Some(match iter.next() {
+    Ok(match iter.next() {
         Some(Ok(b'[')) => match iter.next() {
+            None => unsupported_csi(&vec![b'[']),
             Some(Ok(val @ b'A'...b'E')) => Event::Key(Key::F(1 + val - b'A')),
-            _ => return None,
+            Some(Ok(val)) => unsupported_csi(&vec![b'[', val]),
+            Some(Err(e)) => return Err(e),
         },
         Some(Ok(b'D')) => Event::Key(Key::Left),
         Some(Ok(b'C')) => Event::Key(Key::Right),
@@ -159,10 +163,14 @@ where
             // X10 emulation mouse encoding: ESC [ CB Cx Cy (6 characters only).
             let mut next = || iter.next().unwrap().unwrap();
 
-            let cb = next() as i8 - 32;
+            let b1 = next();
+            let b2 = next();
+            let b3 = next();
+
+            let cb = b1 as i8 - 32;
             // (1, 1) are the coords for upper left.
-            let cx = next().saturating_sub(32) as u16;
-            let cy = next().saturating_sub(32) as u16;
+            let cx = b2.saturating_sub(32) as u16;
+            let cy = b3.saturating_sub(32) as u16;
             Event::Mouse(match cb & 0b11 {
                 0 => {
                     if cb & 0x40 != 0 {
@@ -180,7 +188,7 @@ where
                 }
                 2 => MouseEvent::Press(MouseButton::Right, cx, cy),
                 3 => MouseEvent::Release(cx, cy),
-                _ => return None,
+                _ => return Ok(unsupported_csi(&vec![b'M', b1, b2, b3])),
             })
         }
         Some(Ok(b'<')) => {
@@ -215,12 +223,12 @@ where
                     match c {
                         b'M' => MouseEvent::Press(button, cx, cy),
                         b'm' => MouseEvent::Release(cx, cy),
-                        _ => return None,
+                        _ => return Ok(unsupported_csi(str_buf.as_bytes())),
                     }
                 }
                 32 => MouseEvent::Hold(cx, cy),
                 3 => MouseEvent::Release(cx, cy),
-                _ => return None,
+                _ => return Ok(unsupported_csi(str_buf.as_bytes())),
             };
 
             Event::Mouse(event)
@@ -256,7 +264,9 @@ where
                         35 => MouseEvent::Release(cx, cy),
                         64 => MouseEvent::Hold(cx, cy),
                         96 | 97 => MouseEvent::Press(MouseButton::WheelUp, cx, cy),
-                        _ => return None,
+                        _ => {
+                            return Ok(unsupported_csi(str_buf.as_bytes()));
+                        }
                     };
 
                     Event::Mouse(event)
@@ -270,13 +280,13 @@ where
                     let nums: Vec<u8> = str_buf.split(';').map(|n| n.parse().unwrap()).collect();
 
                     if nums.is_empty() {
-                        return None;
+                        return Ok(unsupported_csi(str_buf.as_bytes()));
                     }
 
                     // TODO: handle multiple values for key modififiers (ex: values
                     // [3, 2] means Shift+Delete)
                     if nums.len() > 1 {
-                        return None;
+                        return Ok(unsupported_csi(str_buf.as_bytes()));
                     }
 
                     match nums[0] {
@@ -289,14 +299,22 @@ where
                         v @ 11...15 => Event::Key(Key::F(v - 10)),
                         v @ 17...21 => Event::Key(Key::F(v - 11)),
                         v @ 23...24 => Event::Key(Key::F(v - 12)),
-                        _ => return None,
+                        _ => return Ok(unsupported_csi(str_buf.as_bytes())),
                     }
                 }
-                _ => return None,
+                _ => return Ok(unsupported_csi(&buf)),
             }
         }
-        _ => return None,
+        Some(Ok(c)) => return Ok(unsupported_csi(&vec![c])),
+        Some(Err(e)) => return Err(e),
+        None => return Ok(unsupported_csi(&vec![])),
     })
+}
+
+fn unsupported_csi(bytes: &[u8]) -> Event {
+    let mut seq = vec![b'\x1B', b'['];
+    seq.extend(bytes);
+    Event::Unsupported(seq)
 }
 
 /// Parse `c` as either a single byte ASCII char or a variable size UTF-8 char.
@@ -341,4 +359,14 @@ fn test_parse_utf8() {
         let b = bytes.next().unwrap().unwrap();
         assert!(c == parse_utf8_char(b, bytes).unwrap());
     }
+}
+
+#[test]
+fn test_parse_invalid_mouse() {
+    let item = b'\x1B';
+    let mut iter = "[x".bytes().map(|x| Ok(x));
+    assert_eq!(
+        parse_event(item, &mut iter).unwrap(),
+        Event::Unsupported(vec![b'\x1B', b'[', b'x'])
+    )
 }
