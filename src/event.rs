@@ -96,8 +96,26 @@ pub enum Key {
     __IsNotComplete,
 }
 
+pub fn parse_event<I>(item: u8, iter: &mut I) -> Result<(Event, Vec<u8>), Error>
+where
+    I: Iterator<Item = Result<u8, Error>>,
+{
+    let mut buf = vec![item];
+    let result = {
+        let mut iter = iter.inspect(|byte| {
+            if let &Ok(byte) = byte {
+                buf.push(byte);
+            }
+        });
+        try_parse_event(item, &mut iter)
+    };
+    result
+        .or(Ok(Event::Unsupported(buf.clone())))
+        .map(|e| (e, buf))
+}
+
 /// Parse an Event from `item` and possibly subsequent bytes through `iter`.
-pub fn parse_event<I>(item: u8, iter: &mut I) -> Result<Event, Error>
+fn try_parse_event<I>(item: u8, iter: &mut I) -> Result<Event, Error>
 where
     I: Iterator<Item = Result<u8, Error>>,
 {
@@ -139,6 +157,20 @@ where
     }
 }
 
+fn pop<I, T>(iter: &mut I) -> Result<T, Error>
+where
+    I: Iterator<Item = Result<T, Error>>,
+{
+    iter.next().unwrap_or(Err(err_unexpected_eof()))
+}
+
+fn err_invalid_input() -> Error {
+    Error::from(ErrorKind::InvalidInput)
+}
+fn err_unexpected_eof() -> Error {
+    Error::from(ErrorKind::UnexpectedEof)
+}
+
 /// Parses a CSI sequence, just after reading ^[
 ///
 /// Returns Ok(Event::Unsupported) if an unrecognized sequence is found.
@@ -146,26 +178,25 @@ fn parse_csi<I>(iter: &mut I) -> Result<Event, Error>
 where
     I: Iterator<Item = Result<u8, Error>>,
 {
-    Ok(match iter.next() {
-        Some(Ok(b'[')) => match iter.next() {
-            None => unsupported_csi(&vec![b'[']),
+    Ok(match pop(iter)? {
+        b'[' => match iter.next() {
+            None => return Err(err_unexpected_eof()),
             Some(Ok(val @ b'A'...b'E')) => Event::Key(Key::F(1 + val - b'A')),
-            Some(Ok(val)) => unsupported_csi(&vec![b'[', val]),
+            Some(Ok(_)) => return Err(err_invalid_input()),
             Some(Err(e)) => return Err(e),
         },
-        Some(Ok(b'D')) => Event::Key(Key::Left),
-        Some(Ok(b'C')) => Event::Key(Key::Right),
-        Some(Ok(b'A')) => Event::Key(Key::Up),
-        Some(Ok(b'B')) => Event::Key(Key::Down),
-        Some(Ok(b'H')) => Event::Key(Key::Home),
-        Some(Ok(b'F')) => Event::Key(Key::End),
-        Some(Ok(b'M')) => {
+        b'D' => Event::Key(Key::Left),
+        b'C' => Event::Key(Key::Right),
+        b'A' => Event::Key(Key::Up),
+        b'B' => Event::Key(Key::Down),
+        b'H' => Event::Key(Key::Home),
+        b'F' => Event::Key(Key::End),
+        b'M' => {
             // X10 emulation mouse encoding: ESC [ CB Cx Cy (6 characters only).
-            let mut next = || iter.next().unwrap().unwrap();
 
-            let b1 = next();
-            let b2 = next();
-            let b3 = next();
+            let b1 = pop(iter)?;
+            let b2 = pop(iter)?;
+            let b3 = pop(iter)?;
 
             let cb = b1 as i8 - 32;
             // (1, 1) are the coords for upper left.
@@ -188,27 +219,29 @@ where
                 }
                 2 => MouseEvent::Press(MouseButton::Right, cx, cy),
                 3 => MouseEvent::Release(cx, cy),
-                _ => return Ok(unsupported_csi(&vec![b'M', b1, b2, b3])),
+                _ => return Err(err_invalid_input()),
             })
         }
-        Some(Ok(b'<')) => {
+        b'<' => {
             // xterm mouse encoding:
             // ESC [ < Cb ; Cx ; Cy (;) (M or m)
             let mut buf = Vec::new();
-            let mut c = iter.next().unwrap().unwrap();
+            let mut c = pop(iter)?;
             while match c {
                 b'm' | b'M' => false,
                 _ => true,
             } {
                 buf.push(c);
-                c = iter.next().unwrap().unwrap();
+                c = pop(iter)?;
             }
-            let str_buf = String::from_utf8(buf).unwrap();
-            let nums = &mut str_buf.split(';');
+            let str_buf = String::from_utf8(buf).map_err(|_| err_invalid_input())?;
+            let nums = &mut str_buf
+                .split(';')
+                .map(|n| n.parse::<u16>().map_err(|_| err_invalid_input()));
 
-            let cb = nums.next().unwrap().parse::<u16>().unwrap();
-            let cx = nums.next().unwrap().parse::<u16>().unwrap();
-            let cy = nums.next().unwrap().parse::<u16>().unwrap();
+            let cb = pop(nums)?;
+            let cx = pop(nums)?;
+            let cy = pop(nums)?;
 
             let event = match cb {
                 0...2 | 64...65 => {
@@ -223,17 +256,17 @@ where
                     match c {
                         b'M' => MouseEvent::Press(button, cx, cy),
                         b'm' => MouseEvent::Release(cx, cy),
-                        _ => return Ok(unsupported_csi(str_buf.as_bytes())),
+                        _ => return Err(err_invalid_input()),
                     }
                 }
                 32 => MouseEvent::Hold(cx, cy),
                 3 => MouseEvent::Release(cx, cy),
-                _ => return Ok(unsupported_csi(str_buf.as_bytes())),
+                _ => return Err(err_invalid_input()),
             };
 
             Event::Mouse(event)
         }
-        Some(Ok(mut c @ b'0'...b'9')) => {
+        mut c @ b'0'...b'9' => {
             // Numbered escape code.
             let mut buf = Vec::new();
             buf.push(c);
@@ -252,13 +285,15 @@ where
                 // rxvt mouse encoding:
                 // ESC [ Cb ; Cx ; Cy ; M
                 b'M' => {
-                    let str_buf = String::from_utf8(buf).unwrap();
+                    let str_buf = String::from_utf8(buf).map_err(|_| err_invalid_input())?;
 
-                    let nums: Vec<u16> = str_buf.split(';').map(|n| n.parse().unwrap()).collect();
+                    let mut nums = str_buf
+                        .split(';')
+                        .map(|n| n.parse().map_err(|_| err_invalid_input()));
 
-                    let cb = nums[0];
-                    let cx = nums[1];
-                    let cy = nums[2];
+                    let cb = pop(&mut nums)?;
+                    let cx = pop(&mut nums)?;
+                    let cy = pop(&mut nums)?;
 
                     let event = match cb {
                         32 => MouseEvent::Press(MouseButton::Left, cx, cy),
@@ -268,7 +303,7 @@ where
                         64 => MouseEvent::Hold(cx, cy),
                         96 | 97 => MouseEvent::Press(MouseButton::WheelUp, cx, cy),
                         _ => {
-                            return Ok(unsupported_csi(str_buf.as_bytes()));
+                            return Err(err_invalid_input());
                         }
                     };
 
@@ -276,23 +311,23 @@ where
                 }
                 // Special key code.
                 b'~' => {
-                    let str_buf = String::from_utf8(buf).unwrap();
+                    let str_buf = String::from_utf8(buf).map_err(|_| err_invalid_input())?;
 
                     // This CSI sequence can be a list of semicolon-separated
                     // numbers.
-                    let nums: Vec<u8> = str_buf.split(';').map(|n| n.parse().unwrap()).collect();
+                    let mut nums = str_buf
+                        .split(';')
+                        .map(|n| n.parse().map_err(|_| err_invalid_input()));
 
-                    if nums.is_empty() {
-                        return Ok(unsupported_csi(str_buf.as_bytes()));
-                    }
+                    let num = pop(&mut nums)?;
 
                     // TODO: handle multiple values for key modififiers (ex: values
                     // [3, 2] means Shift+Delete)
-                    if nums.len() > 1 {
-                        return Ok(unsupported_csi(str_buf.as_bytes()));
+                    if let Some(_) = nums.next() {
+                        return Err(err_invalid_input());
                     }
 
-                    match nums[0] {
+                    match num {
                         1 | 7 => Event::Key(Key::Home),
                         2 => Event::Key(Key::Insert),
                         3 => Event::Key(Key::Delete),
@@ -302,22 +337,14 @@ where
                         v @ 11...15 => Event::Key(Key::F(v - 10)),
                         v @ 17...21 => Event::Key(Key::F(v - 11)),
                         v @ 23...24 => Event::Key(Key::F(v - 12)),
-                        _ => return Ok(unsupported_csi(str_buf.as_bytes())),
+                        _ => return Err(err_invalid_input()),
                     }
                 }
-                _ => return Ok(unsupported_csi(&buf)),
+                _ => return Err(err_invalid_input()),
             }
         }
-        Some(Ok(c)) => return Ok(unsupported_csi(&vec![c])),
-        Some(Err(e)) => return Err(e),
-        None => return Ok(unsupported_csi(&vec![])),
+        _ => return Err(err_invalid_input()),
     })
-}
-
-fn unsupported_csi(bytes: &[u8]) -> Event {
-    let mut seq = vec![b'\x1B', b'['];
-    seq.extend(bytes);
-    Event::Unsupported(seq)
 }
 
 /// Parse `c` as either a single byte ASCII char or a variable size UTF-8 char.
@@ -340,6 +367,7 @@ where
                 Some(Ok(next)) => {
                     bytes.push(next);
                     if let Ok(st) = str::from_utf8(bytes) {
+                        // unwrap is safe here because parse was OK
                         return Ok(st.chars().next().unwrap());
                     }
                     if bytes.len() >= 4 {
@@ -370,6 +398,9 @@ fn test_parse_invalid_mouse() {
     let mut iter = "[x".bytes().map(|x| Ok(x));
     assert_eq!(
         parse_event(item, &mut iter).unwrap(),
-        Event::Unsupported(vec![b'\x1B', b'[', b'x'])
+        (
+            Event::Unsupported(vec![b'\x1B', b'[', b'x']),
+            vec![b'\x1B', b'[', b'x']
+        )
     )
 }

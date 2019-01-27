@@ -1,9 +1,10 @@
 //! User input.
 
+use event::parse_event;
 use std::io::{self, Read, Write};
 use std::ops;
 
-use event::{self, Event, Key};
+use event::{Event, Key};
 use raw::IntoRawMode;
 
 /// An iterator over input keys.
@@ -86,19 +87,6 @@ impl<R: Read> Iterator for EventsAndRaw<R> {
 
         Some(res)
     }
-}
-
-fn parse_event<I>(item: u8, iter: &mut I) -> Result<(Event, Vec<u8>), io::Error>
-    where I: Iterator<Item = Result<u8, io::Error>>
-{
-    let mut buf = vec![item];
-    let result = {
-        let mut iter = iter.inspect(|byte| if let &Ok(byte) = byte {
-                                        buf.push(byte);
-                                    });
-        event::parse_event(item, &mut iter)
-    };
-    result.or(Ok(Event::Unsupported(buf.clone()))).map(|e| (e, buf))
 }
 
 
