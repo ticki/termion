@@ -11,16 +11,23 @@ use sys::tty::get_tty;
 pub fn async_stdin_until(delimiter: u8) -> AsyncReader {
     let (send, recv) = mpsc::channel();
 
-    thread::spawn(move || for i in get_tty().unwrap().bytes() {
+    thread::spawn(move || {
+        for i in get_tty().unwrap().bytes() {
+            match i {
+                Ok(byte) => {
+                    let end_of_stream = &byte == &delimiter;
+                    let send_error = send.send(Ok(byte)).is_err();
 
-        match i {
-            Ok(byte) => {
-                let end_of_stream = &byte == &delimiter;
-                let send_error = send.send(Ok(byte)).is_err();
-
-                if end_of_stream || send_error { return; }
-            },
-            Err(_) => { return; }
+                    if end_of_stream || send_error {
+                        warn!("Send error");
+                        return;
+                    }
+                }
+                Err(e) => {
+                    warn!("Read error: {}", e);
+                    return;
+                }
+            }
         }
     });
 
@@ -40,11 +47,13 @@ pub fn async_stdin_until(delimiter: u8) -> AsyncReader {
 pub fn async_stdin() -> AsyncReader {
     let (send, recv) = mpsc::channel();
 
-    thread::spawn(move || for i in get_tty().unwrap().bytes() {
-                      if send.send(i).is_err() {
-                          return;
-                      }
-                  });
+    thread::spawn(move || {
+        for i in get_tty().unwrap().bytes() {
+            if send.send(i).is_err() {
+                return;
+            }
+        }
+    });
 
     AsyncReader { recv: recv }
 }
@@ -80,7 +89,10 @@ impl Read for AsyncReader {
                     total += 1;
                 }
                 Ok(Err(e)) => return Err(e),
-                Err(_) => break,
+                Err(e) => {
+                    warn!("Receive error {}", e);
+                    break;
+                }
             }
         }
 
