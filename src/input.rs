@@ -54,9 +54,9 @@ impl<R: Read> Iterator for EventsAndRaw<R> {
     fn next(&mut self) -> Option<Result<(Event, Vec<u8>), io::Error>> {
         let source = &mut self.source;
 
-        if let Some(c) = self.leftover {
+        if let Some(c) = self.leftover.take() {
             // we have a leftover byte, use it
-            self.leftover = None;
+            debug!("Leftover: {}", c);
             return Some(parse_event(c, &mut source.bytes()));
         }
 
@@ -68,7 +68,10 @@ impl<R: Read> Iterator for EventsAndRaw<R> {
         let res = match source.read(&mut buf) {
             Ok(0) => return None,
             Ok(1) => match buf[0] {
-                b'\x1B' => Ok((Event::Key(Key::Esc), vec![b'\x1B'])),
+                b'\x1B' => {
+                    debug!("Event: lone ESC");
+                    Ok((Event::Key(Key::Esc), vec![b'\x1B']))
+                }
                 c => parse_event(c, &mut source.bytes()),
             },
             Ok(2) => {
