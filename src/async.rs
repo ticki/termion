@@ -89,9 +89,10 @@ impl Read for AsyncReader {
                     total += 1;
                 }
                 Ok(Err(e)) => return Err(e),
-                Err(e) => {
-                    warn!("Receive error {}", e);
-                    break;
+                Err(mpsc::TryRecvError::Empty) => break,
+                Err(mpsc::TryRecvError::Disconnected) => {
+                    warn!("Receiver disconnected");
+                    return Err(io::Error::from(io::ErrorKind::BrokenPipe));
                 }
             }
         }
