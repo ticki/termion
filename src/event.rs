@@ -114,7 +114,10 @@ where
             warn!("Event parse error: {}", err);
             Ok(Event::Unsupported(buf.clone()))
         })
-        .map(|e| (e, buf))
+        .map(|e| {
+            debug!("Event: {:?}", e);
+            (e, buf)
+        })
 }
 
 /// Parse an Event from `item` and possibly subsequent bytes through `iter`.
