@@ -110,7 +110,10 @@ where
         try_parse_event(item, &mut iter)
     };
     result
-        .or(Ok(Event::Unsupported(buf.clone())))
+        .or_else(|err| {
+            warn!("Event parse error: {}", err);
+            Ok(Event::Unsupported(buf.clone()))
+        })
         .map(|e| (e, buf))
 }
 

@@ -13,6 +13,9 @@
 
 extern crate numtoa;
 
+#[macro_use]
+extern crate log;
+
 #[cfg(target_os = "redox")]
 #[path="sys/redox/mod.rs"]
 mod sys;
