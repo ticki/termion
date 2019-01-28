@@ -25,6 +25,9 @@
 use std::io::{self, Write};
 use std::ops;
 
+use sys::Termios;
+use sys::attr::{get_terminal_attr, raw_terminal_attr, set_terminal_attr};
+
 /// The timeout of an escape code control sequence, in milliseconds.
 pub const CONTROL_SEQUENCE_TIMEOUT: u64 = 100;
 
@@ -32,34 +35,14 @@ pub const CONTROL_SEQUENCE_TIMEOUT: u64 = 100;
 /// dropped.
 ///
 /// Restoring will entirely bring back the old TTY state.
-#[cfg(target_os = "redox")]
-pub struct RawTerminal<W: Write> {
-    output: W,
-}
-
-#[cfg(target_os = "redox")]
-impl<W: Write> Drop for RawTerminal<W> {
-    fn drop(&mut self) {
-        let _ = write!(self, csi!("?82l"));
-        let _ = self.flush();
-    }
-}
-
-#[cfg(not(target_os = "redox"))]
-use termios::Termios;
-/// A terminal restorer, which keeps the previous state of the terminal, and restores it, when
-/// dropped.
-#[cfg(not(target_os = "redox"))]
 pub struct RawTerminal<W: Write> {
     prev_ios: Termios,
     output: W,
 }
 
-#[cfg(not(target_os = "redox"))]
 impl<W: Write> Drop for RawTerminal<W> {
     fn drop(&mut self) {
-        use termios::set_terminal_attr;
-        set_terminal_attr(&mut self.prev_ios as *mut _);
+        set_terminal_attr(&self.prev_ios).unwrap();
     }
 }
 
@@ -103,36 +86,32 @@ pub trait IntoRawMode: Write + Sized {
 }
 
 impl<W: Write> IntoRawMode for W {
-    #[cfg(not(target_os = "redox"))]
     fn into_raw_mode(self) -> io::Result<RawTerminal<W>> {
-        use termios::{cfmakeraw, get_terminal_attr, set_terminal_attr};
-
-        let (mut ios, exit) = get_terminal_attr();
+        let mut ios = get_terminal_attr()?;
         let prev_ios = ios;
-        if exit != 0 {
-            return Err(io::Error::new(io::ErrorKind::Other, "Unable to get Termios attribute."));
-        }
 
-        unsafe {
-            cfmakeraw(&mut ios);
-        }
+        raw_terminal_attr(&mut ios);
 
-        if set_terminal_attr(&mut ios as *mut _) != 0 {
-            Err(io::Error::new(io::ErrorKind::Other, "Unable to set Termios attribute."))
-        } else {
-            let res = RawTerminal {
-                prev_ios: prev_ios,
-                output: self,
-            };
-            Ok(res)
-        }
+        set_terminal_attr(&ios)?;
+
+        Ok(RawTerminal {
+            prev_ios: prev_ios,
+            output: self,
+        })
+    }
+}
+
+impl<W: Write> RawTerminal<W> {
+    pub fn suspend_raw_mode(&self) -> io::Result<()> {
+        set_terminal_attr(&self.prev_ios)?;
+        Ok(())
     }
 
-    #[cfg(target_os = "redox")]
-    fn into_raw_mode(mut self) -> io::Result<RawTerminal<W>> {
-        write!(self, csi!("?82h"))?;
-        self.flush()?;
-        Ok(RawTerminal { output: self })
+    pub fn activate_raw_mode(&self) -> io::Result<()> {
+        let mut ios = get_terminal_attr()?;
+        raw_terminal_attr(&mut ios);
+        set_terminal_attr(&ios)?;
+        Ok(())
     }
 }
 
@@ -145,6 +124,8 @@ mod test {
     fn test_into_raw_mode() {
         let mut out = stdout().into_raw_mode().unwrap();
 
-        out.write_all(b"this is a test, muahhahahah").unwrap();
+        out.write_all(b"this is a test, muahhahahah\r\n").unwrap();
+
+        drop(out);
     }
 }

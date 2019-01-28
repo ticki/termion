@@ -8,23 +8,24 @@
 //!
 //! Supports Redox, Mac OS X, and Linux (or, in general, ANSI terminals).
 //!
-//! For more information refer to the [README](https://github.com/ticki/termion).
+//! For more information refer to the [README](https://github.com/redox-os/termion).
 #![warn(missing_docs)]
 
-#[cfg(not(target_os = "redox"))]
-extern crate libc;
+extern crate numtoa;
 
-#[cfg(not(target_os = "redox"))]
-mod termios;
+#[cfg(target_os = "redox")]
+#[path="sys/redox/mod.rs"]
+mod sys;
+
+#[cfg(unix)]
+#[path="sys/unix/mod.rs"]
+mod sys;
+
+pub use sys::size::terminal_size;
+pub use sys::tty::{is_tty, get_tty};
 
 mod async;
 pub use async::{AsyncReader, async_stdin};
-
-mod size;
-pub use size::terminal_size;
-
-mod tty;
-pub use tty::{is_tty, get_tty};
 
 #[macro_use]
 mod macros;
@@ -37,3 +38,26 @@ pub mod raw;
 pub mod screen;
 pub mod scroll;
 pub mod style;
+
+#[cfg(test)]
+mod test {
+    use super::sys;
+
+    #[test]
+    fn test_get_terminal_attr() {
+        sys::attr::get_terminal_attr().unwrap();
+        sys::attr::get_terminal_attr().unwrap();
+        sys::attr::get_terminal_attr().unwrap();
+    }
+
+    #[test]
+    fn test_set_terminal_attr() {
+        let ios = sys::attr::get_terminal_attr().unwrap();
+        sys::attr::set_terminal_attr(&ios).unwrap();
+    }
+
+    #[test]
+    fn test_size() {
+        sys::size::terminal_size().unwrap();
+    }
+}

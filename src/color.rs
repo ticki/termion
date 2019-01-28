@@ -18,6 +18,7 @@ use std::io::{self, Write, Read};
 use std::time::{SystemTime, Duration};
 use async::async_stdin;
 use std::env;
+use numtoa::NumToA;
 
 /// A terminal color.
 pub trait Color {
@@ -36,13 +37,23 @@ macro_rules! derive_color {
         impl Color for $name {
             #[inline]
             fn write_fg(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                write!(f, csi!("38;5;", $value, "m"))
+                f.write_str(self.fg_str())
             }
 
             #[inline]
             fn write_bg(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                write!(f, csi!("48;5;", $value, "m"))
+                f.write_str(self.bg_str())
             }
+        }
+
+        impl $name {
+            #[inline]
+            /// Returns the ANSI escape sequence as a string.
+            pub fn fg_str(&self) -> &'static str { csi!("38;5;", $value, "m") }
+
+            #[inline]
+            /// Returns the ANSI escape sequences as a string.
+            pub fn bg_str(&self) -> &'static str { csi!("48;5;", $value, "m") }
         }
     };
 }
@@ -110,15 +121,31 @@ impl AnsiValue {
     }
 }
 
+impl AnsiValue {
+    /// Returns the ANSI sequence as a string.
+    pub fn fg_string(self) -> String {
+        let mut x = [0u8; 20];
+        let x = self.0.numtoa_str(10, &mut x);
+        [csi!("38;5;"), x, "m"].concat()
+    }
+
+    /// Returns the ANSI sequence as a string.
+    pub fn bg_string(self) -> String {
+        let mut x = [0u8; 20];
+        let x = self.0.numtoa_str(10, &mut x);
+        [csi!("48;5;"), x, "m"].concat()
+    }
+}
+
 impl Color for AnsiValue {
     #[inline]
     fn write_fg(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, csi!("38;5;{}m"), self.0)
+        f.write_str(&self.fg_string())
     }
 
     #[inline]
     fn write_bg(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, csi!("48;5;{}m"), self.0)
+        f.write_str(&self.bg_string())
     }
 }
 
@@ -126,15 +153,41 @@ impl Color for AnsiValue {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Rgb(pub u8, pub u8, pub u8);
 
+impl Rgb {
+    /// Returns the ANSI sequence as a string.
+    pub fn fg_string(self) -> String {
+        let (mut x, mut y, mut z) = ([0u8; 20], [0u8; 20], [0u8; 20]);
+        let (x, y, z) = (
+            self.0.numtoa_str(10, &mut x),
+            self.1.numtoa_str(10, &mut y),
+            self.2.numtoa_str(10, &mut z),
+        );
+
+        [csi!("38;2;"), x, ";", y, ";", z, "m"].concat()
+    }
+
+    /// Returns the ANSI sequence as a string.
+    pub fn bg_string(self) -> String {
+        let (mut x, mut y, mut z) = ([0u8; 20], [0u8; 20], [0u8; 20]);
+        let (x, y, z) = (
+            self.0.numtoa_str(10, &mut x),
+            self.1.numtoa_str(10, &mut y),
+            self.2.numtoa_str(10, &mut z),
+        );
+
+        [csi!("48;2;"), x, ";", y, ";", z, "m"].concat()
+    }
+}
+
 impl Color for Rgb {
     #[inline]
     fn write_fg(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, csi!("38;2;{};{};{}m"), self.0, self.1, self.2)
+        f.write_str(&self.fg_string())
     }
 
     #[inline]
     fn write_bg(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, csi!("48;2;{};{};{}m"), self.0, self.1, self.2)
+        f.write_str(&self.bg_string())
     }
 }
 
@@ -142,15 +195,25 @@ impl Color for Rgb {
 #[derive(Debug, Clone, Copy)]
 pub struct Reset;
 
+const RESET_FG: &str = csi!("39m");
+const RESET_BG: &str = csi!("49m");
+
+impl Reset {
+    /// Returns the ANSI sequence as a string.
+    pub fn fg_str(self) -> &'static str { RESET_FG }
+    /// Returns the ANSI sequence as a string.
+    pub fn bg_str(self) -> &'static str { RESET_BG }
+}
+
 impl Color for Reset {
     #[inline]
     fn write_fg(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, csi!("39m"))
+        f.write_str(RESET_FG)
     }
 
     #[inline]
     fn write_bg(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, csi!("49m"))
+        f.write_str(RESET_BG)
     }
 }
 

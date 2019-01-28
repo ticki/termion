@@ -27,16 +27,29 @@ impl<R: Read> Iterator for Keys<R> {
 }
 
 /// An iterator over input events.
-pub struct Events<R> {
-    source: R,
-    leftover: Option<u8>,
+pub struct Events<R>  {
+    inner: EventsAndRaw<R>
 }
 
 impl<R: Read> Iterator for Events<R> {
     type Item = Result<Event, io::Error>;
 
     fn next(&mut self) -> Option<Result<Event, io::Error>> {
-        let mut source = &mut self.source;
+        self.inner.next().map(|tuple| tuple.map(|(event, _raw)| event))
+    }
+}
+
+/// An iterator over input events and the bytes that define them.
+pub struct EventsAndRaw<R> {
+    source: R,
+    leftover: Option<u8>,
+}
+
+impl<R: Read> Iterator for EventsAndRaw<R> {
+    type Item = Result<(Event, Vec<u8>), io::Error>;
+
+    fn next(&mut self) -> Option<Result<(Event, Vec<u8>), io::Error>> {
+        let source = &mut self.source;
 
         if let Some(c) = self.leftover {
             // we have a leftover byte, use it
@@ -53,7 +66,7 @@ impl<R: Read> Iterator for Events<R> {
             Ok(0) => return None,
             Ok(1) => {
                 match buf[0] {
-                    b'\x1B' => Ok(Event::Key(Key::Esc)),
+                    b'\x1B' => Ok((Event::Key(Key::Esc), vec![b'\x1B'])),
                     c => parse_event(c, &mut source.bytes()),
                 }
             }
@@ -75,7 +88,7 @@ impl<R: Read> Iterator for Events<R> {
     }
 }
 
-fn parse_event<I>(item: u8, iter: &mut I) -> Result<Event, io::Error>
+fn parse_event<I>(item: u8, iter: &mut I) -> Result<(Event, Vec<u8>), io::Error>
     where I: Iterator<Item = Result<u8, io::Error>>
 {
     let mut buf = vec![item];
@@ -85,7 +98,7 @@ fn parse_event<I>(item: u8, iter: &mut I) -> Result<Event, io::Error>
                                     });
         event::parse_event(item, &mut iter)
     };
-    result.or(Ok(Event::Unsupported(buf)))
+    result.or(Ok(Event::Unsupported(buf.clone()))).map(|e| (e, buf))
 }
 
 
@@ -113,11 +126,11 @@ pub trait TermRead {
     }
 }
 
-impl<R: Read> TermRead for R {
+
+impl<R: Read + TermReadEventsAndRaw> TermRead for R {
     fn events(self) -> Events<Self> {
         Events {
-            source: self,
-            leftover: None,
+            inner: self.events_and_raw()
         }
     }
     fn keys(self) -> Keys<Self> {
@@ -142,6 +155,21 @@ impl<R: Read> TermRead for R {
         let string = try!(String::from_utf8(buf)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e)));
         Ok(Some(string))
+    }
+}
+
+/// Extension to `TermRead` trait. A separate trait in order to maintain backwards compatibility.
+pub trait TermReadEventsAndRaw {
+    /// An iterator over input events and the bytes that define them.
+    fn events_and_raw(self) -> EventsAndRaw<Self> where Self: Sized;
+}
+
+impl<R: Read> TermReadEventsAndRaw for R {
+    fn events_and_raw(self) -> EventsAndRaw<Self> {
+        EventsAndRaw {
+            source: self,
+            leftover: None,
+        }
     }
 }
 
@@ -239,6 +267,38 @@ mod test {
                    Event::Mouse(MouseEvent::Release(2, 4)));
         assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Char('b')));
         assert!(i.next().is_none());
+    }
+
+    #[test]
+    fn test_events_and_raw() {
+        let input = b"\x1B[\x00bc\x7F\x1B[D\
+                    \x1B[M\x00\x22\x24\x1B[<0;2;4;M\x1B[32;2;4M\x1B[<0;2;4;m\x1B[35;2;4Mb";
+        let mut output = Vec::<u8>::new();
+        {
+            let mut i = input.events_and_raw().map(|res| res.unwrap())
+                .inspect(|&(_, ref raw)| { output.extend(raw); }).map(|(event, _)| event);
+
+            assert_eq!(i.next().unwrap(),
+            Event::Unsupported(vec![0x1B, b'[', 0x00]));
+            assert_eq!(i.next().unwrap(), Event::Key(Key::Char('b')));
+            assert_eq!(i.next().unwrap(), Event::Key(Key::Char('c')));
+            assert_eq!(i.next().unwrap(), Event::Key(Key::Backspace));
+            assert_eq!(i.next().unwrap(), Event::Key(Key::Left));
+            assert_eq!(i.next().unwrap(),
+            Event::Mouse(MouseEvent::Press(MouseButton::WheelUp, 2, 4)));
+            assert_eq!(i.next().unwrap(),
+            Event::Mouse(MouseEvent::Press(MouseButton::Left, 2, 4)));
+            assert_eq!(i.next().unwrap(),
+            Event::Mouse(MouseEvent::Press(MouseButton::Left, 2, 4)));
+            assert_eq!(i.next().unwrap(),
+            Event::Mouse(MouseEvent::Release(2, 4)));
+            assert_eq!(i.next().unwrap(),
+            Event::Mouse(MouseEvent::Release(2, 4)));
+            assert_eq!(i.next().unwrap(), Event::Key(Key::Char('b')));
+            assert!(i.next().is_none());
+        }
+
+        assert_eq!(input.iter().map(|b| *b).collect::<Vec<u8>>(), output)
     }
 
     #[test]
