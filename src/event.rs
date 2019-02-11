@@ -97,6 +97,9 @@ pub enum Key {
 }
 
 /// Parse an Event from `item` and possibly subsequent bytes through `iter`.
+///
+/// Note that this will /not/ parse `\x1B` as `Key::Esc`, since we can't ensure that a
+/// control sequence may follow, and if checked we'd potentially lose a byte of input.
 pub fn parse_event<I>(item: u8, iter: &mut I) -> Result<Event, Error>
 where
     I: Iterator<Item = Result<u8, Error>>,
@@ -249,7 +252,7 @@ where
         // Numbered escape code.
         Some(Ok(c @ b'0'...b'9')) => {
             let mut count = 0;
-            let mut bytes = [b'\0'; 19];
+            let mut bytes = [b'\0'; 20];
             bytes[0] = c;
 
             for i in 1..20 {
