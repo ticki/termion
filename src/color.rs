@@ -18,10 +18,11 @@ use std::io::{self, Write, Read};
 use std::time::{SystemTime, Duration};
 use async::async_stdin;
 use std::env;
+use std::fmt::Debug;
 use numtoa::NumToA;
 
 /// A terminal color.
-pub trait Color {
+pub trait Color: Debug {
     /// Write the foreground version of this color.
     fn write_fg(&self, f: &mut fmt::Formatter) -> fmt::Result;
     /// Write the background version of this color.
