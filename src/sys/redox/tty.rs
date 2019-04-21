@@ -5,7 +5,7 @@ use super::syscall;
 
 /// Is this stream a TTY?
 pub fn is_tty<T: AsRawFd>(stream: &T) -> bool {
-    if let Ok(fd) = syscall::dup(stream.as_raw_fd(), b"termios") {
+    if let Ok(fd) = syscall::dup(stream.as_raw_fd() as _, b"termios") {
         let _ = syscall::close(fd);
         true
     } else {

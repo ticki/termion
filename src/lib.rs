@@ -17,7 +17,7 @@ extern crate numtoa;
 #[path="sys/redox/mod.rs"]
 mod sys;
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "redox")))]
 #[path="sys/unix/mod.rs"]
 mod sys;
 
