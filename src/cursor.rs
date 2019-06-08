@@ -151,7 +151,7 @@ impl<W: Write> DetectCursorPos for W {
             }
         }
 
-        if read_chars.is_empty() {
+        if read_chars.last() != Some(&delimiter) {
             return Err(Error::new(ErrorKind::Other, "Cursor position detection timed out."));
         }
 
