@@ -5,7 +5,7 @@ use super::{cvt, syscall, Termios};
 pub fn get_terminal_attr() -> io::Result<Termios> {
     let mut termios = Termios::default();
 
-    let fd = cvt(syscall::dup(0, b"termios"))?;
+    let fd = cvt(syscall::dup(1, b"termios"))?;
     let res = cvt(syscall::read(fd, &mut termios));
     let _ = syscall::close(fd);
 
@@ -17,7 +17,7 @@ pub fn get_terminal_attr() -> io::Result<Termios> {
 }
 
 pub fn set_terminal_attr(termios: &Termios) -> io::Result<()> {
-    let fd = cvt(syscall::dup(0, b"termios"))?;
+    let fd = cvt(syscall::dup(1, b"termios"))?;
     let res = cvt(syscall::write(fd, termios));
     let _ = syscall::close(fd);
 
