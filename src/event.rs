@@ -71,6 +71,8 @@ pub enum Key {
     PageUp,
     /// Page Down key.
     PageDown,
+    /// Backward Tab key.
+    BackTab,
     /// Delete key.
     Delete,
     /// Insert key.
@@ -155,6 +157,7 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
              Some(Ok(b'B')) => Event::Key(Key::Down),
              Some(Ok(b'H')) => Event::Key(Key::Home),
              Some(Ok(b'F')) => Event::Key(Key::End),
+             Some(Ok(b'Z')) => Event::Key(Key::BackTab),
              Some(Ok(b'M')) => {
         // X10 emulation mouse encoding: ESC [ CB Cx Cy (6 characters only).
         let mut next = || iter.next().unwrap().unwrap();
