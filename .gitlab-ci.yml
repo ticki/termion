@@ -1,66 +1,39 @@
-image: "rust:latest"
+image: "redoxos/redoxer"
 
 stages:
-  - build
-  - test
-
-before_script:
-    - rustup toolchain add $toolchain
+    - build
+    - test
 
 cache:
-  paths:
-    - target/
+    paths:
+        - target/
 
-build:stable:
-  stage: build
-  variables:
-    toolchain: stable
-  script:
-    - cargo +stable build --verbose
-    - cargo +stable build --release --verbose
+build:linux:stable:
+    stage: build
+    script: cargo +stable build --verbose
 
-test:stable:
-  stage: test
-  variables:
-    toolchain: stable
-  dependencies:
-    - build:stable
-  script:
-    - script -q -c "cargo +stable test --verbose"
-    - script -q -c "cargo +stable test --release --verbose"
+build:linux:
+    stage: build
+    script: cargo +nightly build --verbose
 
-build:beta:
-  stage: build
-  variables:
-    toolchain: beta
-  script:
-    - cargo +beta build --verbose
-    - cargo +beta build --release --verbose
+build:redox:
+    stage: build
+    script: redoxer build --verbose
 
-test:beta:
-  stage: test
-  variables:
-    toolchain: beta
-  dependencies:
-    - build:beta
-  script:
-    - script -q -c "cargo +beta test --verbose"
-    - script -q -c "cargo +beta test --release --verbose"
+test:linux:stable:
+    stage: test
+    dependencies:
+        - build:linux:stable
+    script: cargo +stable test --verbose
 
-build:nightly:
-  stage: build
-  variables:
-    toolchain: nightly
-  script:
-    - cargo +nightly build --verbose
-    - cargo +nightly build --release --verbose
+test:linux:
+    stage: test
+    dependencies:
+        - build:linux
+    script: cargo +nightly test --verbose
 
-test:nightly:
-  stage: test
-  variables:
-    toolchain: nightly
-  dependencies:
-    - build:nightly
-  script:
-    - script -q -c "cargo +nightly test --verbose"
-    - script -q -c "cargo +nightly test --release --verbose"
+test:redox:
+    stage: test
+    dependencies:
+        - build:redox
+    script: redoxer test --verbose
