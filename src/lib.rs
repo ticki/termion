@@ -22,6 +22,8 @@ mod sys;
 mod sys;
 
 pub use sys::size::terminal_size;
+#[cfg(all(unix, not(target_os = "redox")))]
+pub use sys::size::terminal_size_pixels;
 pub use sys::tty::{is_tty, get_tty};
 
 mod async;
