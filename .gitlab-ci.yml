@@ -8,12 +8,11 @@ cache:
     paths:
         - target/
 
-before_script:
-    rustup update stable
-
 build:linux:stable:
     stage: build
-    script: cargo +stable build --verbose
+    script:
+        - rustup update stable
+        - cargo +stable build --verbose
 
 build:linux:
     stage: build
