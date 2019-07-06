@@ -11,7 +11,6 @@ cache:
 build:linux:stable:
     stage: build
     script:
-        - rustup update stable
         - cargo +stable build --verbose
 
 build:linux:
@@ -26,7 +25,9 @@ test:linux:stable:
     stage: test
     dependencies:
         - build:linux:stable
-    script: cargo +stable test --verbose
+    script:
+        - rustup update stable
+        - cargo +stable test --verbose
 
 test:linux:
     stage: test
