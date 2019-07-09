@@ -19,7 +19,7 @@ impl<R: Read> Iterator for Keys<R> {
             match self.iter.next() {
                 Some(Ok(Event::Key(k))) => return Some(Ok(k)),
                 Some(Ok(_)) => continue,
-                e @ Some(Err(_)) => e,
+                Some(Err(e)) => return Some(Err(e)),
                 None => return None,
             };
         }
