@@ -11,6 +11,7 @@ cache:
 build:linux:stable:
     stage: build
     script:
+        - rustup update stable
         - cargo +stable build --verbose
 
 build:linux:
