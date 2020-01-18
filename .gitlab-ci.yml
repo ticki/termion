@@ -28,13 +28,13 @@ test:linux:stable:
         - build:linux:stable
     script:
         - rustup update stable
-        - cargo +stable test --verbose
+        - script -c "cargo +stable test --verbose"
 
 test:linux:
     stage: test
     dependencies:
         - build:linux
-    script: cargo +nightly test --verbose
+    script: script -c "cargo +nightly test --verbose"
 
 test:redox:
     stage: test
