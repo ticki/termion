@@ -50,7 +50,7 @@ impl Default for Goto {
 impl fmt::Display for Goto {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         debug_assert!(self != &Goto(0, 0), "Goto is one-based.");
-        f.write_str(&String::from(*self))
+        write!(f, "\x1B[{};{}H", self.1, self.0)
     }
 }
 
@@ -67,7 +67,7 @@ impl From<Left> for String {
 
 impl fmt::Display for Left {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str(&String::from(*self))
+        write!(f, "\x1B[{}D", self.0)
     }
 }
 
@@ -84,7 +84,7 @@ impl From<Right> for String {
 
 impl fmt::Display for Right {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str(&String::from(*self))
+        write!(f, "\x1B[{}C", self.0)
     }
 }
 
@@ -101,7 +101,7 @@ impl From<Up> for String {
 
 impl fmt::Display for Up {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str(&String::from(*self))
+        write!(f, "\x1B[{}A", self.0)
     }
 }
 
@@ -118,7 +118,7 @@ impl From<Down> for String {
 
 impl fmt::Display for Down {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str(&String::from(*self))
+        write!(f, "\x1B[{}B", self.0)
     }
 }
 
