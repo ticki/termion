@@ -14,6 +14,13 @@ derive_csi_sequence!("Show the cursor.", Show, "?25h");
 derive_csi_sequence!("Restore the cursor.", Restore, "u");
 derive_csi_sequence!("Save the cursor.", Save, "s");
 
+derive_csi_sequence!("Change the cursor style to blinking block", BlinkingBlock, "\x31 q");
+derive_csi_sequence!("Change the cursor style to steady block", SteadyBlock, "\x32 q");
+derive_csi_sequence!("Change the cursor style to blinking underline", BlinkingUnderline, "\x33 q");
+derive_csi_sequence!("Change the cursor style to steady underline", SteadyUnderline, "\x34 q");
+derive_csi_sequence!("Change the cursor style to blinking bar", BlinkingBar, "\x35 q");
+derive_csi_sequence!("Change the cursor style to steady bar", SteadyBar, "\x36 q");
+
 /// Goto some position ((1,1)-based).
 ///
 /// # Why one-based?
