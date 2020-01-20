@@ -121,7 +121,7 @@ pub trait TermRead {
     /// EOT and ETX will abort the prompt, returning `None`. Newline or carriage return will
     /// complete the input.
     fn read_passwd<W: Write>(&mut self, writer: &mut W) -> io::Result<Option<String>> {
-        let _raw = try!(writer.into_raw_mode());
+        let _raw = writer.into_raw_mode()?;
         self.read_line()
     }
 }
@@ -152,8 +152,8 @@ impl<R: Read + TermReadEventsAndRaw> TermRead for R {
             }
         }
 
-        let string = try!(String::from_utf8(buf)
-            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e)));
+        let string = String::from_utf8(buf)
+            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
         Ok(Some(string))
     }
 }
