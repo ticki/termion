@@ -76,7 +76,7 @@ derive_color!("High-intensity light magenta.", LightMagenta, "13");
 derive_color!("High-intensity light cyan.", LightCyan, "14");
 derive_color!("High-intensity light white.", LightWhite, "15");
 
-impl<'a> Color for &'a Color {
+impl<'a> Color for &'a dyn Color {
     #[inline]
     fn write_fg(&self, f: &mut fmt::Formatter) -> fmt::Result {
         (*self).write_fg(f)
@@ -283,7 +283,7 @@ impl<W: Write> DetectColors for W {
 }
 
 /// Detect a color using OSC 4.
-fn detect_color(stdout: &mut Write, stdin: &mut Read, color: u16) -> io::Result<bool> {
+fn detect_color(stdout: &mut dyn Write, stdin: &mut dyn Read, color: u16) -> io::Result<bool> {
     // Is the color available?
     // Use `ESC ] 4 ; color ; ? BEL`.
     write!(stdout, "\x1B]4;{};?\x07", color)?;

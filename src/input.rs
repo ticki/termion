@@ -71,7 +71,7 @@ impl<R: Read> Iterator for EventsAndRaw<R> {
                 }
             }
             Ok(2) => {
-                let mut option_iter = &mut Some(buf[1]).into_iter();
+                let option_iter = &mut Some(buf[1]).into_iter();
                 let result = {
                     let mut iter = option_iter.map(|c| Ok(c)).chain(source.bytes());
                     parse_event(buf[0], &mut iter)
