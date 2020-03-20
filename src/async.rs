@@ -46,7 +46,7 @@ pub fn async_stdin() -> AsyncReader {
                       }
                   });
 
-    AsyncReader { recv: recv }
+    AsyncReader { recv }
 }
 
 /// An asynchronous reader.
