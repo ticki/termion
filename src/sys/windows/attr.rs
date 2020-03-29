@@ -1,50 +1,37 @@
 use std::{io, mem};
 
-use super::{DWORD, Termios};
-use super::winapi::um::{consoleapi, handleapi, processenv, winbase, wincon};
+use super::Termios;
+
+use super::crossterm_winapi::{ConsoleMode, Handle};
 
 pub fn get_terminal_attr() -> io::Result<Termios> {
-    let input_mode = get_console_mode(winbase::STD_INPUT_HANDLE)?;
-    let output_mode = get_console_mode(winbase::STD_OUTPUT_HANDLE)?;
+	let console_mode = ConsoleMode::from(Handle::current_in_handle()?);
 
-    Ok(Termios(input_mode, output_mode))
+	let mode = console_mode.mode()?;
+
+	Ok(Termios(mode))
 }
 
 pub fn set_terminal_attr(termios: &Termios) -> io::Result<()> {
-    set_console_mode(winbase::STD_INPUT_HANDLE, termios.0)?;
-    set_console_mode(winbase::STD_OUTPUT_HANDLE, termios.1)?;
-    Ok(())
-}
+	let console_mode = ConsoleMode::from(Handle::current_in_handle()?);
 
-fn get_console_mode(handle: DWORD) -> io::Result<DWORD> {
-    unsafe {
-        let handle = processenv::GetStdHandle(handle);
-        if handle == handleapi::INVALID_HANDLE_VALUE {
-            return Err(io::Error::last_os_error());
-        }
-        let mut mode: DWORD = mem::zeroed();
-        consoleapi::GetConsoleMode(handle, &mut mode);
-        Ok(mode)
-    }
-}
+	console_mode.set_mode(termios.0)?;
 
-fn set_console_mode(handle: DWORD, mode: DWORD) -> io::Result<()> {
-    unsafe {
-        let handle = processenv::GetStdHandle(handle);
-        if handle == handleapi::INVALID_HANDLE_VALUE {
-            return Err(io::Error::last_os_error());
-        }
-        let check = consoleapi::SetConsoleMode(handle, mode);
-        if check != 1 {
-            return Err(io::Error::last_os_error());
-        }
-        Ok(())
-    }
+	Ok(())
 }
 
 pub fn raw_terminal_attr(termios: &mut Termios) {
-    termios.0 = wincon::ENABLE_VIRTUAL_TERMINAL_INPUT;
-    termios.1 = wincon::ENABLE_VIRTUAL_TERMINAL_PROCESSING
-        | wincon::ENABLE_PROCESSED_OUTPUT
-        | wincon::DISABLE_NEWLINE_AUTO_RETURN;
+
+	// These are copied from the MSDocs.
+	// Yes, technically, not the best, but Windows won't change these for obvious reasons.
+	// We could link in winapi explicitly, as crossterm_winapi is already doing that, but
+	// I feel it just adds a bit too much cruft, when we can just do this.
+	//
+	// https://docs.microsoft.com/en-us/windows/console/setconsolemode#parameters
+	const ENABLE_PROCESSED_INPUT: u32 = 0x0001;
+	const ENABLE_LINE_INPUT: u32 = 0x0002;
+	const ENABLE_ECHO_INPUT: u32 = 0x0004;
+	const RAW_MODE_MASK: u32 = ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT;
+
+	termios.0 = termios.0 & !RAW_MODE_MASK;
 }
