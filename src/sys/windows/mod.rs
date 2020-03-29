@@ -1,9 +1,7 @@
-extern crate winapi;
-
-use self::winapi::shared::minwindef::DWORD;
+extern crate crossterm_winapi;
 
 #[derive(Clone, Copy, Debug)]
-pub struct Termios(DWORD, DWORD);
+pub struct Termios(u32);
 
 pub mod attr;
 pub mod size;

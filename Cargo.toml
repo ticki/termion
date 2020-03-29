@@ -26,6 +26,4 @@ redox_syscall = "0.1"
 redox_termios = "0.1" 
 
 [target.'cfg(windows)'.dependencies]
-[dependencies.winapi]
-version = "0.3.6"
-features = ["winbase", "wincon", "processenv", "consoleapi", "handleapi"]
+crossterm_winapi = "0.6.1"

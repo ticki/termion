@@ -1,16 +1,13 @@
 use std::{io, mem};
 
-use super::winapi::um::{processenv, winbase, wincon};
+use super::crossterm_winapi::ScreenBuffer;
 
 /// Get the size of the terminal.
 pub fn terminal_size() -> io::Result<(u16, u16)> {
-    unsafe {
-        let output_handle = processenv::GetStdHandle(winbase::STD_OUTPUT_HANDLE);
-        let mut screen_info: wincon::CONSOLE_SCREEN_BUFFER_INFO = mem::zeroed();
-        wincon::GetConsoleScreenBufferInfo(output_handle, &mut screen_info);
-
-        let columns = screen_info.srWindow.Right - screen_info.srWindow.Left + 1;
-        let rows = screen_info.srWindow.Bottom - screen_info.srWindow.Top + 1;
-        Ok((columns as u16, rows as u16))
-    }
+	let terminal_size = ScreenBuffer::current()?.info()?.terminal_size();
+	// windows starts counting at 0, unix at 1, add one to replicated unix behaviour.
+	Ok((
+		(terminal_size.width + 1) as u16,
+		(terminal_size.height + 1) as u16,
+	))
 }
