@@ -1,5 +1,5 @@
-use std::os::windows::io::{AsRawHandle};
-use std::io::{self, Read, Write, Stdin, Stdout, Result};
+use std::io::{self, Read, Result, Stdin, Stdout, Write};
+use std::os::windows::io::AsRawHandle;
 
 /// Is this stream a TTY?
 pub fn is_tty<T: AsRawHandle>(stream: &T) -> bool {
