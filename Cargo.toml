@@ -27,3 +27,4 @@ redox_termios = "0.1"
 
 [target.'cfg(windows)'.dependencies]
 crossterm_winapi = "0.6.1"
+crossterm = "0.17.7"
