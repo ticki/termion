@@ -1,4 +1,4 @@
-use std::{io, mem};
+use std::io;
 
 use super::crossterm_winapi::ScreenBuffer;
 
