@@ -1,6 +1,10 @@
 extern crate termion;
 
-use std::{fs, io};
+#[cfg(not(windows))]
+use std::fs;
+
+#[cfg(windows)]
+use std::io;
 
 fn main() {
     #[cfg(not(windows))]

@@ -1,4 +1,4 @@
-use std::{io, mem};
+use std::io;
 
 use super::crossterm_winapi::{ConsoleMode, Handle};
 use super::Termios;
@@ -31,5 +31,5 @@ pub fn raw_terminal_attr(termios: &mut Termios) {
     const ENABLE_ECHO_INPUT: u32 = 0x0004;
     const RAW_MODE_MASK: u32 = ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT;
 
-    termios.0 = termios.0 & !RAW_MODE_MASK;
+    termios.0 &= !RAW_MODE_MASK;
 }
