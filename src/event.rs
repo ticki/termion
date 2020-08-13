@@ -177,23 +177,13 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
             let cb = cb?;
             // TODO: "cb & 0b11100" encodes modifiers:
             // 4=Shift, 8=Meta, 16=Control
-            Event::Mouse(match cb & 0b11 {
-                0 => {
-                    if cb & 0x40 != 0 {
-                        MouseEvent::Press(MouseButton::WheelUp, cx, cy)
-                    } else {
-                        MouseEvent::Press(MouseButton::Left, cx, cy)
-                    }
-                }
-                1 => {
-                    if cb & 0x40 != 0 {
-                        MouseEvent::Press(MouseButton::WheelDown, cx, cy)
-                    } else {
-                        MouseEvent::Press(MouseButton::Middle, cx, cy)
-                    }
-                }
+            Event::Mouse(match cb & 0b1000011 {
+                0 => MouseEvent::Press(MouseButton::Left, cx, cy),
+                1 => MouseEvent::Press(MouseButton::Middle, cx, cy),
                 2 => MouseEvent::Press(MouseButton::Right, cx, cy),
                 3 => MouseEvent::Release(cx, cy),
+                64 => MouseEvent::Press(MouseButton::WheelUp, cx, cy),
+                65 => MouseEvent::Press(MouseButton::WheelDown, cx, cy),
                 _ => return None,
             })
         }
