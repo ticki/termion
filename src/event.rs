@@ -147,7 +147,7 @@ pub fn parse_event<I>(item: u8, iter: &mut I) -> Result<Event, Error>
     }
 }
 
-/// Parses a CSI sequence, just after reading ^[
+/// Parses a CSI sequence, just after reading ^[[
 ///
 /// Returns None if an unrecognized sequence is found.
 fn parse_csi<I>(iter: &mut I) -> Option<Event>
