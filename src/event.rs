@@ -159,13 +159,17 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
         b'F' => Event::Key(Key::End),
         b'Z' => Event::Key(Key::BackTab),
         b'M' => {
-            // X10 emulation mouse encoding: ESC [ CB Cx Cy (6 characters only).
-            let mut next = || iter.next().unwrap().unwrap();
+            // X10 emulation mouse encoding: ESC [ M CB Cx Cy (6 characters only).
+            let mut next = || iter.next().map_or(None, |b|b.ok());
 
-            let cb = next() as i8 - 32;
+            let cb = next()?.checked_sub(32);
             // (1, 1) are the coords for upper left.
-            let cx = next().saturating_sub(32) as u16;
-            let cy = next().saturating_sub(32) as u16;
+            let cx = next()?.saturating_sub(32) as u16;
+            let cy = next()?.saturating_sub(32) as u16;
+            // check validity of cb after reading the full sequence
+            let cb = cb?;
+            // TODO: "cb & 0b11100" encodes modifiers:
+            // 4=Shift, 8=Meta, 16=Control
             Event::Mouse(match cb & 0b11 {
                 0 => {
                     if cb & 0x40 != 0 {
@@ -393,6 +397,43 @@ mod tests {
         assert!(match ev {
             Some(Event::Mouse(MouseEvent::Press(MouseButton::Middle, 10, 20))) => true,
             _ => false
+        });
+    }
+
+    #[test]
+    #[allow(non_snake_case)]
+    fn test_parse_csi_M() {
+        let err = ||Err(Error::new(ErrorKind::Other, "?"));
+        let err_iter = ||vec![err()].into_iter();
+        let ok_iter = |bs: &'static [u8]| bs.iter().map(|b|Ok(*b));
+
+        // short seq
+        let mut input = ok_iter(b"M");
+        assert!(parse_csi(&mut input).is_none());
+
+        // seq with error
+        let mut input = ok_iter(b"M").chain(err_iter());
+        assert!(parse_csi(&mut input).is_none());
+
+        // invalid button
+        let mut input = ok_iter(b"M\x80");
+        assert!(parse_csi(&mut input).is_none());
+
+        // short seq
+        let mut input = ok_iter(b"M ");
+        assert!(parse_csi(&mut input).is_none());
+
+        // short seq
+        let mut input = ok_iter(b"M  ");
+        assert!(parse_csi(&mut input).is_none());
+
+        // mouse press with extra input
+        let mut input = ok_iter(b"M   extra");
+        let ev = parse_csi(&mut input);
+        assert_eq!(input.collect::<Result<Vec<_>, _>>().unwrap(), b"extra");
+        assert!(match ev {
+            Some(Event::Mouse(MouseEvent::Press(MouseButton::Left, 0, 0))) => true,
+            _ => false,
         });
     }
 }
