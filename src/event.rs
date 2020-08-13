@@ -226,25 +226,27 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
             // Numbered escape code.
             let mut buf = Vec::new();
             buf.push(c);
-            let mut c = iter.next().unwrap().unwrap();
+            let mut c = iter.next()?.ok()?;
             // The final byte of a CSI sequence can be in the range 64-126, so
             // let's keep reading anything else.
             while c < 64 || c > 126 {
                 buf.push(c);
-                c = iter.next().unwrap().unwrap();
+                c = iter.next()?.ok()?;
             }
 
             match c {
                 // rxvt mouse encoding:
                 // ESC [ Cb ; Cx ; Cy ; M
                 b'M' => {
-                    let str_buf = String::from_utf8(buf).unwrap();
+                    let str_buf = String::from_utf8(buf).ok()?;
 
-                    let nums: Vec<u16> = str_buf.split(';').map(|n| n.parse().unwrap()).collect();
+                    let nums = str_buf.split(';').map(|n| n.parse().ok())
+                        .collect::<Option<Vec<u16>>>()?;
 
-                    let cb = nums[0];
-                    let cx = nums[1];
-                    let cy = nums[2];
+                    let (cb, cx, cy) = match nums[..] {
+                        [cb, cx, cy] => (cb, cx, cy),
+                        _ => return None,
+                    };
 
                     let event = match cb {
                         32 => MouseEvent::Press(MouseButton::Left, cx, cy),
@@ -423,6 +425,49 @@ mod tests {
         assert_eq!(input.collect::<Result<Vec<_>, _>>().unwrap(), b"extra");
         assert!(match ev {
             Some(Event::Mouse(MouseEvent::Press(MouseButton::Left, 0, 0))) => true,
+            _ => false,
+        });
+    }
+    #[test]
+    fn test_parse_csi_number() {
+        let err = ||Err(Error::new(ErrorKind::Other, "?"));
+        let err_iter = ||vec![err()].into_iter();
+        let ok_iter = |bs: &'static [u8]| bs.iter().map(|b|Ok(*b));
+
+        // short seq
+        let mut input = ok_iter(b"0");
+        assert!(parse_csi(&mut input).is_none());
+
+        // seq with error
+        let mut input = ok_iter(b"0").chain(err_iter());
+        assert!(parse_csi(&mut input).is_none());
+
+        // short seq
+        let mut input = ok_iter(b"00");
+        assert!(parse_csi(&mut input).is_none());
+
+        // seq with error
+        let mut input = ok_iter(b"00").chain(err_iter());
+        assert!(parse_csi(&mut input).is_none());
+
+        // bad utf-8
+        let mut input = ok_iter(b"0\xffM");
+        assert!(parse_csi(&mut input).is_none());
+
+        // bad number
+        let mut input = ok_iter(b"0!M");
+        assert!(parse_csi(&mut input).is_none());
+
+        // too few numbers
+        let mut input = ok_iter(b"0M");
+        assert!(parse_csi(&mut input).is_none());
+
+        // mouse press with extra input
+        let mut input = ok_iter(b"32;10;10Mextra");
+        let ev = parse_csi(&mut input);
+        assert_eq!(input.collect::<Result<Vec<_>, _>>().unwrap(), b"extra");
+        assert!(match ev {
+            Some(Event::Mouse(MouseEvent::Press(MouseButton::Left, 10, 10))) => true,
             _ => false,
         });
     }
