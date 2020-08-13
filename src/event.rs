@@ -269,23 +269,21 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
                 }
                 // Special key code.
                 b'~' => {
-                    let str_buf = String::from_utf8(buf).unwrap();
+                    let str_buf = String::from_utf8(buf).ok()?;
 
                     // This CSI sequence can be a list of semicolon-separated
                     // numbers.
-                    let nums: Vec<u8> = str_buf.split(';').map(|n| n.parse().unwrap()).collect();
-
-                    if nums.is_empty() {
-                        return None;
-                    }
+                    let nums = str_buf.split(';').map(|n| n.parse().ok())
+                        .collect::<Option<Vec<u8>>>()?;
 
                     // TODO: handle multiple values for key modififiers (ex: values
                     // [3, 2] means Shift+Delete)
-                    if nums.len() > 1 {
-                        return None;
-                    }
+                    let num = match nums[..] {
+                        [num] => num,
+                        _ => return None,
+                    };
 
-                    match nums[0] {
+                    match num {
                         1 | 7 => Event::Key(Key::Home),
                         2 => Event::Key(Key::Insert),
                         3 => Event::Key(Key::Delete),
@@ -475,6 +473,23 @@ mod tests {
         assert_eq!(input.collect::<Result<Vec<_>, _>>().unwrap(), b"extra");
         assert!(match ev {
             Some(Event::Mouse(MouseEvent::Press(MouseButton::Left, 10, 10))) => true,
+            _ => false,
+        });
+
+        // bad utf-8
+        let mut input = ok_iter(b"0\xff~");
+        assert!(parse_csi(&mut input).is_none());
+
+        // bad number
+        let mut input = ok_iter(b"0!~");
+        assert!(parse_csi(&mut input).is_none());
+
+        // F12 key with extra input
+        let mut input = ok_iter(b"24~extra");
+        let ev = parse_csi(&mut input);
+        assert_eq!(input.collect::<Result<Vec<_>, _>>().unwrap(), b"extra");
+        assert!(match ev {
+            Some(Event::Key(Key::F(12))) => true,
             _ => false,
         });
     }
