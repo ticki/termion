@@ -190,29 +190,20 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
             // xterm mouse encoding:
             // ESC [ < Cb ; Cx ; Cy (;) (M or m)
             let mut buf = Vec::new();
-            let mut c = iter.next().unwrap().unwrap();
+            let mut c = iter.next()?.ok()?;
             while match c {
                 b'm' | b'M' => false,
                 _ => true,
             } {
                 buf.push(c);
-                c = iter.next().unwrap().unwrap();
+                c = iter.next()?.ok()?;
             }
-            let str_buf = String::from_utf8(buf).unwrap();
+            let str_buf = String::from_utf8(buf).ok()?;
             let nums = &mut str_buf.split(';');
 
-            let cb = nums.next()
-                .unwrap()
-                .parse::<u16>()
-                .unwrap();
-            let cx = nums.next()
-                .unwrap()
-                .parse::<u16>()
-                .unwrap();
-            let cy = nums.next()
-                .unwrap()
-                .parse::<u16>()
-                .unwrap();
+            let cb = nums.next()?.parse::<u16>().ok()?;
+            let cx = nums.next()?.parse::<u16>().ok()?;
+            let cy = nums.next()?.parse::<u16>().ok()?;
 
             let event = match cb {
                 0..=2 | 64..=65 => {
@@ -340,13 +331,68 @@ fn parse_utf8_char<I>(c: u8, iter: &mut I) -> Result<char, Error>
 }
 
 #[cfg(test)]
-#[test]
-fn test_parse_utf8() {
-    let st = "abcéŷ¤£€ù%323";
-    let ref mut bytes = st.bytes().map(|x| Ok(x));
-    let chars = st.chars();
-    for c in chars {
-        let b = bytes.next().unwrap().unwrap();
-        assert!(c == parse_utf8_char(b, bytes).unwrap());
+mod tests {
+    use super::*;
+    #[test]
+    fn test_parse_utf8() {
+        let st = "abcéŷ¤£€ù%323";
+        let ref mut bytes = st.bytes().map(|x| Ok(x));
+        let chars = st.chars();
+        for c in chars {
+            let b = bytes.next().unwrap().unwrap();
+            assert!(c == parse_utf8_char(b, bytes).unwrap());
+        }
+    }
+
+    #[test]
+    fn test_parse_csi_lt() {
+        let err = ||Err(Error::new(ErrorKind::Other, "?"));
+        let err_iter = ||vec![err()].into_iter();
+        let ok_iter = |bs: &'static [u8]| bs.iter().map(|b|Ok(*b));
+
+        // seq with error
+        let input = vec![err()];
+        assert!(parse_csi(&mut input.into_iter()).is_none());
+
+        // short seq
+        let mut input = ok_iter(b"<");
+        assert!(parse_csi(&mut input).is_none());
+
+        // seq with error
+        let mut input = ok_iter(b"<").chain(err_iter());
+        assert!(parse_csi(&mut input).is_none());
+
+        // short seq
+        let mut input = ok_iter(b"<x");
+        assert!(parse_csi(&mut input).is_none());
+
+        // seq with error
+        let mut input = ok_iter(b"<x").chain(err_iter());
+        assert!(parse_csi(&mut input).is_none());
+
+        // non-utf8 seq
+        let mut input = ok_iter(b"<\xffM");
+        assert!(parse_csi(&mut input).is_none());
+
+        // short seq
+        let mut input = ok_iter(b"<xM");
+        assert!(parse_csi(&mut input).is_none());
+
+        // short seq
+        let mut input = ok_iter(b"<1M");
+        assert!(parse_csi(&mut input).is_none());
+
+        // short seq
+        let mut input = ok_iter(b"<1;1M");
+        assert!(parse_csi(&mut input).is_none());
+
+        // mouse press with extra input
+        let mut input = ok_iter(b"<1;10;20Mextra");
+        let ev = parse_csi(&mut input);
+        assert_eq!(input.collect::<Result<Vec<_>, _>>().unwrap(), b"extra");
+        assert!(match ev {
+            Some(Event::Mouse(MouseEvent::Press(MouseButton::Middle, 10, 20))) => true,
+            _ => false
+        });
     }
 }
