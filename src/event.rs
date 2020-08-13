@@ -153,19 +153,19 @@ pub fn parse_event<I>(item: u8, iter: &mut I) -> Result<Event, Error>
 fn parse_csi<I>(iter: &mut I) -> Option<Event>
     where I: Iterator<Item = Result<u8, Error>>
 {
-    Some(match iter.next() {
-        Some(Ok(b'[')) => match iter.next() {
+    Some(match iter.next()? {
+        Ok(b'[') => match iter.next() {
             Some(Ok(val @ b'A'..=b'E')) => Event::Key(Key::F(1 + val - b'A')),
             _ => return None,
         },
-        Some(Ok(b'D')) => Event::Key(Key::Left),
-        Some(Ok(b'C')) => Event::Key(Key::Right),
-        Some(Ok(b'A')) => Event::Key(Key::Up),
-        Some(Ok(b'B')) => Event::Key(Key::Down),
-        Some(Ok(b'H')) => Event::Key(Key::Home),
-        Some(Ok(b'F')) => Event::Key(Key::End),
-        Some(Ok(b'Z')) => Event::Key(Key::BackTab),
-        Some(Ok(b'M')) => {
+        Ok(b'D') => Event::Key(Key::Left),
+        Ok(b'C') => Event::Key(Key::Right),
+        Ok(b'A') => Event::Key(Key::Up),
+        Ok(b'B') => Event::Key(Key::Down),
+        Ok(b'H') => Event::Key(Key::Home),
+        Ok(b'F') => Event::Key(Key::End),
+        Ok(b'Z') => Event::Key(Key::BackTab),
+        Ok(b'M') => {
             // X10 emulation mouse encoding: ESC [ CB Cx Cy (6 characters only).
             let mut next = || iter.next().unwrap().unwrap();
 
@@ -193,7 +193,7 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
                 _ => return None,
             })
         }
-        Some(Ok(b'<')) => {
+        Ok(b'<') => {
             // xterm mouse encoding:
             // ESC [ < Cb ; Cx ; Cy (;) (M or m)
             let mut buf = Vec::new();
@@ -244,7 +244,7 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
 
             Event::Mouse(event)
         }
-        Some(Ok(c @ b'0'..=b'9')) => {
+        Ok(c @ b'0'..=b'9') => {
             // Numbered escape code.
             let mut buf = Vec::new();
             buf.push(c);
