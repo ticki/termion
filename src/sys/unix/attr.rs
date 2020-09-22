@@ -18,12 +18,18 @@ pub fn set_terminal_attr(termios: &Termios) -> io::Result<()> {
     extern "C" {
         pub fn tcsetattr(fd: c_int, opt: c_int, termptr: *const Termios) -> c_int;
     }
-    cvt(unsafe { tcsetattr(1, 0, termios) }).and(Ok(()))
+    cvt(unsafe { tcsetattr(libc::STDOUT_FILENO, libc::TCSANOW, termios) }).and(Ok(()))
 }
 
+#[cfg(not(target_os = "illumos"))]
 pub fn raw_terminal_attr(termios: &mut Termios) {
     extern "C" {
         pub fn cfmakeraw(termptr: *mut Termios);
     }
     unsafe { cfmakeraw(termios) }
+}
+
+#[cfg(target_os = "illumos")]
+pub fn raw_terminal_attr(termios: &mut Termios) {
+    unsafe { libc::cfmakeraw(termios) }
 }
