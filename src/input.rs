@@ -262,9 +262,9 @@ mod test {
         assert_eq!(i.next().unwrap().unwrap(),
                    Event::Mouse(MouseEvent::Press(MouseButton::Left, 2, 4)));
         assert_eq!(i.next().unwrap().unwrap(),
-                   Event::Mouse(MouseEvent::Release(2, 4)));
+                   Event::Mouse(MouseEvent::Release(Some(MouseButton::Left), 2, 4)));
         assert_eq!(i.next().unwrap().unwrap(),
-                   Event::Mouse(MouseEvent::Release(2, 4)));
+                   Event::Mouse(MouseEvent::Release(None, 2, 4)));
         assert_eq!(i.next().unwrap().unwrap(), Event::Key(Key::Char('b')));
         assert!(i.next().is_none());
     }
@@ -291,9 +291,9 @@ mod test {
             assert_eq!(i.next().unwrap(),
             Event::Mouse(MouseEvent::Press(MouseButton::Left, 2, 4)));
             assert_eq!(i.next().unwrap(),
-            Event::Mouse(MouseEvent::Release(2, 4)));
+            Event::Mouse(MouseEvent::Release(Some(MouseButton::Left), 2, 4)));
             assert_eq!(i.next().unwrap(),
-            Event::Mouse(MouseEvent::Release(2, 4)));
+            Event::Mouse(MouseEvent::Release(None, 2, 4)));
             assert_eq!(i.next().unwrap(), Event::Key(Key::Char('b')));
             assert!(i.next().is_none());
         }

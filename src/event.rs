@@ -24,11 +24,11 @@ pub enum MouseEvent {
     /// A mouse button was released.
     ///
     /// The coordinates are one-based.
-    Release(u16, u16),
+    Release(Option<MouseButton>, u16, u16),
     /// A mouse button is held over the given coordinates.
     ///
     /// The coordinates are one-based.
-    Hold(u16, u16),
+    Hold(MouseButton, u16, u16),
 }
 
 /// A mouse button.
@@ -182,7 +182,7 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
                              }
                          }
                          2 => MouseEvent::Press(MouseButton::Right, cx, cy),
-                         3 => MouseEvent::Release(cx, cy),
+                         3 => MouseEvent::Release(None, cx, cy),
                          _ => return None,
                      })
     }
@@ -226,12 +226,14 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
                 };
                 match c {
                     b'M' => MouseEvent::Press(button, cx, cy),
-                    b'm' => MouseEvent::Release(cx, cy),
+                    b'm' => MouseEvent::Release(Some(button), cx, cy),
                     _ => return None,
                 }
             }
-            32 => MouseEvent::Hold(cx, cy),
-            3 => MouseEvent::Release(cx, cy),
+            32 => MouseEvent::Hold(MouseButton::Left, cx, cy),
+            33 => MouseEvent::Hold(MouseButton::Middle, cx, cy),
+            34 => MouseEvent::Hold(MouseButton::Right, cx, cy),
+            3 => MouseEvent::Release(None, cx, cy),
             _ => return None,
         };
 
@@ -265,8 +267,8 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
                     32 => MouseEvent::Press(MouseButton::Left, cx, cy),
                     33 => MouseEvent::Press(MouseButton::Middle, cx, cy),
                     34 => MouseEvent::Press(MouseButton::Right, cx, cy),
-                    35 => MouseEvent::Release(cx, cy),
-                    64 => MouseEvent::Hold(cx, cy),
+                    35 => MouseEvent::Release(None, cx, cy),
+                    64 => MouseEvent::Hold(MouseButton::Left, cx, cy),
                     96 | 97 => MouseEvent::Press(MouseButton::WheelUp, cx, cy),
                     _ => return None,
                 };
