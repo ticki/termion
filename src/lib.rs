@@ -26,8 +26,8 @@ pub use sys::size::terminal_size;
 pub use sys::size::terminal_size_pixels;
 pub use sys::tty::{is_tty, get_tty};
 
-mod async;
-pub use async::{AsyncReader, async_stdin};
+mod r#async;
+pub use r#async::{AsyncReader, async_stdin};
 
 #[macro_use]
 mod macros;
