@@ -26,9 +26,9 @@ fn main() {
 
         match c.unwrap() {
             Key::Char('q') => break,
+            Key::Alt(c) => println!("*{}", c),
             Key::Char(c) => println!("{}", c),
-            Key::Alt(c) => println!("^{}", c),
-            Key::Ctrl(c) => println!("*{}", c),
+            Key::Ctrl(c) => println!("^{}", c),
             Key::Esc => println!("ESC"),
             Key::Left => println!("←"),
             Key::Right => println!("→"),
