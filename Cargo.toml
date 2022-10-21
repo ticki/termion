@@ -1,7 +1,12 @@
 [package]
 name = "termion"
 version = "1.6.0"
-authors = ["ticki <Ticki@users.noreply.github.com>", "gycos <alexandre.bury@gmail.com>", "IGI-111 <igi-111@protonmail.com>"]
+authors = [
+    "ticki <Ticki@users.noreply.github.com>",
+    "gycos <alexandre.bury@gmail.com>",
+    "IGI-111 <igi-111@protonmail.com>",
+    "Jeremy Soller <jackpot51@gmail.com>",
+]
 description = "A bindless library for manipulating terminals."
 repository = "https://gitlab.redox-os.org/redox-os/termion"
 documentation = "https://docs.rs/termion"
