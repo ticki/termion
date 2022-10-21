@@ -1,6 +1,6 @@
 [package]
 name = "termion"
-version = "1.6.0"
+version = "2.0.0"
 authors = [
     "ticki <Ticki@users.noreply.github.com>",
     "gycos <alexandre.bury@gmail.com>",
