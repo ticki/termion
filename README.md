@@ -35,6 +35,12 @@ This crate is stable.
 termion = "*"
 ```
 
+## 1.0.0 to 2.0.0 guide
+
+| 1.0.0                          | 2.0.0
+|--------------------------------|---------------------------
+| `AlternativeScreen::from(x)`   | `x.into_alternative_screen()`
+
 ## 0.1.0 to 1.0.0 guide
 
 This sample table gives an idea of how to go about converting to the new major
