@@ -1,4 +1,4 @@
-use std::{env, fs, io};
+use std::{env, fs, io::{self, Read, Write}};
 use std::os::unix::io::AsRawFd;
 
 use super::syscall;
@@ -16,7 +16,7 @@ pub fn is_tty<T: AsRawFd>(stream: &T) -> bool {
 /// Get the TTY device.
 ///
 /// This allows for getting stdio representing _only_ the TTY, and not other streams.
-pub fn get_tty() -> io::Result<fs::File> {
+pub fn get_tty() -> io::Result<impl Read + Write> {
     let tty = try!(env::var("TTY").map_err(|x| io::Error::new(io::ErrorKind::NotFound, x)));
     fs::OpenOptions::new().read(true).write(true).open(tty)
 }

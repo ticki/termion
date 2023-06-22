@@ -42,6 +42,7 @@ pub struct RawTerminal<W: Write> {
 
 impl<W: Write> Drop for RawTerminal<W> {
     fn drop(&mut self) {
+        self.flush().ok();
         let _ = set_terminal_attr(&self.prev_ios);
     }
 }
@@ -107,7 +108,7 @@ impl<W: Write> IntoRawMode for W {
         set_terminal_attr(&ios)?;
 
         Ok(RawTerminal {
-            prev_ios: prev_ios,
+            prev_ios,
             output: self,
         })
     }

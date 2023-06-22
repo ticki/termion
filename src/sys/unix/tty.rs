@@ -1,4 +1,4 @@
-use std::{fs, io};
+use std::{fs, io::{self, Read, Write}};
 use std::os::unix::io::AsRawFd;
 
 use super::libc;
@@ -12,6 +12,6 @@ pub fn is_tty<T: AsRawFd>(stream: &T) -> bool {
 /// Get the TTY device.
 ///
 /// This allows for getting stdio representing _only_ the TTY, and not other streams.
-pub fn get_tty() -> io::Result<fs::File> {
+pub fn get_tty() -> io::Result<impl Read + Write> {
     fs::OpenOptions::new().read(true).write(true).open("/dev/tty")
 }

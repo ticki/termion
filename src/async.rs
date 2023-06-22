@@ -24,7 +24,7 @@ pub fn async_stdin_until(delimiter: u8) -> AsyncReader {
         }
     });
 
-    AsyncReader { recv: recv }
+    AsyncReader { recv }
 }
 
 /// Construct an asynchronous handle to the TTY standard input.
@@ -46,7 +46,7 @@ pub fn async_stdin() -> AsyncReader {
                       }
                   });
 
-    AsyncReader { recv: recv }
+    AsyncReader { recv }
 }
 
 /// An asynchronous reader.

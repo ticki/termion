@@ -258,7 +258,7 @@ mod test {
     fn test_events() {
         let mut i =
             b"\x1B[\x00bc\x7F\x1B[D\
-                    \x1B[M\x00\x22\x24\x1B[<0;2;4;M\x1B[32;2;4M\x1B[<0;2;4;m\x1B[35;2;4Mb"
+                    \x1B[M\x60\x22\x24\x1B[<0;2;4;M\x1B[32;2;4M\x1B[<0;2;4;m\x1B[35;2;4Mb"
                     .events();
 
         assert_eq!(i.next().unwrap().unwrap(),
@@ -284,7 +284,7 @@ mod test {
     #[test]
     fn test_events_and_raw() {
         let input = b"\x1B[\x00bc\x7F\x1B[D\
-                    \x1B[M\x00\x22\x24\x1B[<0;2;4;M\x1B[32;2;4M\x1B[<0;2;4;m\x1B[35;2;4Mb";
+                    \x1B[M\x60\x22\x24\x1B[<0;2;4;M\x1B[32;2;4M\x1B[<0;2;4;m\x1B[35;2;4Mb";
         let mut output = Vec::<u8>::new();
         {
             let mut i = input.events_and_raw().map(|res| res.unwrap())

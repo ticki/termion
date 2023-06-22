@@ -147,176 +147,160 @@ pub fn parse_event<I>(item: u8, iter: &mut I) -> Result<Event, Error>
     }
 }
 
-/// Parses a CSI sequence, just after reading ^[
+/// Parses a CSI sequence, just after reading ^[[
 ///
 /// Returns None if an unrecognized sequence is found.
 fn parse_csi<I>(iter: &mut I) -> Option<Event>
     where I: Iterator<Item = Result<u8, Error>>
 {
-    Some(match iter.next() {
-             Some(Ok(b'[')) => match iter.next() {
-                 Some(Ok(val @ b'A'..=b'E')) => Event::Key(Key::F(1 + val - b'A')),
-                 _ => return None,
-             },
-             Some(Ok(b'D')) => Event::Key(Key::Left),
-             Some(Ok(b'C')) => Event::Key(Key::Right),
-             Some(Ok(b'A')) => Event::Key(Key::Up),
-             Some(Ok(b'B')) => Event::Key(Key::Down),
-             Some(Ok(b'H')) => Event::Key(Key::Home),
-             Some(Ok(b'F')) => Event::Key(Key::End),
-             Some(Ok(b'Z')) => Event::Key(Key::BackTab),
-             Some(Ok(b'M')) => {
-        // X10 emulation mouse encoding: ESC [ CB Cx Cy (6 characters only).
-        let mut next = || iter.next().unwrap().unwrap();
-
-        let cb = next() as i8 - 32;
-        // (1, 1) are the coords for upper left.
-        let cx = next().saturating_sub(32) as u16;
-        let cy = next().saturating_sub(32) as u16;
-        Event::Mouse(match cb & 0b11 {
-                         0 => {
-                             if cb & 0x40 != 0 {
-                                 MouseEvent::Press(MouseButton::WheelUp, cx, cy)
-                             } else {
-                                 MouseEvent::Press(MouseButton::Left, cx, cy)
-                             }
-                         }
-                         1 => {
-                             if cb & 0x40 != 0 {
-                                 MouseEvent::Press(MouseButton::WheelDown, cx, cy)
-                             } else {
-                                 MouseEvent::Press(MouseButton::Middle, cx, cy)
-                             }
-                         }
-                         2 => MouseEvent::Press(MouseButton::Right, cx, cy),
-                         3 => MouseEvent::Release(cx, cy),
-                         _ => return None,
-                     })
-    }
-             Some(Ok(b'<')) => {
-        // xterm mouse encoding:
-        // ESC [ < Cb ; Cx ; Cy (;) (M or m)
-        let mut buf = Vec::new();
-        let mut c = iter.next().unwrap().unwrap();
-        while match c {
-                  b'm' | b'M' => false,
-                  _ => true,
-              } {
-            buf.push(c);
-            c = iter.next().unwrap().unwrap();
-        }
-        let str_buf = String::from_utf8(buf).unwrap();
-        let nums = &mut str_buf.split(';');
-
-        let cb = nums.next()
-            .unwrap()
-            .parse::<u16>()
-            .unwrap();
-        let cx = nums.next()
-            .unwrap()
-            .parse::<u16>()
-            .unwrap();
-        let cy = nums.next()
-            .unwrap()
-            .parse::<u16>()
-            .unwrap();
-
-        let event = match cb {
-            0..=2 | 64..=65 => {
-                let button = match cb {
-                    0 => MouseButton::Left,
-                    1 => MouseButton::Middle,
-                    2 => MouseButton::Right,
-                    64 => MouseButton::WheelUp,
-                    65 => MouseButton::WheelDown,
-                    _ => unreachable!(),
-                };
-                match c {
-                    b'M' => MouseEvent::Press(button, cx, cy),
-                    b'm' => MouseEvent::Release(cx, cy),
-                    _ => return None,
-                }
-            }
-            32 => MouseEvent::Hold(cx, cy),
-            3 => MouseEvent::Release(cx, cy),
+    Some(match iter.next()?.ok()? {
+        b'[' => match iter.next()?.ok()? {
+            val @ b'A'..=b'E' => Event::Key(Key::F(1 + val - b'A')),
             _ => return None,
-        };
+        },
+        b'D' => Event::Key(Key::Left),
+        b'C' => Event::Key(Key::Right),
+        b'A' => Event::Key(Key::Up),
+        b'B' => Event::Key(Key::Down),
+        b'H' => Event::Key(Key::Home),
+        b'F' => Event::Key(Key::End),
+        b'Z' => Event::Key(Key::BackTab),
+        b'M' => {
+            // X10 emulation mouse encoding: ESC [ M CB Cx Cy (6 characters only).
+            let mut next = || iter.next().map_or(None, |b|b.ok());
 
-        Event::Mouse(event)
-    }
-             Some(Ok(c @ b'0'..=b'9')) => {
-        // Numbered escape code.
-        let mut buf = Vec::new();
-        buf.push(c);
-        let mut c = iter.next().unwrap().unwrap();
-        // The final byte of a CSI sequence can be in the range 64-126, so
-        // let's keep reading anything else.
-        while c < 64 || c > 126 {
+            let cb = next()?.checked_sub(32);
+            // (1, 1) are the coords for upper left.
+            let cx = next()?.saturating_sub(32) as u16;
+            let cy = next()?.saturating_sub(32) as u16;
+            // check validity of cb after reading the full sequence
+            let cb = cb?;
+            // TODO: "cb & 0b11100" encodes modifiers:
+            // 4=Shift, 8=Meta, 16=Control
+            Event::Mouse(match cb & 0b1000011 {
+                0 => MouseEvent::Press(MouseButton::Left, cx, cy),
+                1 => MouseEvent::Press(MouseButton::Middle, cx, cy),
+                2 => MouseEvent::Press(MouseButton::Right, cx, cy),
+                3 => MouseEvent::Release(cx, cy),
+                64 => MouseEvent::Press(MouseButton::WheelUp, cx, cy),
+                65 => MouseEvent::Press(MouseButton::WheelDown, cx, cy),
+                _ => return None,
+            })
+        }
+        b'<' => {
+            // xterm mouse encoding:
+            // ESC [ < Cb ; Cx ; Cy (;) (M or m)
+            let mut buf = Vec::new();
+            let mut c = iter.next()?.ok()?;
+            while match c {
+                b'm' | b'M' => false,
+                _ => true,
+            } {
+                buf.push(c);
+                c = iter.next()?.ok()?;
+            }
+            let str_buf = String::from_utf8(buf).ok()?;
+            let nums = &mut str_buf.split(';');
+
+            let cb = nums.next()?.parse::<u16>().ok()?;
+            let cx = nums.next()?.parse::<u16>().ok()?;
+            let cy = nums.next()?.parse::<u16>().ok()?;
+
+            let event = match cb {
+                0..=2 | 64..=65 => {
+                    let button = match cb {
+                        0 => MouseButton::Left,
+                        1 => MouseButton::Middle,
+                        2 => MouseButton::Right,
+                        64 => MouseButton::WheelUp,
+                        65 => MouseButton::WheelDown,
+                        _ => unreachable!(),
+                    };
+                    match c {
+                        b'M' => MouseEvent::Press(button, cx, cy),
+                        b'm' => MouseEvent::Release(cx, cy),
+                        _ => return None,
+                    }
+                }
+                32 => MouseEvent::Hold(cx, cy),
+                3 => MouseEvent::Release(cx, cy),
+                _ => return None,
+            };
+
+            Event::Mouse(event)
+        }
+        c @ b'0'..=b'9' => {
+            // Numbered escape code.
+            let mut buf = Vec::new();
             buf.push(c);
-            c = iter.next().unwrap().unwrap();
-        }
-
-        match c {
-            // rxvt mouse encoding:
-            // ESC [ Cb ; Cx ; Cy ; M
-            b'M' => {
-                let str_buf = String::from_utf8(buf).unwrap();
-
-                let nums: Vec<u16> = str_buf.split(';').map(|n| n.parse().unwrap()).collect();
-
-                let cb = nums[0];
-                let cx = nums[1];
-                let cy = nums[2];
-
-                let event = match cb {
-                    32 => MouseEvent::Press(MouseButton::Left, cx, cy),
-                    33 => MouseEvent::Press(MouseButton::Middle, cx, cy),
-                    34 => MouseEvent::Press(MouseButton::Right, cx, cy),
-                    35 => MouseEvent::Release(cx, cy),
-                    64 => MouseEvent::Hold(cx, cy),
-                    96 | 97 => MouseEvent::Press(MouseButton::WheelUp, cx, cy),
-                    _ => return None,
-                };
-
-                Event::Mouse(event)
+            let mut c = iter.next()?.ok()?;
+            // The final byte of a CSI sequence can be in the range 64-126, so
+            // let's keep reading anything else.
+            while c < 64 || c > 126 {
+                buf.push(c);
+                c = iter.next()?.ok()?;
             }
-            // Special key code.
-            b'~' => {
-                let str_buf = String::from_utf8(buf).unwrap();
 
-                // This CSI sequence can be a list of semicolon-separated
-                // numbers.
-                let nums: Vec<u8> = str_buf.split(';').map(|n| n.parse().unwrap()).collect();
+            match c {
+                // rxvt mouse encoding:
+                // ESC [ Cb ; Cx ; Cy ; M
+                b'M' => {
+                    let str_buf = String::from_utf8(buf).ok()?;
 
-                if nums.is_empty() {
-                    return None;
+                    let nums = str_buf.split(';').map(|n| n.parse().ok())
+                        .collect::<Option<Vec<u16>>>()?;
+
+                    let (cb, cx, cy) = match nums[..] {
+                        [cb, cx, cy] => (cb, cx, cy),
+                        _ => return None,
+                    };
+
+                    let event = match cb {
+                        32 => MouseEvent::Press(MouseButton::Left, cx, cy),
+                        33 => MouseEvent::Press(MouseButton::Middle, cx, cy),
+                        34 => MouseEvent::Press(MouseButton::Right, cx, cy),
+                        35 => MouseEvent::Release(cx, cy),
+                        64 => MouseEvent::Hold(cx, cy),
+                        96 | 97 => MouseEvent::Press(MouseButton::WheelUp, cx, cy),
+                        _ => return None,
+                    };
+
+                    Event::Mouse(event)
                 }
+                // Special key code.
+                b'~' => {
+                    let str_buf = String::from_utf8(buf).ok()?;
 
-                // TODO: handle multiple values for key modififiers (ex: values
-                // [3, 2] means Shift+Delete)
-                if nums.len() > 1 {
-                    return None;
-                }
+                    // This CSI sequence can be a list of semicolon-separated
+                    // numbers.
+                    let nums = str_buf.split(';').map(|n| n.parse().ok())
+                        .collect::<Option<Vec<u8>>>()?;
 
-                match nums[0] {
-                    1 | 7 => Event::Key(Key::Home),
-                    2 => Event::Key(Key::Insert),
-                    3 => Event::Key(Key::Delete),
-                    4 | 8 => Event::Key(Key::End),
-                    5 => Event::Key(Key::PageUp),
-                    6 => Event::Key(Key::PageDown),
-                    v @ 11..=15 => Event::Key(Key::F(v - 10)),
-                    v @ 17..=21 => Event::Key(Key::F(v - 11)),
-                    v @ 23..=24 => Event::Key(Key::F(v - 12)),
-                    _ => return None,
+                    // TODO: handle multiple values for key modififiers (ex: values
+                    // [3, 2] means Shift+Delete)
+                    let num = match nums[..] {
+                        [num] => num,
+                        _ => return None,
+                    };
+
+                    match num {
+                        1 | 7 => Event::Key(Key::Home),
+                        2 => Event::Key(Key::Insert),
+                        3 => Event::Key(Key::Delete),
+                        4 | 8 => Event::Key(Key::End),
+                        5 => Event::Key(Key::PageUp),
+                        6 => Event::Key(Key::PageDown),
+                        v @ 11..=15 => Event::Key(Key::F(v - 10)),
+                        v @ 17..=21 => Event::Key(Key::F(v - 11)),
+                        v @ 23..=24 => Event::Key(Key::F(v - 12)),
+                        _ => return None,
+                    }
                 }
+                _ => return None,
             }
-            _ => return None,
         }
-    }
-             _ => return None,
-         })
-
+        _ => return None,
+    })
 }
 
 /// Parse `c` as either a single byte ASCII char or a variable size UTF-8 char.
@@ -348,13 +332,165 @@ fn parse_utf8_char<I>(c: u8, iter: &mut I) -> Result<char, Error>
 }
 
 #[cfg(test)]
-#[test]
-fn test_parse_utf8() {
-    let st = "abcéŷ¤£€ù%323";
-    let ref mut bytes = st.bytes().map(|x| Ok(x));
-    let chars = st.chars();
-    for c in chars {
-        let b = bytes.next().unwrap().unwrap();
-        assert!(c == parse_utf8_char(b, bytes).unwrap());
+mod tests {
+    use super::*;
+    #[test]
+    fn test_parse_utf8() {
+        let st = "abcéŷ¤£€ù%323";
+        let ref mut bytes = st.bytes().map(|x| Ok(x));
+        let chars = st.chars();
+        for c in chars {
+            let b = bytes.next().unwrap().unwrap();
+            assert!(c == parse_utf8_char(b, bytes).unwrap());
+        }
+    }
+
+    #[test]
+    fn test_parse_csi_lt() {
+        let err = ||Err(Error::new(ErrorKind::Other, "?"));
+        let err_iter = ||vec![err()].into_iter();
+        let ok_iter = |bs: &'static [u8]| bs.iter().map(|b|Ok(*b));
+
+        // seq with error
+        let input = vec![err()];
+        assert!(parse_csi(&mut input.into_iter()).is_none());
+
+        // short seq
+        let mut input = ok_iter(b"<");
+        assert!(parse_csi(&mut input).is_none());
+
+        // seq with error
+        let mut input = ok_iter(b"<").chain(err_iter());
+        assert!(parse_csi(&mut input).is_none());
+
+        // short seq
+        let mut input = ok_iter(b"<x");
+        assert!(parse_csi(&mut input).is_none());
+
+        // seq with error
+        let mut input = ok_iter(b"<x").chain(err_iter());
+        assert!(parse_csi(&mut input).is_none());
+
+        // non-utf8 seq
+        let mut input = ok_iter(b"<\xffM");
+        assert!(parse_csi(&mut input).is_none());
+
+        // short seq
+        let mut input = ok_iter(b"<xM");
+        assert!(parse_csi(&mut input).is_none());
+
+        // short seq
+        let mut input = ok_iter(b"<1M");
+        assert!(parse_csi(&mut input).is_none());
+
+        // short seq
+        let mut input = ok_iter(b"<1;1M");
+        assert!(parse_csi(&mut input).is_none());
+
+        // mouse press with extra input
+        let mut input = ok_iter(b"<1;10;20Mextra");
+        let ev = parse_csi(&mut input);
+        assert_eq!(input.collect::<Result<Vec<_>, _>>().unwrap(), b"extra");
+        assert!(match ev {
+            Some(Event::Mouse(MouseEvent::Press(MouseButton::Middle, 10, 20))) => true,
+            _ => false
+        });
+    }
+
+    #[test]
+    #[allow(non_snake_case)]
+    fn test_parse_csi_M() {
+        let err = ||Err(Error::new(ErrorKind::Other, "?"));
+        let err_iter = ||vec![err()].into_iter();
+        let ok_iter = |bs: &'static [u8]| bs.iter().map(|b|Ok(*b));
+
+        // short seq
+        let mut input = ok_iter(b"M");
+        assert!(parse_csi(&mut input).is_none());
+
+        // seq with error
+        let mut input = ok_iter(b"M").chain(err_iter());
+        assert!(parse_csi(&mut input).is_none());
+
+        // invalid button
+        let mut input = ok_iter(b"M\x80");
+        assert!(parse_csi(&mut input).is_none());
+
+        // short seq
+        let mut input = ok_iter(b"M ");
+        assert!(parse_csi(&mut input).is_none());
+
+        // short seq
+        let mut input = ok_iter(b"M  ");
+        assert!(parse_csi(&mut input).is_none());
+
+        // mouse press with extra input
+        let mut input = ok_iter(b"M   extra");
+        let ev = parse_csi(&mut input);
+        assert_eq!(input.collect::<Result<Vec<_>, _>>().unwrap(), b"extra");
+        assert!(match ev {
+            Some(Event::Mouse(MouseEvent::Press(MouseButton::Left, 0, 0))) => true,
+            _ => false,
+        });
+    }
+    #[test]
+    fn test_parse_csi_number() {
+        let err = ||Err(Error::new(ErrorKind::Other, "?"));
+        let err_iter = ||vec![err()].into_iter();
+        let ok_iter = |bs: &'static [u8]| bs.iter().map(|b|Ok(*b));
+
+        // short seq
+        let mut input = ok_iter(b"0");
+        assert!(parse_csi(&mut input).is_none());
+
+        // seq with error
+        let mut input = ok_iter(b"0").chain(err_iter());
+        assert!(parse_csi(&mut input).is_none());
+
+        // short seq
+        let mut input = ok_iter(b"00");
+        assert!(parse_csi(&mut input).is_none());
+
+        // seq with error
+        let mut input = ok_iter(b"00").chain(err_iter());
+        assert!(parse_csi(&mut input).is_none());
+
+        // bad utf-8
+        let mut input = ok_iter(b"0\xffM");
+        assert!(parse_csi(&mut input).is_none());
+
+        // bad number
+        let mut input = ok_iter(b"0!M");
+        assert!(parse_csi(&mut input).is_none());
+
+        // too few numbers
+        let mut input = ok_iter(b"0M");
+        assert!(parse_csi(&mut input).is_none());
+
+        // mouse press with extra input
+        let mut input = ok_iter(b"32;10;10Mextra");
+        let ev = parse_csi(&mut input);
+        assert_eq!(input.collect::<Result<Vec<_>, _>>().unwrap(), b"extra");
+        assert!(match ev {
+            Some(Event::Mouse(MouseEvent::Press(MouseButton::Left, 10, 10))) => true,
+            _ => false,
+        });
+
+        // bad utf-8
+        let mut input = ok_iter(b"0\xff~");
+        assert!(parse_csi(&mut input).is_none());
+
+        // bad number
+        let mut input = ok_iter(b"0!~");
+        assert!(parse_csi(&mut input).is_none());
+
+        // F12 key with extra input
+        let mut input = ok_iter(b"24~extra");
+        let ev = parse_csi(&mut input);
+        assert_eq!(input.collect::<Result<Vec<_>, _>>().unwrap(), b"extra");
+        assert!(match ev {
+            Some(Event::Key(Key::F(12))) => true,
+            _ => false,
+        });
     }
 }
