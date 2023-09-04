@@ -11,7 +11,6 @@
 //! For more information refer to the [README](https://github.com/redox-os/termion).
 #![warn(missing_docs)]
 
-extern crate numtoa;
 #[cfg(feature = "serde")]
 extern crate serde;
 

@@ -15,7 +15,6 @@ keywords = ["tty", "color", "terminal", "password", "tui"]
 exclude = ["target", "CHANGELOG.md", "image.png", "Cargo.lock"]
 
 [dependencies]
-numtoa = { version = "0.1", features = ["std"]}
 serde = { version = "1.0", features = ["derive"], optional = true }
 
 [target.'cfg(not(target_os = "redox"))'.dependencies]
