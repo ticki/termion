@@ -1,5 +1,5 @@
+extern crate libredox;
 extern crate redox_termios;
-extern crate syscall;
 
 use std::io;
 
@@ -10,6 +10,6 @@ pub mod size;
 pub mod tty;
 
 // Support function for converting syscall error to io error
-fn cvt(result: Result<usize, syscall::Error>) -> io::Result<usize> {
+fn cvt(result: Result<usize, libredox::error::Error>) -> io::Result<usize> {
     result.map_err(|err| io::Error::from_raw_os_error(err.errno))
 }
