@@ -15,15 +15,17 @@
 //! use termion::raw::IntoRawMode;
 //! use std::io::{Write, stdout};
 //!
-//! fn main() {
-//!     let mut stdout = stdout().into_raw_mode().unwrap();
-//!
-//!     write!(stdout, "Hey there.").unwrap();
-//! }
+//! let mut stdout = stdout();
+//! let mut stdout = stdout.into_raw_mode()?;
+//! write!(stdout, "Hey there.").unwrap();
+//! # std::io::Result::Ok(())
 //! ```
 
-use std::io::{self, Write};
-use std::ops;
+use std::{
+    io::{self, Write},
+    ops,
+    os::fd::AsFd,
+};
 
 use sys::attr::{get_terminal_attr, raw_terminal_attr, set_terminal_attr};
 use sys::Termios;
@@ -35,18 +37,18 @@ pub const CONTROL_SEQUENCE_TIMEOUT: u64 = 100;
 /// dropped.
 ///
 /// Restoring will entirely bring back the old TTY state.
-pub struct RawTerminal<W: Write> {
+pub struct RawTerminal<W: Write + AsFd> {
     prev_ios: Termios,
     output: W,
 }
 
-impl<W: Write> Drop for RawTerminal<W> {
+impl<W: Write + AsFd> Drop for RawTerminal<W> {
     fn drop(&mut self) {
-        let _ = set_terminal_attr(&self.prev_ios);
+        let _ = set_terminal_attr(self.output.as_fd(), &self.prev_ios);
     }
 }
 
-impl<W: Write> ops::Deref for RawTerminal<W> {
+impl<W: Write + AsFd> ops::Deref for RawTerminal<W> {
     type Target = W;
 
     fn deref(&self) -> &W {
@@ -54,13 +56,13 @@ impl<W: Write> ops::Deref for RawTerminal<W> {
     }
 }
 
-impl<W: Write> ops::DerefMut for RawTerminal<W> {
+impl<W: Write + AsFd> ops::DerefMut for RawTerminal<W> {
     fn deref_mut(&mut self) -> &mut W {
         &mut self.output
     }
 }
 
-impl<W: Write> Write for RawTerminal<W> {
+impl<W: Write + AsFd> Write for RawTerminal<W> {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         self.output.write(buf)
     }
@@ -73,11 +75,11 @@ impl<W: Write> Write for RawTerminal<W> {
 #[cfg(unix)]
 mod unix_impl {
     use super::*;
-    use std::os::unix::io::{AsRawFd, RawFd};
+    use std::os::unix::io::{AsFd, BorrowedFd};
 
-    impl<W: Write + AsRawFd> AsRawFd for RawTerminal<W> {
-        fn as_raw_fd(&self) -> RawFd {
-            self.output.as_raw_fd()
+    impl<W: Write + AsFd> AsFd for RawTerminal<W> {
+        fn as_fd(&self) -> BorrowedFd {
+            self.output.as_fd()
         }
     }
 }
@@ -88,7 +90,7 @@ mod unix_impl {
 ///
 /// TTYs has their state controlled by the writer, not the reader. You use the writer to clear the
 /// screen, move the cursor and so on, so naturally you use the writer to change the mode as well.
-pub trait IntoRawMode: Write + Sized {
+pub trait IntoRawMode: Write + AsFd + Sized {
     /// Switch to raw mode.
     ///
     /// Raw mode means that stdin won't be printed (it will instead have to be written manually by
@@ -97,34 +99,34 @@ pub trait IntoRawMode: Write + Sized {
     fn into_raw_mode(self) -> io::Result<RawTerminal<Self>>;
 }
 
-impl<W: Write> IntoRawMode for W {
+impl<W: Write + AsFd> IntoRawMode for W {
     fn into_raw_mode(self) -> io::Result<RawTerminal<W>> {
-        let mut ios = get_terminal_attr()?;
+        let mut ios = get_terminal_attr(self.as_fd())?;
         let prev_ios = ios;
 
         raw_terminal_attr(&mut ios);
 
-        set_terminal_attr(&ios)?;
+        set_terminal_attr(self.as_fd(), &ios)?;
 
         Ok(RawTerminal {
-            prev_ios: prev_ios,
+            prev_ios,
             output: self,
         })
     }
 }
 
-impl<W: Write> RawTerminal<W> {
+impl<W: Write + AsFd> RawTerminal<W> {
     /// Temporarily switch to original mode
     pub fn suspend_raw_mode(&self) -> io::Result<()> {
-        set_terminal_attr(&self.prev_ios)?;
+        set_terminal_attr(self.as_fd(), &self.prev_ios)?;
         Ok(())
     }
 
     /// Temporarily switch to raw mode
     pub fn activate_raw_mode(&self) -> io::Result<()> {
-        let mut ios = get_terminal_attr()?;
+        let mut ios = get_terminal_attr(self.as_fd())?;
         raw_terminal_attr(&mut ios);
-        set_terminal_attr(&ios)?;
+        set_terminal_attr(self.as_fd(), &ios)?;
         Ok(())
     }
 }
