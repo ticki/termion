@@ -35,6 +35,14 @@ This crate is stable.
 termion = "*"
 ```
 
+## 2.0.0 to 3.0.0 guide
+
+Changes are only required if you were using `IntoRawMode` on generic terminals `W: Write`. Now, terminal
+is also required to implement [`AsFd` trait][AsFd-trait]. So replacing generic bounds with `W: Write + AsFd`
+should be sufficient.
+
+[AsFd-trait]: https://doc.rust-lang.org/std/os/fd/trait.AsFd.html
+
 ## 1.0.0 to 2.0.0 guide
 
 | 1.0.0                          | 2.0.0
