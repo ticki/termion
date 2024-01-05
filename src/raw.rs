@@ -15,8 +15,7 @@
 //! use termion::raw::IntoRawMode;
 //! use std::io::{Write, stdout};
 //!
-//! let mut stdout = stdout();
-//! let mut stdout = stdout.into_raw_mode()?;
+//! let mut stdout = stdout().into_raw_mode()?;
 //! write!(stdout, "Hey there.").unwrap();
 //! # std::io::Result::Ok(())
 //! ```
