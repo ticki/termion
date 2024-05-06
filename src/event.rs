@@ -54,6 +54,14 @@ pub enum MouseButton {
     ///
     /// This event is typically only used with Mouse::Press.
     WheelDown,
+    /// Mouse wheel is going left. Only supported in certain terminals.
+    ///
+    /// This event is typically only used with Mouse::Press.
+    WheelLeft,
+    /// Mouse wheel is going right. Only supported in certain terminals.
+    ///
+    /// This event is typically only used with Mouse::Press.
+    WheelRight,
 }
 
 /// A key.
@@ -251,8 +259,20 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
                         MouseEvent::Press(MouseButton::Middle, cx, cy)
                     }
                 }
-                2 => MouseEvent::Press(MouseButton::Right, cx, cy),
-                3 => MouseEvent::Release(cx, cy),
+                2 => {
+                    if cb & 0x40 != 0 {
+                        MouseEvent::Press(MouseButton::WheelLeft, cx, cy)
+                    } else {
+                        MouseEvent::Press(MouseButton::Right, cx, cy)
+                    }
+                }
+                3 => {
+                    if cb & 0x40 != 0 {
+                        MouseEvent::Press(MouseButton::WheelRight, cx, cy)
+                    } else {
+                        MouseEvent::Release(cx, cy)
+                    }
+                }
                 _ => return None,
             })
         }
@@ -276,13 +296,15 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
             let cy = nums.next().unwrap().parse::<u16>().unwrap();
 
             let event = match cb {
-                0..=2 | 64..=65 => {
+                0..=2 | 64..=67 => {
                     let button = match cb {
                         0 => MouseButton::Left,
                         1 => MouseButton::Middle,
                         2 => MouseButton::Right,
                         64 => MouseButton::WheelUp,
                         65 => MouseButton::WheelDown,
+                        66 => MouseButton::WheelLeft,
+                        67 => MouseButton::WheelRight,
                         _ => unreachable!(),
                     };
                     match c {
