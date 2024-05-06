@@ -35,6 +35,11 @@ This crate is stable.
 termion = "*"
 ```
 
+## 3.0.0 to 4.0.0 guide
+
+A change is only necessary if you were matching on all variants of the `MouseEvent` enum without a wildcard.
+In this case, you need to either handle the two new variants, `MouseLeft` and `MouseRight`, or add a wildcard.
+
 ## 2.0.0 to 3.0.0 guide
 
 Changes are only required if you were using `IntoRawMode` on generic terminals `W: Write`. Now, terminal
