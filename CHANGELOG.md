@@ -1,3 +1,12 @@
+# 4.0.0
+
+4.0.0 adds support for horizontal scrolling when working with `MouseTerminal`.
+
+## 3.0.0 to 4.0.0 guide
+
+A change is only necessary if you were matching on all variants of the `MouseEvent` enum without a wildcard.
+In this case, you need to either handle the two new variants, `MouseLeft` and `MouseRight`, or add a wildcard.
+
 # 3.0.0
 
 v3 release improves `raw` terminal API and enables support of any TTY target.
