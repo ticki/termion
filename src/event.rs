@@ -143,8 +143,8 @@ pub enum Key {
 
 /// Parse an Event from `item` and possibly subsequent bytes through `iter`.
 pub fn parse_event<I>(item: u8, iter: &mut I) -> Result<Event, Error>
-    where
-        I: Iterator<Item = Result<u8, Error>>,
+where
+    I: Iterator<Item = Result<u8, Error>>,
 {
     let error = Error::new(ErrorKind::Other, "Could not parse an event");
     match item {
@@ -186,49 +186,14 @@ pub fn parse_event<I>(item: u8, iter: &mut I) -> Result<Event, Error>
 ///
 /// Returns None if an unrecognized sequence is found.
 fn parse_csi<I>(iter: &mut I) -> Option<Event>
-    where
-        I: Iterator<Item = Result<u8, Error>>,
+where
+    I: Iterator<Item = Result<u8, Error>>,
 {
     Some(match iter.next() {
         Some(Ok(b'[')) => match iter.next() {
             Some(Ok(val @ b'A'..=b'E')) => Event::Key(Key::F(1 + val - b'A')),
             _ => return None,
         },
-        Some(Ok(b'1')) => {
-            iter.next(); // Consume next char (;)
-            match iter.next() {
-                Some(Ok(b'2')) => { // Shift Modifier
-                    match iter.next() {
-                        Some(Ok(b'D')) => Event::Key(Key::ShiftLeft),
-                        Some(Ok(b'C')) => Event::Key(Key::ShiftRight),
-                        Some(Ok(b'A')) => Event::Key(Key::ShiftUp),
-                        Some(Ok(b'B')) => Event::Key(Key::ShiftDown),
-                        _ => return None,
-                    }
-                }
-                Some(Ok(b'3')) => { // Alt Modifier
-                    match iter.next() {
-                        Some(Ok(b'D')) => Event::Key(Key::AltLeft),
-                        Some(Ok(b'C')) => Event::Key(Key::AltRight),
-                        Some(Ok(b'A')) => Event::Key(Key::AltUp),
-                        Some(Ok(b'B')) => Event::Key(Key::AltDown),
-                        _ => return None,
-                    }
-                }
-                Some(Ok(b'5')) => { // Ctrl Modifier
-                    match iter.next() {
-                        Some(Ok(b'D')) => Event::Key(Key::CtrlLeft),
-                        Some(Ok(b'C')) => Event::Key(Key::CtrlRight),
-                        Some(Ok(b'A')) => Event::Key(Key::CtrlUp),
-                        Some(Ok(b'B')) => Event::Key(Key::CtrlDown),
-                        Some(Ok(b'H')) => Event::Key(Key::CtrlHome),
-                        Some(Ok(b'F')) => Event::Key(Key::CtrlEnd),
-                        _ => return None,
-                    }
-                }
-                _ => return None,
-            }
-        }
         Some(Ok(b'D')) => Event::Key(Key::Left),
         Some(Ok(b'C')) => Event::Key(Key::Right),
         Some(Ok(b'A')) => Event::Key(Key::Up),
@@ -390,6 +355,53 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
                         }
                     }
                 }
+                b'A' | b'B' | b'C' | b'D' | b'F' | b'H' => {
+                    let str_buf = String::from_utf8(buf).unwrap();
+
+                    // This CSI sequence can be a list of semicolon-separated
+                    // numbers.
+                    let nums: Vec<u8> = str_buf.split(';').map(|n| n.parse().unwrap()).collect();
+
+                    if nums.len() != 2 && nums[0] != 1 {
+                        return None;
+                    }
+
+                    match nums[1] {
+                        2 => {
+                            // Shift Modifier
+                            match c {
+                                b'D' => Event::Key(Key::ShiftLeft),
+                                b'C' => Event::Key(Key::ShiftRight),
+                                b'A' => Event::Key(Key::ShiftUp),
+                                b'B' => Event::Key(Key::ShiftDown),
+                                _ => return None,
+                            }
+                        }
+                        3 => {
+                            // Alt Modifier
+                            match c {
+                                b'D' => Event::Key(Key::AltLeft),
+                                b'C' => Event::Key(Key::AltRight),
+                                b'A' => Event::Key(Key::AltUp),
+                                b'B' => Event::Key(Key::AltDown),
+                                _ => return None,
+                            }
+                        }
+                        5 => {
+                            // Ctrl Modifier
+                            match c {
+                                b'D' => Event::Key(Key::CtrlLeft),
+                                b'C' => Event::Key(Key::CtrlRight),
+                                b'A' => Event::Key(Key::CtrlUp),
+                                b'B' => Event::Key(Key::CtrlDown),
+                                b'H' => Event::Key(Key::CtrlHome),
+                                b'F' => Event::Key(Key::CtrlEnd),
+                                _ => return None,
+                            }
+                        }
+                        _ => return None,
+                    }
+                }
                 _ => return None,
             }
         }
@@ -399,8 +411,8 @@ fn parse_csi<I>(iter: &mut I) -> Option<Event>
 
 /// Parse `c` as either a single byte ASCII char or a variable size UTF-8 char.
 fn parse_utf8_char<I>(c: u8, iter: &mut I) -> Result<char, Error>
-    where
-        I: Iterator<Item = Result<u8, Error>>,
+where
+    I: Iterator<Item = Result<u8, Error>>,
 {
     let error = Err(Error::new(
         ErrorKind::Other,
