@@ -1,3 +1,7 @@
+# 4.0.1
+
+Fixes a regression in function keys F5 and above.
+
 # 4.0.0
 
 4.0.0 adds support for horizontal scrolling when working with `MouseTerminal`.
