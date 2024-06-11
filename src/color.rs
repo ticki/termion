@@ -19,7 +19,6 @@ use std::time::{SystemTime, Duration};
 use async::async_stdin;
 use std::env;
 use std::fmt::Debug;
-use numtoa::NumToA;
 
 /// A terminal color.
 pub trait Color: Debug {
@@ -125,16 +124,12 @@ impl AnsiValue {
 impl AnsiValue {
     /// Returns the ANSI sequence as a string.
     pub fn fg_string(self) -> String {
-        let mut x = [0u8; 20];
-        let x = self.0.numtoa_str(10, &mut x);
-        [csi!("38;5;"), x, "m"].concat()
+        format!("{}{}m", csi!("38;5;"), self.0)
     }
 
     /// Returns the ANSI sequence as a string.
     pub fn bg_string(self) -> String {
-        let mut x = [0u8; 20];
-        let x = self.0.numtoa_str(10, &mut x);
-        [csi!("48;5;"), x, "m"].concat()
+        format!("{}{}m", csi!("48;5;"), self.0)
     }
 }
 
@@ -157,26 +152,12 @@ pub struct Rgb(pub u8, pub u8, pub u8);
 impl Rgb {
     /// Returns the ANSI sequence as a string.
     pub fn fg_string(self) -> String {
-        let (mut x, mut y, mut z) = ([0u8; 20], [0u8; 20], [0u8; 20]);
-        let (x, y, z) = (
-            self.0.numtoa_str(10, &mut x),
-            self.1.numtoa_str(10, &mut y),
-            self.2.numtoa_str(10, &mut z),
-        );
-
-        [csi!("38;2;"), x, ";", y, ";", z, "m"].concat()
+        format!("{}{};{};{}m", csi!("38;2;"), self.0, self.1, self.2)
     }
 
     /// Returns the ANSI sequence as a string.
     pub fn bg_string(self) -> String {
-        let (mut x, mut y, mut z) = ([0u8; 20], [0u8; 20], [0u8; 20]);
-        let (x, y, z) = (
-            self.0.numtoa_str(10, &mut x),
-            self.1.numtoa_str(10, &mut y),
-            self.2.numtoa_str(10, &mut z),
-        );
-
-        [csi!("48;2;"), x, ";", y, ";", z, "m"].concat()
+        format!("{}{};{};{}m", csi!("48;2;"), self.0, self.1, self.2)
     }
 }
 
