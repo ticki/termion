@@ -1,8 +1,8 @@
 extern crate termion;
 
-use termion::color::{DetectColors, AnsiValue, Bg};
-use termion::raw::IntoRawMode;
 use std::io::stdout;
+use termion::color::{AnsiValue, Bg, DetectColors};
+use termion::raw::IntoRawMode;
 
 fn main() {
     let count;

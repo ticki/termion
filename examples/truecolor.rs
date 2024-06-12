@@ -1,7 +1,7 @@
 extern crate termion;
 
-use termion::{color, cursor, clear};
 use std::{thread, time};
+use termion::{clear, color, cursor};
 
 fn main() {
     for r in 0..255 {

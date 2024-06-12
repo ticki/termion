@@ -362,7 +362,7 @@ where
                     // numbers.
                     let nums: Vec<u8> = str_buf.split(';').map(|n| n.parse().unwrap()).collect();
 
-                    if nums.len() != 2 && nums[0] != 1 {
+                    if !(nums.len() == 2 && nums[0] == 1) {
                         return None;
                     }
 

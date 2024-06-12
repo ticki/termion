@@ -19,9 +19,9 @@
 //! }
 //! ```
 
+use std::fmt;
 use std::io::{self, Write};
 use std::ops;
-use std::fmt;
 
 /// Switch to the main screen buffer of the terminal.
 pub struct ToMainScreen;

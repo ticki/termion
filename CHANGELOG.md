@@ -1,3 +1,7 @@
+# 4.0.2
+
+Fixes an error check in Ctrl-Arrow code, no difference in behavior. Cleaned up examples.
+
 # 4.0.1
 
 Fixes a regression in function keys F5 and above.

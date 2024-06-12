@@ -1,10 +1,10 @@
 extern crate termion;
 
+use std::io::{stdin, stdout, Write};
 use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 use termion::screen::{IntoAlternateScreen, ToAlternateScreen, ToMainScreen};
-use std::io::{Write, stdout, stdin};
 
 fn write_alt_screen_msg<W: Write>(screen: &mut W) {
     write!(screen, "{}{}Welcome to the alternate screen.{}Press '1' to switch to the main screen or '2' to switch to the alternate screen.{}Press 'q' to exit (and switch back to the main screen).",
@@ -16,7 +16,11 @@ fn write_alt_screen_msg<W: Write>(screen: &mut W) {
 
 fn main() {
     let stdin = stdin();
-    let mut screen = stdout().into_raw_mode().unwrap().into_alternate_screen().unwrap();
+    let mut screen = stdout()
+        .into_raw_mode()
+        .unwrap()
+        .into_alternate_screen()
+        .unwrap();
     write!(screen, "{}", termion::cursor::Hide).unwrap();
     write_alt_screen_msg(&mut screen);
 
