@@ -1,8 +1,8 @@
 extern crate termion;
 
+use std::io::{stdout, Write};
+use std::{thread, time};
 use termion::screen::IntoAlternateScreen;
-use std::io::{Write, stdout};
-use std::{time, thread};
 
 fn main() {
     {

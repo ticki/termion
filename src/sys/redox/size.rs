@@ -13,6 +13,9 @@ pub fn terminal_size() -> io::Result<(u16, u16)> {
     if res? == winsize.len() {
         Ok((winsize.ws_col, winsize.ws_row))
     } else {
-        Err(io::Error::new(io::ErrorKind::Other, "Unable to get the terminal size."))
+        Err(io::Error::new(
+            io::ErrorKind::Other,
+            "Unable to get the terminal size.",
+        ))
     }
 }

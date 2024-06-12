@@ -1,7 +1,7 @@
 extern crate termion;
 
+use std::io::{stdin, stdout, Write};
 use termion::input::TermRead;
-use std::io::{Write, stdout, stdin};
 
 fn main() {
     let stdout = stdout();

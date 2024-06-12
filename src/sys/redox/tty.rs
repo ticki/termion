@@ -1,5 +1,5 @@
-use std::{env, fs, io};
 use std::os::unix::io::AsRawFd;
+use std::{env, fs, io};
 
 /// Is this stream a TTY?
 pub fn is_tty<T: AsRawFd>(stream: &T) -> bool {

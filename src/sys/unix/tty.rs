@@ -1,8 +1,7 @@
-use std::{fs, io};
 use std::os::unix::io::AsRawFd;
+use std::{fs, io};
 
 use super::libc;
-
 
 /// Is this stream a TTY?
 pub fn is_tty<T: AsRawFd>(stream: &T) -> bool {
@@ -13,5 +12,8 @@ pub fn is_tty<T: AsRawFd>(stream: &T) -> bool {
 ///
 /// This allows for getting stdio representing _only_ the TTY, and not other streams.
 pub fn get_tty() -> io::Result<fs::File> {
-    fs::OpenOptions::new().read(true).write(true).open("/dev/tty")
+    fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .open("/dev/tty")
 }
