@@ -198,6 +198,18 @@ pub struct MouseTerminal<W: Write> {
     term: W,
 }
 
+impl<W: Write> MouseTerminal<W> {
+    /// Temporarily activate mouse input
+    pub fn activate_mouse_input(&mut self) -> io::Result<()> {
+        self.term.write_all(ENTER_MOUSE_SEQUENCE.as_bytes())
+    }
+
+    /// Temporarily suspend mouse input
+    pub fn suspend_mouse_input(&mut self) -> io::Result<()> {
+        self.term.write_all(EXIT_MOUSE_SEQUENCE.as_bytes())
+    }
+}
+
 impl<W: Write> From<W> for MouseTerminal<W> {
     fn from(mut from: W) -> MouseTerminal<W> {
         from.write_all(ENTER_MOUSE_SEQUENCE.as_bytes()).unwrap();
