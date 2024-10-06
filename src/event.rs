@@ -14,8 +14,20 @@ pub enum Event {
     Key(Key),
     /// A mouse button press, release or wheel use at specific coordinates.
     Mouse(MouseEvent),
+    /// A Clipboard Paste event, for indicate bracketed paste of start and end
+    Paste(PasteEvent),
     /// An event that cannot currently be evaluated.
     Unsupported(Vec<u8>),
+}
+
+/// A paste related event.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum PasteEvent {
+    /// A bracketed paste start.
+    BracketedPasteStart,
+    /// A bracketed paste end.
+    BracketedPasteEnd,
 }
 
 /// A mouse related event.
@@ -349,6 +361,8 @@ where
                         v @ 11..=15 => Event::Key(Key::F(v - 10)),
                         v @ 17..=21 => Event::Key(Key::F(v - 11)),
                         v @ 23..=24 => Event::Key(Key::F(v - 12)),
+                        200 => Event::Paste(PasteEvent::BracketedPasteStart),
+                        201 => Event::Paste(PasteEvent::BracketedPasteEnd),
                         v => {
                             println!("{:?}", v);
                             return None;
