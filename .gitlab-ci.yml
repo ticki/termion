@@ -4,6 +4,12 @@ stages:
     - build
     - test
 
+variables:
+    REDOXER_USE_FUSE: no
+
+before_script:
+    cargo install redoxer --git "https://gitlab.redox-os.org/redox-os/redoxer.git"
+
 cache:
     paths:
         - target/
