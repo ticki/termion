@@ -1,5 +1,6 @@
 //! User input.
 
+use std::fmt;
 use std::io::{self, Read, Write};
 use std::ops;
 use std::os::fd::AsFd;
@@ -196,7 +197,7 @@ pub struct StartMouseInput;
 
 impl fmt::Display for StartMouseInput {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, ENTER_MOUSE_SEQUENCE)
+        write!(f, "{}", ENTER_MOUSE_SEQUENCE)
     }
 }
 
@@ -205,7 +206,7 @@ pub struct StopMouseInput;
 
 impl fmt::Display for StopMouseInput {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, EXIT_MOUSE_SEQUENCE)
+        write!(f, "{}", EXIT_MOUSE_SEQUENCE)
     }
 }
 
