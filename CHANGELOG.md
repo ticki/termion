@@ -1,3 +1,7 @@
+# 4.0.3
+
+Remove unused code and update dependencies.
+
 # 4.0.2
 
 Fixes an error check in Ctrl-Arrow code, no difference in behavior. Cleaned up examples.
