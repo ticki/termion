@@ -1,12 +1,13 @@
 //! Cursor movement.
 
-use async::async_stdin_until;
 use numtoa::NumToA;
-use raw::CONTROL_SEQUENCE_TIMEOUT;
 use std::fmt;
 use std::io::{self, Error, ErrorKind, Read, Write};
 use std::ops;
 use std::time::{Duration, SystemTime};
+
+use crate::r#async::async_stdin_until;
+use crate::raw::CONTROL_SEQUENCE_TIMEOUT;
 
 derive_csi_sequence!("Hide the cursor.", Hide, "?25l");
 derive_csi_sequence!("Show the cursor.", Show, "?25h");
@@ -218,7 +219,7 @@ impl<W: Write> HideCursor<W> {
     /// Create a hide cursor wrapper struct for the provided output and hides the cursor.
     pub fn from(mut output: W) -> Self {
         write!(output, "{}", Hide).expect("hide the cursor");
-        HideCursor { output: output }
+        HideCursor { output }
     }
 }
 

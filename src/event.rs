@@ -67,6 +67,7 @@ pub enum MouseButton {
 /// A key.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[non_exhaustive]
 pub enum Key {
     /// Backspace.
     Backspace,
@@ -136,9 +137,6 @@ pub enum Key {
     Null,
     /// Esc key.
     Esc,
-
-    #[doc(hidden)]
-    __IsNotComplete,
 }
 
 /// Parse an Event from `item` and possibly subsequent bytes through `iter`.
@@ -172,8 +170,8 @@ where
         b'\n' | b'\r' => Ok(Event::Key(Key::Char('\n'))),
         b'\t' => Ok(Event::Key(Key::Char('\t'))),
         b'\x7F' => Ok(Event::Key(Key::Backspace)),
-        c @ b'\x01'..=b'\x1A' => Ok(Event::Key(Key::Ctrl((c as u8 - 0x1 + b'a') as char))),
-        c @ b'\x1C'..=b'\x1F' => Ok(Event::Key(Key::Ctrl((c as u8 - 0x1C + b'4') as char))),
+        c @ b'\x01'..=b'\x1A' => Ok(Event::Key(Key::Ctrl((c - 0x1 + b'a') as char))),
+        c @ b'\x1C'..=b'\x1F' => Ok(Event::Key(Key::Ctrl((c - 0x1C + b'4') as char))),
         b'\0' => Ok(Event::Key(Key::Null)),
         c => Ok({
             let ch = parse_utf8_char(c, iter)?;
@@ -246,10 +244,7 @@ where
             // ESC [ < Cb ; Cx ; Cy (;) (M or m)
             let mut buf = Vec::new();
             let mut c = iter.next().unwrap().unwrap();
-            while match c {
-                b'm' | b'M' => false,
-                _ => true,
-            } {
+            while !matches!(c, b'm' | b'M') {
                 buf.push(c);
                 c = iter.next().unwrap().unwrap();
             }
@@ -292,7 +287,7 @@ where
             let mut c = iter.next().unwrap().unwrap();
             // The final byte of a CSI sequence can be in the range 64-126, so
             // let's keep reading anything else.
-            while c < 64 || c > 126 {
+            while !(64..=126).contains(&c) {
                 buf.push(c);
                 c = iter.next().unwrap().unwrap();
             }
@@ -445,7 +440,7 @@ where
 #[test]
 fn test_parse_utf8() {
     let st = "abcéŷ¤£€ù%323";
-    let ref mut bytes = st.bytes().map(|x| Ok(x));
+    let bytes = &mut st.bytes().map(Ok);
     let chars = st.chars();
     for c in chars {
         let b = bytes.next().unwrap().unwrap();
