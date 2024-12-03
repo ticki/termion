@@ -349,10 +349,7 @@ where
                         v @ 11..=15 => Event::Key(Key::F(v - 10)),
                         v @ 17..=21 => Event::Key(Key::F(v - 11)),
                         v @ 23..=24 => Event::Key(Key::F(v - 12)),
-                        v => {
-                            println!("{:?}", v);
-                            return None;
-                        }
+                        _ => return None,
                     }
                 }
                 b'A' | b'B' | b'C' | b'D' | b'F' | b'H' => {
