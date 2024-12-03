@@ -14,7 +14,7 @@ struct TermSize {
 pub fn terminal_size() -> io::Result<(u16, u16)> {
     unsafe {
         let mut size: TermSize = mem::zeroed();
-        cvt(ioctl(STDOUT_FILENO, TIOCGWINSZ.into(), &mut size as *mut _))?;
+        cvt(ioctl(STDOUT_FILENO, TIOCGWINSZ, &mut size as *mut _))?;
         Ok((size.col as u16, size.row as u16))
     }
 }
@@ -23,7 +23,7 @@ pub fn terminal_size() -> io::Result<(u16, u16)> {
 pub fn terminal_size_pixels() -> io::Result<(u16, u16)> {
     unsafe {
         let mut size: TermSize = mem::zeroed();
-        cvt(ioctl(STDOUT_FILENO, TIOCGWINSZ.into(), &mut size as *mut _))?;
+        cvt(ioctl(STDOUT_FILENO, TIOCGWINSZ, &mut size as *mut _))?;
         Ok((size.x as u16, size.y as u16))
     }
 }

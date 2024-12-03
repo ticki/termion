@@ -9,14 +9,12 @@
 //! use termion::screen::IntoAlternateScreen;
 //! use std::io::{Write, stdout};
 //!
-//! fn main() {
-//!     {
-//!         let mut screen = stdout().into_alternate_screen().unwrap();
-//!         write!(screen, "Writing to alternate screen!").unwrap();
-//!         screen.flush().unwrap();
-//!     }
-//!     println!("Writing to main screen.");
+//! {
+//!     let mut screen = stdout().into_alternate_screen().unwrap();
+//!     write!(screen, "Writing to alternate screen!").unwrap();
+//!     screen.flush().unwrap();
 //! }
+//! println!("Writing to main screen.");
 //! ```
 
 use std::fmt;

@@ -4,8 +4,8 @@ use std::io::{self, Read, Write};
 use std::ops;
 use std::os::fd::AsFd;
 
-use event::{self, Event, Key};
-use raw::IntoRawMode;
+use crate::event::{self, Event, Key};
+use crate::raw::IntoRawMode;
 
 /// An iterator over input keys.
 pub struct Keys<R> {
@@ -74,7 +74,7 @@ impl<R: Read> Iterator for EventsAndRaw<R> {
             Ok(2) => {
                 let option_iter = &mut Some(buf[1]).into_iter();
                 let result = {
-                    let mut iter = option_iter.map(|c| Ok(c)).chain(source.bytes());
+                    let mut iter = option_iter.map(Ok).chain(source.bytes());
                     parse_event(buf[0], &mut iter)
                 };
                 // If the option_iter wasn't consumed, keep the byte for later.
@@ -186,10 +186,10 @@ impl<R: Read> TermReadEventsAndRaw for R {
 }
 
 /// A sequence of escape codes to enable terminal mouse support.
-const ENTER_MOUSE_SEQUENCE: &'static str = csi!("?1000h\x1b[?1002h\x1b[?1015h\x1b[?1006h");
+const ENTER_MOUSE_SEQUENCE: &str = csi!("?1000h\x1b[?1002h\x1b[?1015h\x1b[?1006h");
 
 /// A sequence of escape codes to disable terminal mouse support.
-const EXIT_MOUSE_SEQUENCE: &'static str = csi!("?1006l\x1b[?1015l\x1b[?1002l\x1b[?1000l");
+const EXIT_MOUSE_SEQUENCE: &str = csi!("?1006l\x1b[?1015l\x1b[?1002l\x1b[?1000l");
 
 /// A terminal with added mouse support.
 ///
@@ -312,7 +312,7 @@ mod test {
             let mut i = input
                 .events_and_raw()
                 .map(|res| res.unwrap())
-                .inspect(|&(_, ref raw)| {
+                .inspect(|(_, raw)| {
                     output.extend(raw);
                 })
                 .map(|(event, _)| event);
@@ -343,7 +343,7 @@ mod test {
             assert!(i.next().is_none());
         }
 
-        assert_eq!(input.iter().map(|b| *b).collect::<Vec<u8>>(), output)
+        assert_eq!(input.to_vec(), output)
     }
 
     #[test]

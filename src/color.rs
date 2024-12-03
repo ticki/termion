@@ -5,21 +5,20 @@
 //! ```rust
 //! use termion::color;
 //!
-//! fn main() {
-//!     println!("{}Red", color::Fg(color::Red));
-//!     println!("{}Blue", color::Fg(color::Blue));
-//!     println!("{}Back again", color::Fg(color::Reset));
-//! }
+//! println!("{}Red", color::Fg(color::Red));
+//! println!("{}Blue", color::Fg(color::Blue));
+//! println!("{}Back again", color::Fg(color::Reset));
 //! ```
 
-use async::async_stdin;
 use numtoa::NumToA;
-use raw::CONTROL_SEQUENCE_TIMEOUT;
 use std::env;
 use std::fmt;
 use std::fmt::Debug;
 use std::io::{self, Read, Write};
 use std::time::{Duration, SystemTime};
+
+use crate::r#async::async_stdin;
+use crate::raw::CONTROL_SEQUENCE_TIMEOUT;
 
 /// A terminal color.
 pub trait Color: Debug {
