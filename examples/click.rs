@@ -22,12 +22,9 @@ fn main() {
         let evt = c.unwrap();
         match evt {
             Event::Key(Key::Char('q')) => break,
-            Event::Mouse(me) => match me {
-                MouseEvent::Press(_, x, y) => {
-                    write!(stdout, "{}x", termion::cursor::Goto(x, y)).unwrap();
-                }
-                _ => (),
-            },
+            Event::Mouse(MouseEvent::Press(_, x, y)) => {
+                write!(stdout, "{}x", termion::cursor::Goto(x, y)).unwrap();
+            }
             _ => {}
         }
         stdout.flush().unwrap();

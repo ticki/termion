@@ -1,12 +1,13 @@
 //! Cursor movement.
 
-use async::async_stdin_until;
 use numtoa::NumToA;
-use raw::CONTROL_SEQUENCE_TIMEOUT;
-use std::fmt;
-use std::io::{self, Error, ErrorKind, Read, Write};
+use std::io::{self, Error, Read, Write};
 use std::ops;
-use std::time::{Duration, SystemTime};
+use std::time::Duration;
+use std::{fmt, time::Instant};
+
+use crate::r#async::async_stdin_until;
+use crate::raw::CONTROL_SEQUENCE_TIMEOUT;
 
 derive_csi_sequence!("Hide the cursor.", Hide, "?25l");
 derive_csi_sequence!("Show the cursor.", Show, "?25h");
@@ -156,7 +157,18 @@ impl fmt::Display for Down {
     }
 }
 
-/// Types that allow detection of the cursor position.
+/// A trait for detecting the cursor position.
+///
+/// A blanket implementation is provided for all types that implement Write. This implementation
+/// writes the cursor detection string to the writer, and then waits 100ms for a response from the
+/// tty device. This may be different from any reader attached to the stdin. If another thread is
+/// reading from the tty (i.e. via async_stdin or stdin), this function will exhibit undefined
+/// behavior (it may succeed, fail, or timeout).
+///
+/// # Errors
+///
+/// This trait returns an error if the cursor position detection times out, or if the response is
+/// not valid UTF-8. It also returns an error if the response is invalid (not `ESC [ x ; y R`).
 pub trait DetectCursorPos {
     /// Get the (1,1)-based cursor position from the terminal.
     fn cursor_pos(&mut self) -> io::Result<(u16, u16)>;
@@ -176,34 +188,32 @@ impl<W: Write> DetectCursorPos for W {
         let mut read_chars = Vec::new();
 
         let timeout = Duration::from_millis(CONTROL_SEQUENCE_TIMEOUT);
-        let now = SystemTime::now();
+        let now = Instant::now();
 
         // Either consume all data up to R or wait for a timeout.
-        while buf[0] != delimiter && now.elapsed().unwrap() < timeout {
+        while buf[0] != delimiter && now.elapsed() < timeout {
             if stdin.read(&mut buf)? > 0 {
                 read_chars.push(buf[0]);
             }
         }
 
         if read_chars.is_empty() {
-            return Err(Error::new(
-                ErrorKind::Other,
-                "Cursor position detection timed out.",
-            ));
+            Err(Error::other("Cursor position detection timed out."))?;
         }
 
-        // The answer will look like `ESC [ Cy ; Cx R`.
-
+        // The answer should look like `ESC [ Cy ; Cx R`.
         read_chars.pop(); // remove trailing R.
-        let read_str = String::from_utf8(read_chars).unwrap();
-        let beg = read_str.rfind('[').unwrap();
-        let coords: String = read_str.chars().skip(beg + 1).collect();
-        let mut nums = coords.split(';');
-
-        let cy = nums.next().unwrap().parse::<u16>().unwrap();
-        let cx = nums.next().unwrap().parse::<u16>().unwrap();
-
-        Ok((cx, cy))
+        let read_str = String::from_utf8(read_chars)
+            .map_err(|_| Error::other("Cursor position response is not valid UTF-8."))?;
+        let start = read_str
+            .rfind('[')
+            .ok_or_else(|| Error::other("Cursor position response does not contain '['."))?;
+        let coords = &read_str[start + 1..];
+        let mut nums = coords.split(';').flat_map(|n| n.parse::<u16>());
+        match (nums.next(), nums.next()) {
+            (Some(cx), Some(cy)) => Ok((cx, cy)),
+            _ => Err(Error::other("Cursor position response is not valid.")),
+        }
     }
 }
 
@@ -218,7 +228,7 @@ impl<W: Write> HideCursor<W> {
     /// Create a hide cursor wrapper struct for the provided output and hides the cursor.
     pub fn from(mut output: W) -> Self {
         write!(output, "{}", Hide).expect("hide the cursor");
-        HideCursor { output: output }
+        HideCursor { output }
     }
 }
 

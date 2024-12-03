@@ -2,7 +2,7 @@ use std::io::{self, Read};
 use std::sync::mpsc;
 use std::thread;
 
-use sys::tty::get_tty;
+use crate::sys::tty::get_tty;
 
 /// Construct an asynchronous handle to the TTY standard input, with a delimiter byte.
 ///
@@ -15,7 +15,7 @@ pub fn async_stdin_until(delimiter: u8) -> AsyncReader {
         for i in get_tty().unwrap().bytes() {
             match i {
                 Ok(byte) => {
-                    let end_of_stream = &byte == &delimiter;
+                    let end_of_stream = byte == delimiter;
                     let send_error = send.send(Ok(byte)).is_err();
 
                     if end_of_stream || send_error {
@@ -29,7 +29,7 @@ pub fn async_stdin_until(delimiter: u8) -> AsyncReader {
         }
     });
 
-    AsyncReader { recv: recv }
+    AsyncReader { recv }
 }
 
 /// Construct an asynchronous handle to the TTY standard input.
@@ -53,7 +53,7 @@ pub fn async_stdin() -> AsyncReader {
         }
     });
 
-    AsyncReader { recv: recv }
+    AsyncReader { recv }
 }
 
 /// An asynchronous reader.
