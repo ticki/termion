@@ -1,5 +1,6 @@
 //! User input.
 
+use std::fmt;
 use std::io::{self, Read, Write};
 use std::ops;
 use std::os::fd::AsFd;
@@ -191,11 +192,41 @@ const ENTER_MOUSE_SEQUENCE: &'static str = csi!("?1000h\x1b[?1002h\x1b[?1015h\x1
 /// A sequence of escape codes to disable terminal mouse support.
 const EXIT_MOUSE_SEQUENCE: &'static str = csi!("?1006l\x1b[?1015l\x1b[?1002l\x1b[?1000l");
 
+/// Start handling mouse input
+pub struct StartMouseInput;
+
+impl fmt::Display for StartMouseInput {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", ENTER_MOUSE_SEQUENCE)
+    }
+}
+
+/// Stop handling mouse input
+pub struct StopMouseInput;
+
+impl fmt::Display for StopMouseInput {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", EXIT_MOUSE_SEQUENCE)
+    }
+}
+
 /// A terminal with added mouse support.
 ///
 /// This can be obtained through the `From` implementations.
 pub struct MouseTerminal<W: Write> {
     term: W,
+}
+
+impl<W: Write> MouseTerminal<W> {
+    /// Temporarily activate mouse input
+    pub fn activate_mouse_input(&mut self) -> io::Result<()> {
+        self.term.write_all(ENTER_MOUSE_SEQUENCE.as_bytes())
+    }
+
+    /// Temporarily suspend mouse input
+    pub fn suspend_mouse_input(&mut self) -> io::Result<()> {
+        self.term.write_all(EXIT_MOUSE_SEQUENCE.as_bytes())
+    }
 }
 
 impl<W: Write> From<W> for MouseTerminal<W> {
