@@ -19,7 +19,33 @@ use std::env;
 use std::fmt;
 use std::fmt::Debug;
 use std::io::{self, Read, Write};
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::Ordering;
+use std::sync::Once;
 use std::time::{Duration, SystemTime};
+
+static NO_COLOR: AtomicBool = AtomicBool::new(false);
+static INITIALIZER: Once = Once::new();
+
+/// Returns true if the `NO_COLOR` environment variable is set.
+///
+/// See <https://no-color.org> for more information.
+fn is_no_color_set() -> bool {
+    !std::env::var("NO_COLOR")
+        .unwrap_or("".to_string())
+        .is_empty()
+}
+
+/// Returns true if ANSI colors are disabled.
+///
+/// This function checks the `NO_COLOR` environment variable
+/// and it is memoized.
+fn ansi_color_disabled() -> bool {
+    INITIALIZER.call_once(|| {
+        NO_COLOR.store(is_no_color_set(), Ordering::SeqCst);
+    });
+    NO_COLOR.load(Ordering::SeqCst)
+}
 
 /// A terminal color.
 pub trait Color: Debug {
@@ -38,11 +64,17 @@ macro_rules! derive_color {
         impl Color for $name {
             #[inline]
             fn write_fg(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                if ansi_color_disabled() {
+                    return Ok(());
+                }
                 f.write_str(self.fg_str())
             }
 
             #[inline]
             fn write_bg(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                if ansi_color_disabled() {
+                    return Ok(());
+                }
                 f.write_str(self.bg_str())
             }
         }
@@ -153,11 +185,17 @@ impl AnsiValue {
 impl Color for AnsiValue {
     #[inline]
     fn write_fg(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if ansi_color_disabled() {
+            return Ok(());
+        }
         f.write_str(&self.fg_string())
     }
 
     #[inline]
     fn write_bg(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if ansi_color_disabled() {
+            return Ok(());
+        }
         f.write_str(&self.bg_string())
     }
 }
@@ -195,11 +233,17 @@ impl Rgb {
 impl Color for Rgb {
     #[inline]
     fn write_fg(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if ansi_color_disabled() {
+            return Ok(());
+        }
         f.write_str(&self.fg_string())
     }
 
     #[inline]
     fn write_bg(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if ansi_color_disabled() {
+            return Ok(());
+        }
         f.write_str(&self.bg_string())
     }
 }
